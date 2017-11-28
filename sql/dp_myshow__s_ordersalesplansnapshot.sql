@@ -7,7 +7,7 @@ select
     TicketID TicketClassID,
     SalesPlanTicketPrice
 from
-    S_OrderSalesPlanSnapshot
+    origindb.dp_myshow__s_ordersalesplansnapshot
 where
     OrderID is not null
     and CreateTime>='-time3'

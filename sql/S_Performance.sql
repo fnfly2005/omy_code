@@ -4,3 +4,5 @@ select
     CategoryID
 from
     S_Performance
+where
+    PerformanceID is not null

@@ -4,3 +4,5 @@ select
     Name
 from
     S_Category
+where
+    CategoryID is not null

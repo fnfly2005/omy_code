@@ -1,8 +1,8 @@
 /*演出客户表*/
 select
-  TPID,
-  Name
+    TPID,
+    Name
 from
-    S_Customer
+    origindb.dp_myshow__s_customer
 where
     TPID is not null

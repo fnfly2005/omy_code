@@ -3,6 +3,6 @@ select
     TPID,
     TPSProjectID
 from
-    BS_ActivityMap
+    origindb.dp_myshow__bs_activitymap
 where
     TPID is not null

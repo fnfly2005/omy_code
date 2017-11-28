@@ -1,4 +1,3 @@
-/*渠道结算SQL*/
 select
     sc.Name,
     so.OrderID,
@@ -19,18 +18,17 @@ from
     and TPID>=6
     ) so 
 join (
-    /*交易时销售计划快照表*/ select OrderID, PerformanceName, PerformanceID, ShowName, TicketID TicketClassID, SalesPlanTicketPrice from S_OrderSalesPlanSnapshot where
-    PerformanceID in (22728,21973,19534,23379)
+    /*交易时销售计划快照表*/ select OrderID, PerformanceName, PerformanceID, ShowName, TicketID TicketClassID, SalesPlanTicketPrice from S_OrderSalesPlanSnapshot where OrderID is not null
+    and PerformanceID in (22728,21973,19534,23379,16998,23055)
     ) sos
     on sos.OrderID=so.OrderID
 left join (
-    /*演出客户表*/ select TPID, Name from S_Customer
-where
-    TPID>=6
+    /*演出客户表*/ select TPID, Name from S_Customer where TPID is not null
+    and TPID>=6
     ) sc 
     on sc.TPID=so.TPID
 left join (
-    /*票类表*/ select TicketClassID, PerformanceID, Description from S_TicketClass
+    /*票类表*/ select TicketClassID, PerformanceID, Description from S_TicketClass where TicketClassID is not null
     ) st
     on st.TicketClassID=sos.TicketClassID
 left join (
@@ -38,3 +36,4 @@ left join (
     ) sod
     on sod.OrderID=so.OrderID
 limit 10000
+

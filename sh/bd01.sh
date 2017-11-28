@@ -1,28 +1,39 @@
 #!/bin/bash
-clock="00"
-t1=${1:-`date -v -1d +"%Y-%m-%d ${clock}:00:00"`}
-t2=${2:-`date -j -f %s $(expr $(date -j -f%Y-%m-%d ${t1% *} +%s) + 86400) +"%Y-%m-%d ${clock}:00:00"`}
-t3=`date -j -f %s $(expr $(date -j -f%Y-%m-%d ${t1% *} +%s) - 86400) +"%Y-%m-%d ${clock}:00:00"`
 path="/Users/fannian/Documents/my_code/"
 
 fut() {
 echo `grep -iv "\-time" ${path}sql/${1}.sql`
 }
+if [ $1 = 1 ]
+then
 so=`fut S_Order` 
 sos=`fut S_OrderSalesPlanSnapshot`
 st=`fut S_TicketClass`
-ba=`fut BS_ActivityMap`
 sod=`fut S_OrderDelivery`
 sc=`fut S_Customer`
-
-file="bd01"
+lim="limit 10000"
+file="bd01$1"
 attach="${path}doc/${file}.sql"
-echo "
-select
+fi
+
+if [ $1 = 2 ] 
+then
+so=`fut dp_myshow__s_order` 
+sos=`fut dp_myshow__s_ordersalesplansnapshot`
+st=`fut dp_myshow__s_ticketclass`
+sod=`fut dp_myshow__s_orderdelivery`
+sc=`fut dp_myshow__s_customer`
+file="bd01$1"
+attach="${path}doc/${file}.sql"
+lim=";"
+fi
+
+echo "select
     sc.Name,
     so.OrderID,
     so.PaidTime,
     so.RefundStatus,
+    sos.PerformanceID,
     sos.PerformanceName,
     sos.ShowName,
     st.Description,
@@ -38,13 +49,12 @@ from
     ) so 
 join (
     ${sos}
-    PerformanceID=${3}
+    and PerformanceID in (${2})
     ) sos
     on sos.OrderID=so.OrderID
 left join (
     ${sc}
-where
-    TPID>=6
+    and TPID>=6
     ) sc 
     on sc.TPID=so.TPID
 left join (
@@ -55,5 +65,6 @@ left join (
     ${sod}
     ) sod
     on sod.OrderID=so.OrderID
-limit 10000
-"|tee ${attach}
+$lim
+">${attach}
+echo "succuess,detail see ${attach}"

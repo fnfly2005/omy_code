@@ -1,8 +1,7 @@
 /*演出项目商品匹配表*/
 select
-    TPID,
-    TPSProjectID
+    TPID
 from
-    BS_ActivityMap
+    origindb.dp_myshow__bs_activity
 where
     TPID is not null

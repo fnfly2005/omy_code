@@ -4,6 +4,6 @@ select
     PerformanceID,
     Description
 from
-    S_TicketClass
+    origindb.dp_myshow__s_ticketclass
 where
     TicketClassID is not null

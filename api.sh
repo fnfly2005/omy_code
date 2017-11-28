@@ -12,20 +12,10 @@ s/-time2/${3:-${t2% *}}/g;s/-time3/${4:-${t3% *}}/g"`
 file=""
 attach="${path}doc/${file}.sql"
 
-echo "
-select
+echo "select
 from
     (
-    )
-"|tee ${attach}
-
-${presto_e}"
-${se}
-with as (
-${}
-),
-temp as (select 1)
-"|grep -iv "SET">${attach}
+    )">${attach}
 
 model=${attach/00output/model}
 cp ${model} ${attach}
@@ -85,7 +75,6 @@ content="﻿文件大于25MB未发出，邮件由系统发出，有问题请联�
 exit 0
 fi
 
-presto_e="/opt/presto/bin/presto --server hc:9980 --catalog hive --execute "
 se="set session optimize_hash_generation=true;"
 fut() {
 echo `grep -iv "\-time" ${path}sql/${1}.sql`
