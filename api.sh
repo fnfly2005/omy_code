@@ -10,12 +10,14 @@ s/-time2/${3:-${t2% *}}/g;s/-time3/${4:-${t3% *}}/g"`
 }
 =`fun ` 
 file=""
+lim=";"
 attach="${path}doc/${file}.sql"
 
 echo "select
 from
     (
     )">${attach}
+echo "succuess,detail see ${attach}"
 
 model=${attach/00output/model}
 cp ${model} ${attach}

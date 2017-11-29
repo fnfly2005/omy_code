@@ -5,7 +5,8 @@ select
     PerformanceID,
     ShowName,
     TicketID TicketClassID,
-    SalesPlanTicketPrice
+    SalesPlanTicketPrice,
+    SetNum
 from
     origindb.dp_myshow__s_ordersalesplansnapshot
 where
