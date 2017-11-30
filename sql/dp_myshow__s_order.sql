@@ -9,6 +9,7 @@ select
         when 4 then '小程序'
         when 5 then '猫眼'
         when 6 then '微信演出赛事'
+        when 7 then '微信钱包-小程序'
     else '其他' end SellChannel,
     case RefundStatus
         when 0 then '未发起'
@@ -19,6 +20,7 @@ select
         when 5 then '已退款'
     else '其他' end RefundStatus,
     OrderID,
+    MYOrderID,
     TPID,
     MTUserID,
     PaidTime,

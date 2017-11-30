@@ -1,7 +1,8 @@
 /*演出客户表*/
 select
     TPID,
-    Name
+    Name,
+    ShortName
 from
     origindb.dp_myshow__s_customer
 where

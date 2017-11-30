@@ -6,7 +6,7 @@ t3=`date -j -f %s $(expr $(date -j -f%Y-%m-%d ${t1% *} +%s) - 86400) +"%Y-%m-%d 
 path="/Users/fannian/Documents/my_code/"
 fun() {
 echo `cat ${path}sql/${1}.sql | sed "s/-time1/${2:-${t1% *}}/g;
-s/-time2/${3:-${t2% *}}/g;s/-time3/${4:-${t3% *}}/g"`
+s/-time2/${3:-${t2% *}}/g;s/-time3/${4:-${t3% *}}/g" | grep -iv "/\*"`
 }
 =`fun ` 
 file=""
@@ -18,6 +18,10 @@ from
     (
     )">${attach}
 echo "succuess,detail see ${attach}"
+
+fut() {
+echo `grep -iv "\-time" ${path}sql/${1}.sql | grep -iv "/\*"`
+}
 
 model=${attach/00output/model}
 cp ${model} ${attach}
@@ -62,12 +66,6 @@ echo "max:"${max}
 let min=min+1
 done
 #backup 方式
-presto_f=${presto_e/-execute/f}
-mysql_e="mysql -h10.50.50.48 -P3360 -ubiuser -pkOi9H-G3I;vvnVt4 -N -e"
-mysql_f=${mysql_e/-e/-dsalesorder<}
-spark_e="spark-sql --master spark://hdn8:9077 -e"
-hive_e="/opt/hive/bin/hive -e "
-hive_f="/opt/hive/bin/hive -f "
 #非常用，文件大小检验
 fsize=`ls -l ${attach} | cut -d' ' -f 5`
 if [ ${fsize} -ge 25000000 ]
@@ -78,6 +76,3 @@ exit 0
 fi
 
 se="set session optimize_hash_generation=true;"
-fut() {
-echo `grep -iv "\-time" ${path}sql/${1}.sql`
-}

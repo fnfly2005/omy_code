@@ -2,7 +2,7 @@
 path="/Users/fannian/Documents/my_code/"
 
 fut() {
-echo `grep -iv "\-time" ${path}sql/${1}.sql`
+echo `grep -iv "\-time" ${path}sql/${1}.sql | grep -iv "/\*"`
 }
 if [ $1 = 1 ]
 then
@@ -31,6 +31,7 @@ fi
 echo "select
     sc.Name,
     so.OrderID,
+    so.MYOrderID,
     so.PaidTime,
     so.RefundStatus,
     sos.PerformanceID,
