@@ -3,7 +3,8 @@ select
     PerformanceID,
     CategoryID,
     cityid,
-    bsperformanceid
+    bsperformanceid,
+    TicketStatus
 from
     origindb.dp_myshow__s_performance
 where
