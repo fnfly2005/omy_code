@@ -20,9 +20,10 @@ echo "select
     substr(so.PaidTime,1,7) mt,
     case when so.tp_type='渠道' then scu.ShortName
     else so.tp_type end tp_type,
-    count(distinct sos.PerformanceID) p_num,
+    SellChannel,
     count(distinct so.OrderID) so_num,
     sum(so.TotalPrice) TotalPrice,
+    sum(so.SalesPlanCount*sos.SetNum) tic_num
 from
     (
     $so
@@ -35,7 +36,7 @@ from
     $scu
     ) scu on scu.TPID=so.TPID
 group by
-    1,2
+    1,2,3
 $lim">${attach}
 
 echo "succuess,detail see ${attach}"
