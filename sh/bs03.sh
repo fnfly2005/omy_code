@@ -62,11 +62,12 @@ group by
 join 
 (select
     bam.tp_type,
-    count(distinct sp.PerformanceID) a_p_num
+    count(distinct case when sp.BSPerformanceID is not null then sp.BSPerformanceID else sp.PerformanceID end) a_p_num
 from
     (
     $sp
     and TicketStatus in (2,3)
+    and EditStatus=1
     ) sp
     left join 
     (
@@ -77,12 +78,13 @@ group by
 union all
 select
     'all' tp_type,
-    count(distinct PerformanceID) a_p_num
+    count(distinct case when sp.BSPerformanceID is not null then sp.BSPerformanceID else sp.PerformanceID end) a_p_num
 from
     (
     $sp
     and TicketStatus in (2,3)
-    ) sp2
+    and EditStatus=1
+    ) sp
 group by
     1
     ) s2 on s2.tp_type=s1.tp_type
@@ -126,11 +128,12 @@ group by
 join 
 (select
     bam.tp_type,
-    count(distinct sp.PerformanceID) a_p_num
+    count(distinct case when sp.BSPerformanceID is not null then sp.BSPerformanceID else sp.PerformanceID end) a_p_num
 from
     (
     $sp
     and TicketStatus in (2,3)
+    and EditStatus=1
     ) sp
     left join 
     (
@@ -141,12 +144,13 @@ group by
 union all
 select
     'all' tp_type,
-    count(distinct PerformanceID) a_p_num
+    count(distinct case when sp.BSPerformanceID is not null then sp.BSPerformanceID else sp.PerformanceID end) a_p_num
 from
     (
     $sp
     and TicketStatus in (2,3)
-    ) sp2
+    and EditStatus=1
+    ) sp
 group by
     1
     ) s2 on s2.tp_type=s1.tp_type

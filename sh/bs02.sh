@@ -15,8 +15,11 @@ sc=`fun dp_myshow__s_customer`
 sp=`fun dp_myshow__s_performance`
 bam=`fun dp_myshow__bs_activitymap`
 md=`fun detail_flow_pv_wide_report`
+ssp=`fun S_SettlementPayment`
+scu=`fun S_Customer`
 file="bs02"
 attach="${path}doc/${file}.sql"
+lim=";"
 
 echo "select
     substr(so.PaidTime,1,10) dt,
@@ -45,4 +48,23 @@ from
     $sod
     ) sod on sod.orderid=so.orderid
 group by
-    1,2">${attach}
+    1,2
+$lim">${attach}
+#substr(ssp.PaidTime,1,10) dt,
+echo "
+select
+    case when ssp.tp_type='渠道' then scu.ShortName
+    else ssp.tp_type end tp_type,
+    sum(GrossProfit) GrossProfit
+from
+    (
+    $ssp
+    ) ssp
+    left join 
+    (
+    $scu
+    ) scu 
+    on ssp.TPID=scu.TPID
+group by
+    1
+$lim">>${attach}

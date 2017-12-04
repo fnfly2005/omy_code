@@ -1,7 +1,8 @@
 /*演出客户表*/
 select
   TPID,
-  Name
+  Name,
+  ShortName
 from
     S_Customer
 where
