@@ -16,15 +16,15 @@ sc=`fun dp_myshow__s_category`
 sp=`fun dp_myshow__s_performance`
 bam=`fun dp_myshow__bs_activitymap`
 scu=`fun dp_myshow__s_customer`
+dmp=`fun detail_myshow_performance_performancesnapshotid`
 
-file="bd02"
+file="bd03"
 lim=";"
 attach="${path}doc/${file}.sql"
-cn="('北京','天津')"
 
 echo "select
     substr(so.PaidTime,1,7) mt,
-    sd.cityname,
+    dp.province_name,
     sc.Name,
     case when so.tp_type='渠道' then scu.ShortName
     else so.tp_type end tp_type,
@@ -34,30 +34,75 @@ echo "select
     sum(so.SalesPlanCount*sos.SetNum) tic_num
 from
     (
-    $sd
-    and cityname in $cn
-    ) sd
+    $so
+    ) so 
     join 
     (
+    $sos
+    ) sos 
+    on so.OrderID=sos.OrderID
+    left join 
+    (
     $sp
-    ) sp on sd.cityid=sp.CityID
+    ) sp 
+    on sos.PerformanceID=sp.PerformanceID
+    join 
+    (
+    $scu
+    ) scu on scu.TPID=so.TPID
     left join
     (
     $sc
     ) sc on sp.CategoryID=sc.CategoryID
-    join 
+    left join 
     (
-    $sos
-    ) sos on sos.PerformanceID=sp.PerformanceID
-    join 
+    $sd
+    ) sd
+    on sd.cityid=sp.CityID
+    left join 
     (
-    $so
-    ) so on so.OrderID=sos.OrderID
-    left join (
-    $scu
-    ) scu on scu.TPID=so.TPID
+    $dp
+    ) dp on dp.province_id=sd.ProvinceID
 group by
     1,2,3,4
 $lim">${attach}
+
+echo"/*在线项目数*/
+select
+    dp.province_name,
+    sc.Name,
+    case when bam.tp_type='渠道' then scu.ShortName
+    else bam.tp_type end tp_type,
+    count(distinct case when sp.BSPerformanceID is not null then sp.BSPerformanceID else sp.PerformanceID end) a_p_num
+from
+    (
+    $sp
+    and TicketStatus in (2,3)
+    and EditStatus=1
+    ) sp 
+    left join
+    (
+    $bam
+    ) bam on sp.BSPerformanceID=bam.ActivityID
+    left join 
+    (
+    $sc
+    ) sc on sp.CategoryID=sc.CategoryID
+    left join 
+    (
+    $sd
+    ) sd
+    on sd.cityid=sp.CityID
+    left join 
+    (
+    $dp
+    ) dp on dp.province_id=sd.ProvinceID
+    left join 
+    (
+    $scu
+    ) scu on scu.TPID=bam.TPID
+group by
+    1,2,3
+$lim">>${attach}
 
 echo "succuess,detail see ${attach}"
