@@ -17,6 +17,7 @@ sp=`fun dp_myshow__s_performance`
 bam=`fun dp_myshow__bs_activitymap`
 scu=`fun dp_myshow__s_customer`
 dmp=`fun detail_myshow_performance_performancesnapshotid`
+ssp=`fun dp_myshow__s_settlementpayment`
 
 file="bd03"
 lim=";"
@@ -31,7 +32,8 @@ echo "select
     count(distinct sos.PerformanceID) p_num,
     count(distinct so.OrderID) so_num,
     sum(so.TotalPrice) TotalPrice,
-    sum(so.SalesPlanCount*sos.SetNum) tic_num
+    sum(so.SalesPlanCount*sos.SetNum) tic_num,
+    sum(ssp.GrossProfit) GrossProfit
 from
     (
     $so
@@ -41,6 +43,11 @@ from
     $sos
     ) sos 
     on so.OrderID=sos.OrderID
+    join 
+    (
+    $ssp
+    ) ssp
+    on so.OrderID=ssp.OrderID
     left join 
     (
     $sp
@@ -67,7 +74,7 @@ group by
     1,2,3,4
 $lim">${attach}
 
-echo"/*在线项目数*/
+echo "/*在线项目数*/
 select
     dp.province_name,
     sc.Name,
