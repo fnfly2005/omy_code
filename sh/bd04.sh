@@ -8,8 +8,28 @@ fun() {
 echo `cat ${path}sql/${1}.sql | sed "s/-time1/${2:-${t1% *}}/g;
 s/-time2/${3:-${t2% *}}/g;s/-time3/${4:-${t3% *}}/g" | grep -iv "/\*"`
 }
-fut() {
-echo `grep -iv "\-time" ${path}sql/${1}.sql | grep -iv "/\*"`
-}
-so=`fut S_Order` 
-echo "'\$34'"
+so=`fun dp_myshow__s_order` 
+dc=`fun dim_myshow_customer`
+file="bd04"
+lim=";"
+attach="${path}doc/${file}.sql"
+
+echo "select
+    customer_type_name,
+    count(distinct OrderID) Order_num,
+    sum(TotalPrice) TotalPrice,
+    count(distinct MTUserID) MTUser
+from
+    (
+    $so
+    ) so
+    join 
+    (
+    $dc
+    and customer_type_id=1
+    ) dc
+    on so.TPID=dc.customer_id
+group by
+    1
+    ">${attach}
+echo "succuess,detail see ${attach}"

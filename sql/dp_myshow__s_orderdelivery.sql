@@ -7,4 +7,4 @@ from
 where
     OrderDeliveryID is not null
     and CreateTime>='-time3'
-    and CreateTime<'-time2'
+    and CreateTime<'$time2'

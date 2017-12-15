@@ -6,4 +6,4 @@ from
 where
     orderrefundid is not null
     and createtime>='-time3'
-    and createtime<'-time2'
+    and createtime<'$time2'

@@ -2,7 +2,7 @@
 select
     OrderID,
     PerformanceName,
-    PerformanceID,
+    PerformanceID performance_id,
     ShowName,
     TicketID TicketClassID,
     SalesPlanTicketPrice,
@@ -12,4 +12,4 @@ from
 where
     OrderID is not null
     and CreateTime>='-time3'
-    and CreateTime<'-time2'
+    and CreateTime<'$time2'
