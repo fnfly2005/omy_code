@@ -18,8 +18,29 @@ $lim">${attach}
 
 echo "succuess,detail see ${attach}"
 
+#!/bin/bash
+path="/Users/fannian/Documents/my_code/"
+clock="00"
+t1=${1:-`date -v -1d +"%Y-%m-%d ${clock}:00:00"`}
+t2=${2:-`date -j -f %s $(expr $(date -j -f%Y-%m-%d ${t1% *} +%s) + 86400) +"%Y-%m-%d ${clock}:00:00"`}
+t3=`date -j -f %s $(expr $(date -j -f%Y-%m-%d ${t1% *} +%s) - 86400) +"%Y-%m-%d ${clock}:00:00"`
+fun() {
+echo `cat ${path}sql/${1} | sed "s/-time1/${2:-${t1% *}}/g;
+s/-time2/${3:-${t2% *}}/g;s/-time3/${4:-${t3% *}}/g"`
+}
+=`fun ` 
+file=""
+lim=";"
+attach="${path}doc/${file}.sql"
+echo "select
+from
+    (
+    )
+$lim">${attach}
+echo "succuess,detail see ${attach}"
+
 fut() {
-echo `grep -iv "\-time" ${path}sql/${1}.sql | grep -iv "/\*"`
+echo `grep -iv "\-time" ${path}sql/${1} | grep -iv "/\*"`
 }
 
 model=${attach/00output/model}
@@ -75,7 +96,3 @@ exit 0
 fi
 
 se="set session optimize_hash_generation=true;"
-clock="00"
-t1=${1:-`date -v -1d +"%Y-%m-%d ${clock}:00:00"`}
-t2=${2:-`date -j -f %s $(expr $(date -j -f%Y-%m-%d ${t1% *} +%s) + 86400) +"%Y-%m-%d ${clock}:00:00"`}
-t3=`date -j -f %s $(expr $(date -j -f%Y-%m-%d ${t1% *} +%s) - 86400) +"%Y-%m-%d ${clock}:00:00"`

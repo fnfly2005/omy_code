@@ -7,6 +7,7 @@ select
     category_name,
     area_1_level_name,
     area_2_level_name,
+    province_name,
     city_id,
     city_name
 from

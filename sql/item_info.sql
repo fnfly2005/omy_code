@@ -2,7 +2,8 @@
 select
     id,
     title_cn,
-    type_id
+    type_id,
+    source
 from
     item_info
 where
