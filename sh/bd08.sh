@@ -9,7 +9,7 @@ so=`fun detail_myshow_saleorder.sql`
 dmp=`fun dim_myshow_performance.sql`
 dc=`fun dim_myshow_customer.sql`
 
-file="bd07"
+file="bd08"
 lim=";"
 attach="${path}doc/${file}.sql"
 
@@ -17,11 +17,9 @@ echo "
 select
     substr(so.pay_time,1,7) mt,
     dc.customer_type_name,
-    dmp.category_name,
-    dmp.area_1_level_name,
-    dmp.area_2_level_name,
-    dmp.province_name,
+    customer_lvl1_name,
     dmp.city_name,
+    dmp.performance_name,
     sum(TotalPrice) TotalPrice
 from
     (
@@ -37,9 +35,12 @@ from
     $dc
     ) dc
     on so.customer_id=dc.customer_id
+where
+    dc.customer_id=4
+    or (dc.customer_id<>4 
+    and dmp.performance_name like '%开心麻花%')
 group by
-    1,2,3,4,5,6,7
+    1,2,3,4,5
 $lim">${attach}
 
 echo "succuess,detail see ${attach}"
-

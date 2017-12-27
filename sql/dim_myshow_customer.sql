@@ -4,7 +4,8 @@ select
    case when customer_type_id=1 then customer_shortname
    else customer_type_name end customer_lvl0_name,
    customer_type_id,
-   customer_type_name
+   customer_type_name,
+   customer_lvl1_name
 from
     mart_movie.dim_myshow_customer
 where
