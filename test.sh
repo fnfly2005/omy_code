@@ -12,4 +12,6 @@ fut() {
 echo `grep -iv "\-time" ${path}sql/${1}.sql | grep -iv "/\*"`
 }
 so=`fut S_Order` 
-echo "'\$34'"
+for i in `seq 5 -1 1`
+    echo i
+do
