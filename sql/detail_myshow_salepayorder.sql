@@ -3,6 +3,7 @@ select
     partition_date,
     order_id,
     sellchannel,
+    customer_id,
     performance_id,
     totalprice,
     grossprofit

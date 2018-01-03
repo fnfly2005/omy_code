@@ -7,27 +7,21 @@ echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$
 
 so=`fun detail_myshow_saleorder.sql`
 dp=`fun dim_myshow_performance.sql`
-file="yysc05"
+file="yysc06"
 lim=";"
 attach="${path}doc/${file}.sql"
 
 echo "select
     substr(so.pay_time,1,7) as mt,
-    sellchannel,
-    category_name,
+    count(distinct so.meituan_userid) as user_num,
     count(distinct so.order_id) as order_num,
     sum(so.totalprice) as totalprice
 from
     (
     $so
     ) as so
-    join 
-    (
-    $dp
-    ) as dp
-    using(performance_id)
 group by
-    1,2,3
+    1
 $lim">${attach}
 
 echo "succuess,detail see ${attach}"

@@ -1,4 +1,18 @@
+#!/bin/bash
+path="/Users/fannian/Documents/my_code/"
+t1='$time1'
+fun() {
+echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
+}
 
+so=`fun detail_myshow_saleorder.sql`
+dp=`fun dim_myshow_performance.sql`
+dic=`fun my_dictionary.sql`
+file="yysc05"
+lim=";"
+attach="${path}doc/${file}.sql"
+
+echo "
 select
 mt,
 coalesce(value2,'全部') as sellchannel,
@@ -16,16 +30,16 @@ from
     sum(so.totalprice) as totalprice
 from
     (
-    select order_id, sellchannel, totalprice, customer_id, performance_id, meituan_userid, pay_time from mart_movie.detail_myshow_saleorder where pay_time is not null and pay_time>='$time1' and pay_time<'$time2'
+    $so
     ) as so
     join 
     (
-    select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, city_id, city_name from mart_movie.dim_myshow_performance
+    $dp
     ) as dp
     on so.performance_id=dp.performance_id
     left join
     (
-    select key, value1, value2, value3 from upload_table.dictionary001 where key_name is not null
+    $dic
     and key_name='sellchannel'
     ) as dic
     on dic.key=so.sellchannel
@@ -40,4 +54,6 @@ grouping sets
     dp.category_name),
     substr(so.pay_time,1,7)
     )) as test
-;
+$lim">${attach}
+
+echo "succuess,detail see ${attach}"

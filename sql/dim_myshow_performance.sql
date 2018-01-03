@@ -9,6 +9,7 @@ select
     area_2_level_name,
     province_name,
     city_id,
-    city_name
+    city_name,
+    shop_name
 from
     mart_movie.dim_myshow_performance
