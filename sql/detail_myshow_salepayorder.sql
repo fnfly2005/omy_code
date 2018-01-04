@@ -6,7 +6,9 @@ select
     customer_id,
     performance_id,
     totalprice,
-    grossprofit
+    grossprofit,
+    setnumber,
+    salesplan_count
 from
     mart_movie.detail_myshow_salepayorder
 where
