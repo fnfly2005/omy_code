@@ -6,7 +6,9 @@ select
     customer_id,
     performance_id,
     meituan_userid,
-    pay_time
+    pay_time,
+    consumed_time,
+    show_endtime
 from
     mart_movie.detail_myshow_saleorder
 where

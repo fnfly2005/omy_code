@@ -8,6 +8,7 @@ echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$
 so=`fun detail_myshow_salepayorder.sql` 
 dc=`fun dim_myshow_customer.sql`
 dss=`fun detail_myshow_salesplan.sql`
+dp=`fun dim_myshow_performance.sql`
 file="bs08"
 lim=";"
 attach="${path}doc/${file}.sql"
@@ -108,10 +109,27 @@ $lim">>${attach}
 
 echo "
 select
+    mt,
+    performance_id,
+    performance_name,
+    totalprice,
+    row_number() over(partition by mt order by totalprice desc) as rank
+from
+(select
+    substr(partition_date,1,7) as mt,
+    so.performance_id,
+    performance_name,
+    sum(totalprice) as totalprice
 from
     (
-    $spo
-    ) as spo
-    left 
+    $so
+    ) as so
+    left join
+    (
+    $dp
+    ) as dp
+    using(performance_id)
+group by
+    1,2,3) as s1
 $lim">>${attach}
 echo "succuess,detail see ${attach}"
