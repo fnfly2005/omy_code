@@ -8,7 +8,9 @@ select
     meituan_userid,
     pay_time,
     consumed_time,
-    show_endtime
+    show_endtime,
+    show_starttime,
+    order_create_time
 from
     mart_movie.detail_myshow_saleorder
 where

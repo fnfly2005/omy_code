@@ -1,16 +1,4 @@
-#!/bin/bash
-path="/Users/fannian/Documents/my_code/"
-t1='$time1'
-fun() {
-echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
-}
 
-so=`fun detail_myshow_saleorder.sql` 
-file="zf01"
-lim=";"
-attach="${path}doc/${file}.sql"
-
-echo "
 select
     * 
 from
@@ -36,7 +24,7 @@ from
     order_create_time
 from
     (
-    $so
+    select order_id, sellchannel, totalprice, customer_id, performance_id, meituan_userid, pay_time, consumed_time, show_endtime, show_starttime, order_create_time from mart_movie.detail_myshow_saleorder where pay_time is not null and pay_time>='$time1' and pay_time<'$time2'
     and order_reserve_status=9
     and order_create_time>='2017-09-01'
     and order_refund_status=0
@@ -44,6 +32,4 @@ from
     ) as so) as s1
 where
     s1.flag<>0
-$lim">${attach}
-
-echo "succuess,detail see ${attach}"
+;

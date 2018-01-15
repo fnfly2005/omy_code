@@ -5,6 +5,7 @@ select
     sellchannel,
     customer_id,
     performance_id,
+    show_id,
     totalprice,
     grossprofit,
     setnumber,
