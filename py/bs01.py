@@ -4,6 +4,7 @@
 import numpy as np  
 import math  
 import pandas as pd
+import csv
 
 #求解皮尔逊相关系数  
 def computeCorrelation(X, Y):  
@@ -44,19 +45,28 @@ def polyfit(x, y, degree):
     print" results :",results  
     return results  
 
-# 从csv文件中读取数据，分别为：X列表和对应的Y列表
 def get_data(file_name):
-    # 1. 用pandas读取csv
-    data = pd.read_csv(file_name)
-    for (p1,s1),group in data.groupby(['performance_id','show_id']):
-       # 2. 构造X列表和Y列表
-        X_parameter = []
-        Y_parameter = []
-        for single_dd,single_on in zip(group['date_diff'],group['order_num']):
-            X_parameter.append([float(single_dd)])
-            Y_parameter.append(float(single_on))
-        print p1,s1,"r",computeCorrelation(X_parameter,Y_parameter)  
-        print p1,s1,"r2",str(computeCorrelation(X_parameter,Y_parameter)**2)  
 
-#输出的是简单线性回归的皮尔逊相关度和R平方值  
-get_data('~/Documents/my_code/data/pytest.csv')
+    # 用open创建csv输出文件
+    with open('/Users/fannian/Documents/bs10.csv', 'wb') as csvfile:
+        #用CSV设置写入格式
+        spamwriter = csv.writer(csvfile, delimiter=',',quoting=csv.QUOTE_MINIMAL)
+        #写入表头
+        spamwriter.writerow(['performance_id', 'show_id', 'r','r2'])
+
+        # 用pandas读取csv输入文件
+        data = pd.read_csv(file_name)
+
+        # 用pandas按date_diff order_num进行分组迭代计算performance_id,show_id
+        for (p1,s1),group in data.groupby(['performance_id','show_id']):
+            # 4. 构造X列表和Y列表
+            X_parameter = []
+            Y_parameter = []
+            for single_dd,single_on in zip(group['date_diff'],group['order_num']):
+                X_parameter.append([float(single_dd)])
+                Y_parameter.append(float(single_on))
+            #输出的是简单线性回归的皮尔逊相关度和R平方值  
+            spamwriter.writerow([p1, s1,computeCorrelation(X_parameter,Y_parameter),str(computeCorrelation(X_parameter,Y_parameter)**2)])
+
+#导入文件并执行
+get_data('~/Documents/data/bs10.csv')

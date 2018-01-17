@@ -4,6 +4,7 @@ select
     performance_id,
     customer_id,
     shop_id,
+    show_id,
     salesplan_sellout_flag
 from
     mart_movie.detail_myshow_salesplan

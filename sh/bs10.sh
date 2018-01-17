@@ -114,23 +114,9 @@ select
     substr(dt,1,10) as dt,
     s1.performance_id,
     s1.show_id,
-    date_diff('day',dt,date_parse(et,'%Y-%m-%d')) as dd,
-    order_num*1.0/avg_order_num as ao
+    date_diff('day',dt,date_parse(et,'%Y-%m-%d')) as date_diff,
+    order_num*1.0/avg_order_num as order_num
 from
-    (select
-        performance_id,
-        row_number() over (order by order_num desc) as rank
-    from
-        (select
-        performance_id,
-        count(distinct order_id) as order_num
-    from
-        (
-        $spo
-        ) as sp1
-    group by
-        1) as sp2) as s0
-    join
     (select
         performance_id,
         show_id,
@@ -154,7 +140,6 @@ from
         1,2,3) as so2 
     group by
         1,2) as so3) as s1
-    on s0.performance_id=s1.performance_id and s0.rank<=10
     join
     (select
         date_parse(spo.partition_date,'%Y-%m-%d') as dt,
@@ -178,6 +163,73 @@ from
     group by
         1,2) as s2
     on s1.show_id=s2.show_id
+$lim">>${attach}
+
+echo "
+select
+    s1.date_diff,
+    s1.a_num,
+    s2.s_num
+from
+    (select
+        date_diff('day',dt,date_parse(et,'%Y-%m-%d')) as date_diff,
+        count(distinct show_id) a_num
+    from
+    (select
+        date_parse(ss.partition_date,'%Y-%m-%d') as dt,
+        ss.show_id,
+        max(substr(case when show_endtime is not null 
+            and length(show_endtime)>0
+            and show_starttime<show_endtime 
+        then show_endtime
+        else show_starttime end,1,10)) as et
+    from
+        (
+        $ss
+        and salesplan_sellout_flag=0
+        ) as ss
+        join
+        (
+        $ds
+        and show_type=1
+        ) as ds
+        using(show_id)
+    group by
+        1,2) as s01
+    where 
+        date_diff('day',dt,date_parse(et,'%Y-%m-%d'))>=0
+    group by
+        1) as s1
+    left join
+    (select
+        date_diff('day',dt,date_parse(et,'%Y-%m-%d')) as date_diff,
+        count(distinct show_id) s_num
+    from
+    (select
+        date_parse(spo.partition_date,'%Y-%m-%d') as dt,
+        spo.show_id,
+        max(substr(case when show_endtime is not null 
+            and length(show_endtime)>0
+            and show_starttime<show_endtime 
+        then show_endtime
+        else show_starttime end,1,10)) as et
+    from
+        (
+        $spo
+        ) as spo
+        join
+        (
+        $ds
+        and show_type=1
+        ) as ds
+       using(show_id)
+    group by
+        1,2) as s02
+    group by
+            1) as s2
+    using(date_diff)
+where 
+    date_diff>0
 $lim">>${attach}
 
 echo "succuess,detail see ${attach}"
