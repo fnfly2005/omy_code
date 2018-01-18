@@ -1,4 +1,24 @@
-select
+#!/bin/bash
+path="/Users/fannian/Documents/my_code/"
+t1='$time1'
+fun() {
+echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
+}
+
+ds=`fun dim_myshow_show.sql`
+spo=`fun detail_myshow_salepayorder.sql` 
+ss=`fun detail_myshow_salesplan.sql`
+amp=`fun aggr_myshow_pv_platform.sql`
+dp=`fun dim_myshow_performance.sql`
+dc=`fun dim_myshow_customer.sql`
+md=`fun myshow_dictionary.sql`
+dmp=`fun detail_myshow_performance_performancesnapshotid.sql`
+
+file="bs09"
+lim=";"
+attach="${path}doc/${file}.sql"
+
+echo "select
     sp.partition_date,
     sp.customer_type_name,
     sp.category_name,
@@ -30,16 +50,16 @@ from
     count(distinct spo.performance_id) as sp_num
 from
     (
-    select partition_date, order_id, sellchannel, customer_id, performance_id, show_id, totalprice, grossprofit, setnumber, salesplan_count from mart_movie.detail_myshow_salepayorder where partition_date>='2017-10-01' and partition_date>='$time1' and partition_date<'$time2'
+    $spo
     ) as spo
     left join
     (
-    select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, city_id, city_name, shop_name from mart_movie.dim_myshow_performance
+    $dp
     ) as dp
     on dp.performance_id=spo.performance_id
     left join
     (
-    select customer_id, case when customer_type_id=1 then customer_shortname else customer_type_name end customer_lvl0_name, customer_type_id, customer_type_name, customer_lvl1_name from mart_movie.dim_myshow_customer where customer_id is not null
+    $dc
     ) as dc
     on dc.customer_id=spo.customer_id
 group by
@@ -74,17 +94,17 @@ from
         count(distinct ss.performance_id) as ap_num
     from
        (
-       select partition_date, performance_id, customer_id, shop_id, show_id, salesplan_sellout_flag from mart_movie.detail_myshow_salesplan where salesplan_id is not null and partition_date>='$time1' and partition_date<'$time2'
+       $ss
        and salesplan_sellout_flag=0
        ) as ss
        left join
        (
-       select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, city_id, city_name, shop_name from mart_movie.dim_myshow_performance
+       $dp
        ) as dp
        on dp.performance_id=ss.performance_id
        left join 
        (
-       select customer_id, case when customer_type_id=1 then customer_shortname else customer_type_name end customer_lvl0_name, customer_type_id, customer_type_name, customer_lvl1_name from mart_movie.dim_myshow_customer where customer_id is not null
+       $dc
        ) as dc
        on ss.customer_id=dc.customer_id
     group by
@@ -107,12 +127,14 @@ from
     and sp.category_name=ap.category_name
     and sp.area_1_level_name=ap.area_1_level_name
     and sp.province_name=ap.province_name
-;
-select
+$lim">${attach}
+
+echo "select
     s1.partition_date,
     s1.value2,
     order_num,
     totalprice,
+    sp_num,
     uv,
     pv
 from
@@ -120,14 +142,15 @@ from
     partition_date,
     value2,
     count(distinct order_id) as order_num,
-    sum(totalprice) as totalprice
+    sum(totalprice) as totalprice,
+    count(distinct performance_id) as sp_num
 from
     (
-    select partition_date, order_id, sellchannel, customer_id, performance_id, show_id, totalprice, grossprofit, setnumber, salesplan_count from mart_movie.detail_myshow_salepayorder where partition_date>='2017-10-01' and partition_date>='$time1' and partition_date<'$time2'
+    $spo
     ) as spo
     left join
     (
-    select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
+    $md
     and key_name='sellchannel'
     ) as md
     on md.key=spo.sellchannel
@@ -135,12 +158,13 @@ group by
     1,2) as s1
 left join
     (
-    select partition_date, case new_app_name when '微信演出赛事' then '微信钱包' when '微信吃喝玩乐' then '微信点评' when '未知' then '其他' else new_app_name end as new_app_name, sum(uv) as uv, sum(pv) as pv from mart_movie.aggr_myshow_pv_platform where partition_date>='$time1' and partition_date<'$time2' group by 1, 2
+    $amp
     ) as amp
     on s1.partition_date=amp.partition_date
     and s1.value2=amp.new_app_name
-;
-select
+$lim">>${attach}
+
+echo "select
     partition_date,
     performance_name,
     order_num,
@@ -161,11 +185,11 @@ from
     sum(totalprice) as totalprice
 from
     (
-    select partition_date, order_id, sellchannel, customer_id, performance_id, show_id, totalprice, grossprofit, setnumber, salesplan_count from mart_movie.detail_myshow_salepayorder where partition_date>='2017-10-01' and partition_date>='$time1' and partition_date<'$time2'
+    $spo
     ) as spo
     left join
     (
-    select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, city_id, city_name, shop_name from mart_movie.dim_myshow_performance
+    $dp
     ) as dp
     on dp.performance_id=spo.performance_id
 group by
@@ -173,8 +197,9 @@ group by
     ) as s1) as s2
 where
     rank<=50
-;
-select
+$lim">>${attach}
+
+echo "select
     s1.partition_date,
     s1.a_7num,
     s1.a_15num,
@@ -197,12 +222,12 @@ from
         max(substr(ds.show_endtime,1,10)) as et
     from
         (
-        select partition_date, performance_id, customer_id, shop_id, show_id, salesplan_sellout_flag from mart_movie.detail_myshow_salesplan where salesplan_id is not null and partition_date>='$time1' and partition_date<'$time2'
+        $ss
         and salesplan_sellout_flag=0
         ) as ss
         join
         (
-        select show_id, performance_id, show_starttime, show_endtime from mart_movie.dim_myshow_show where show_id is not null
+        $ds
         ) as ds
         using(show_id)
     group by
@@ -226,11 +251,11 @@ from
         max(substr(ds.show_endtime,1,10)) as et
     from
         (
-        select partition_date, order_id, sellchannel, customer_id, performance_id, show_id, totalprice, grossprofit, setnumber, salesplan_count from mart_movie.detail_myshow_salepayorder where partition_date>='2017-10-01' and partition_date>='$time1' and partition_date<'$time2'
+        $spo
         ) as spo
         join
         (
-        select show_id, performance_id, show_starttime, show_endtime from mart_movie.dim_myshow_show where show_id is not null
+        $ds
         ) as ds
        using(show_id)
     group by
@@ -238,8 +263,9 @@ from
     group by
         1) as s2
     on s1.partition_date=s2.partition_date
-;
-select
+$lim">>${attach}
+
+echo "select
     sp.partition_date,
     sp.customer_type_name,
     sp.category_name,
@@ -271,16 +297,16 @@ from
     count(distinct spo.performance_id) as sp_num
 from
     (
-    select partition_date, order_id, sellchannel, customer_id, performance_id, show_id, totalprice, grossprofit, setnumber, salesplan_count from mart_movie.detail_myshow_salepayorder where partition_date>='2017-10-01' and partition_date>='$time1' and partition_date<'$time2'
+    $spo
     ) as spo
     left join
     (
-    select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, city_id, city_name, shop_name from mart_movie.dim_myshow_performance
+    $dp
     ) as dp
     on dp.performance_id=spo.performance_id
     left join
     (
-    select customer_id, case when customer_type_id=1 then customer_shortname else customer_type_name end customer_lvl0_name, customer_type_id, customer_type_name, customer_lvl1_name from mart_movie.dim_myshow_customer where customer_id is not null
+    $dc
     ) as dc
     on dc.customer_id=spo.customer_id
 group by
@@ -315,11 +341,11 @@ from
         count(distinct dmp.performance_id) as ap_num
     from
        (
-       select partition_date, performance_id from mart_movie.detail_myshow_performance_performancesnapshotid where ticketstatus in (2,3) and editstatus=1 and partition_date>='2017-12-04' and partition_date<'2017-12-20'
+       $dmp
        ) as dmp
        left join
        (
-       select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, city_id, city_name, shop_name from mart_movie.dim_myshow_performance
+       $dp
        ) as dp
        on dp.performance_id=dmp.performance_id
     group by
@@ -342,4 +368,5 @@ from
     and sp.category_name=ap.category_name
     and sp.area_1_level_name=ap.area_1_level_name
     and sp.province_name=ap.province_name
-;
+$lim">>${attach}
+echo "succuess,detail see ${attach}"
