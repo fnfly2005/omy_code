@@ -139,7 +139,7 @@ from
         ) as spo
         join
         (
-        select show_id, performance_id, activity_id, category_name, area_1_level_name, area_2_level_name, shop_id, show_starttime, show_endtime from mart_movie.dim_myshow_show where show_id is not null
+        select show_id, performance_id, show_starttime, show_endtime from mart_movie.dim_myshow_show where show_id is not null
         and show_type=1
         ) as ds
        on spo.show_id=ds.show_id
@@ -172,8 +172,7 @@ from
         ) as ss
         join
         (
-        select show_id, performance_id, activity_id, category_name, area_1_level_name, area_2_level_name, shop_id, show_starttime, show_endtime from mart_movie.dim_myshow_show where show_id is not null
-        and show_type=1
+        select show_id, performance_id, show_starttime, show_endtime from mart_movie.dim_myshow_show where show_id is not null
         ) as ds
         using(show_id)
     group by
@@ -201,7 +200,7 @@ from
         ) as spo
         join
         (
-        select show_id, performance_id, activity_id, category_name, area_1_level_name, area_2_level_name, shop_id, show_starttime, show_endtime from mart_movie.dim_myshow_show where show_id is not null
+        select show_id, performance_id, show_starttime, show_endtime from mart_movie.dim_myshow_show where show_id is not null
         and show_type=1
         ) as ds
        using(show_id)
@@ -212,4 +211,77 @@ from
     using(date_diff)
 where 
     date_diff>0
+;
+
+select
+    value2,
+    case when date_diff<=7 then 7
+    when date_diff<=15 then 15
+    when date_diff<=30 then 30
+    else 99 end as flag,
+    count(distinct order_id) as o_num
+from
+(select
+    date_diff('day',
+    date_parse(spo.partition_date,'%Y-%m-%d'),
+    date_parse(substr(ds.show_endtime,1,10),'%Y-%m-%d')
+    ) as date_diff,
+    md.value2,
+    spo.order_id
+from
+    (
+    select partition_date, order_id, sellchannel, customer_id, performance_id, show_id, totalprice, grossprofit, setnumber, salesplan_count from mart_movie.detail_myshow_salepayorder where partition_date>='2017-10-01' and partition_date>='$time1' and partition_date<'$time2'
+    ) as spo
+    join
+    (
+    select show_id, performance_id, show_starttime, show_endtime from mart_movie.dim_myshow_show where show_id is not null
+    ) as ds
+    on spo.show_id=ds.show_id
+    left join
+    (
+    select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
+    and key_name='sellchannel'
+    ) as md
+    on md.key=spo.sellchannel
+    ) as s02
+where
+    date_diff>=0
+group by
+    1,2
+union all
+select
+    'all' as value2,
+    case when date_diff<=7 then 7
+    when date_diff<=15 then 15
+    when date_diff<=30 then 30
+    else 99 end as flag,
+    count(distinct order_id) as o_num
+from
+(select
+    date_diff('day',
+    date_parse(spo.partition_date,'%Y-%m-%d'),
+    date_parse(substr(ds.show_endtime,1,10),'%Y-%m-%d')
+    ) as date_diff,
+    md.value2,
+    spo.order_id
+from
+    (
+    select partition_date, order_id, sellchannel, customer_id, performance_id, show_id, totalprice, grossprofit, setnumber, salesplan_count from mart_movie.detail_myshow_salepayorder where partition_date>='2017-10-01' and partition_date>='$time1' and partition_date<'$time2'
+    ) as spo
+    join
+    (
+    select show_id, performance_id, show_starttime, show_endtime from mart_movie.dim_myshow_show where show_id is not null
+    ) as ds
+    on spo.show_id=ds.show_id
+    left join
+    (
+    select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
+    and key_name='sellchannel'
+    ) as md
+    on md.key=spo.sellchannel
+    ) as s02
+where
+    date_diff>=0
+group by
+    1,2
 ;

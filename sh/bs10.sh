@@ -9,6 +9,7 @@ dp=`fun dim_myshow_performance.sql`
 spo=`fun detail_myshow_salepayorder.sql` 
 ss=`fun detail_myshow_salesplan.sql`
 ds=`fun dim_myshow_show.sql`
+md=`fun myshow_dictionary.sql`
 file="bs10"
 lim=";"
 attach="${path}doc/${file}.sql"
@@ -191,7 +192,6 @@ from
         join
         (
         $ds
-        and show_type=1
         ) as ds
         using(show_id)
     group by
@@ -230,6 +230,80 @@ from
     using(date_diff)
 where 
     date_diff>0
+$lim">>${attach}
+
+echo "
+select
+    value2,
+    case when date_diff<=7 then 7
+    when date_diff<=15 then 15
+    when date_diff<=30 then 30
+    else 99 end as flag,
+    count(distinct order_id) as o_num
+from
+(select
+    date_diff('day',
+    date_parse(spo.partition_date,'%Y-%m-%d'),
+    date_parse(substr(ds.show_endtime,1,10),'%Y-%m-%d')
+    ) as date_diff,
+    md.value2,
+    spo.order_id
+from
+    (
+    $spo
+    ) as spo
+    join
+    (
+    $ds
+    ) as ds
+    on spo.show_id=ds.show_id
+    left join
+    (
+    $md
+    and key_name='sellchannel'
+    ) as md
+    on md.key=spo.sellchannel
+    ) as s02
+where
+    date_diff>=0
+group by
+    1,2
+union all
+select
+    'all' as value2,
+    case when date_diff<=7 then 7
+    when date_diff<=15 then 15
+    when date_diff<=30 then 30
+    else 99 end as flag,
+    count(distinct order_id) as o_num
+from
+(select
+    date_diff('day',
+    date_parse(spo.partition_date,'%Y-%m-%d'),
+    date_parse(substr(ds.show_endtime,1,10),'%Y-%m-%d')
+    ) as date_diff,
+    md.value2,
+    spo.order_id
+from
+    (
+    $spo
+    ) as spo
+    join
+    (
+    $ds
+    ) as ds
+    on spo.show_id=ds.show_id
+    left join
+    (
+    $md
+    and key_name='sellchannel'
+    ) as md
+    on md.key=spo.sellchannel
+    ) as s02
+where
+    date_diff>=0
+group by
+    1,2
 $lim">>${attach}
 
 echo "succuess,detail see ${attach}"

@@ -113,6 +113,7 @@ select
     s1.value2,
     order_num,
     totalprice,
+    sp_num,
     uv,
     pv
 from
@@ -120,7 +121,8 @@ from
     partition_date,
     value2,
     count(distinct order_id) as order_num,
-    sum(totalprice) as totalprice
+    sum(totalprice) as totalprice,
+    count(distinct performance_id) as sp_num
 from
     (
     select partition_date, order_id, sellchannel, customer_id, performance_id, show_id, totalprice, grossprofit, setnumber, salesplan_count from mart_movie.detail_myshow_salepayorder where partition_date>='2017-10-01' and partition_date>='$time1' and partition_date<'$time2'
@@ -342,4 +344,31 @@ from
     and sp.category_name=ap.category_name
     and sp.area_1_level_name=ap.area_1_level_name
     and sp.province_name=ap.province_name
+;
+
+select
+    partition_date,
+    '微信钱包' as plat,
+    new_page_name,
+    sum(uv) as uv
+from
+    (
+    select partition_date, new_page_name, pv, uv from mart_movie.aggr_myshow_pv_all where new_app_name='微信演出赛事' and partition_date>='$time1' and partition_date<'$time2'
+    and new_page_name in ('演出首页','演出详情页','演出确认订单页')
+    ) apa
+group by
+    1,2,3
+union all
+select
+    partition_date,
+    '全部' as plat,
+    new_page_name,
+    sum(uv) as uv
+from
+    (
+    select partition_date, new_page_name, pv, uv from mart_movie.aggr_myshow_pv_page where partition_date>='$time1' and partition_date<'$time2'
+    and new_page_name in ('演出首页','演出详情页','演出确认订单页')
+    ) app
+group by
+    1,2,3
 ;

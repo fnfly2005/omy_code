@@ -13,6 +13,8 @@ dp=`fun dim_myshow_performance.sql`
 dc=`fun dim_myshow_customer.sql`
 md=`fun myshow_dictionary.sql`
 dmp=`fun detail_myshow_performance_performancesnapshotid.sql`
+apa=`fun aggr_myshow_pv_all.sql`
+app=`fun aggr_myshow_pv_page.sql`
 
 file="bs09"
 lim=";"
@@ -369,4 +371,33 @@ from
     and sp.area_1_level_name=ap.area_1_level_name
     and sp.province_name=ap.province_name
 $lim">>${attach}
+
+echo "
+select
+    partition_date,
+    '微信钱包' as plat,
+    new_page_name,
+    sum(uv) as uv
+from
+    (
+    $apa
+    and new_page_name in ('演出首页','演出详情页','演出确认订单页')
+    ) apa
+group by
+    1,2,3
+union all
+select
+    partition_date,
+    '全部' as plat,
+    new_page_name,
+    sum(uv) as uv
+from
+    (
+    $app
+    and new_page_name in ('演出首页','演出详情页','演出确认订单页')
+    ) app
+group by
+    1,2,3
+$lim">>${attach}
+
 echo "succuess,detail see ${attach}"
