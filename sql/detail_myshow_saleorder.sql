@@ -6,6 +6,7 @@ select
     customer_id,
     performance_id,
     meituan_userid,
+    dianping_userid,
     pay_time,
     consumed_time,
     show_endtime,

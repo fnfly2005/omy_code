@@ -13,3 +13,5 @@ select
     shop_name
 from
     mart_movie.dim_myshow_performance
+where
+    performance_id is not null
