@@ -1,17 +1,4 @@
-#!/bin/bash
-path="/Users/fannian/Documents/my_code/"
-t1='$time1'
-fun() {
-echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
-}
 
-dic=`fun myshow_dictionary.sql`
-spo=`fun detail_myshow_salepayorder.sql`
-file="bi03"
-lim=";"
-attach="${path}doc/${file}.sql"
-
-echo "
 select
     meituan_userid,
     dianping_userid,
@@ -46,7 +33,7 @@ where
     ) as s1
     join 
     (
-    $dic
+    select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
     and key_name='sellchannel'
     ) as dic
     on s1.sellchannel=dic.key
@@ -60,6 +47,4 @@ grouping sets(
 (meituan_userid,dianping_userid,value3,category_id)
 )
 ) as s2
-$lim">${attach}
-
-echo "succuess,detail see ${attach}"
+;
