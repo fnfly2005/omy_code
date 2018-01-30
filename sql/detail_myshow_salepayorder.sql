@@ -1,6 +1,6 @@
 /*订单支付明细表*/
 select
-    partition_date,
+    partition_date as dt,
     order_id,
     sellchannel,
     customer_id,
@@ -9,7 +9,10 @@ select
     totalprice,
     grossprofit,
     setnumber,
-    salesplan_count
+    salesplan_count,
+    expressfee,
+    project_id,
+    bill_id
 from
     mart_movie.detail_myshow_salepayorder
 where
