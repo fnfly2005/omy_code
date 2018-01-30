@@ -2,6 +2,7 @@
 select
     partition_date as dt,
     url_parameters,
+    substr(url,40,40) as url,
     page_name,
     union_id
 from mart_flow.detail_flow_pv_wide_report
