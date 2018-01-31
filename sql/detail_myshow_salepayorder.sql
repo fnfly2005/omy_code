@@ -5,6 +5,7 @@ select
     sellchannel,
     customer_id,
     performance_id,
+    meituan_userid,
     show_id,
     totalprice,
     grossprofit,
@@ -12,10 +13,10 @@ select
     salesplan_count,
     expressfee,
     project_id,
-    bill_id
+    bill_id,
+    substr(pay_time,12,2) as ht
 from
     mart_movie.detail_myshow_salepayorder
 where
-    partition_date>='2017-10-01'
-    and partition_date>='$time1'
+    partition_date>='$time1'
     and partition_date<'$time2'

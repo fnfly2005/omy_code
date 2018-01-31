@@ -1,6 +1,7 @@
 /*新美大流量宽表*/
 select
     partition_date as dt,
+    substr(stat_time,12,2) as ht,
     custom,
     union_id
 from mart_flow.detail_flow_pv_wide_report

@@ -5,7 +5,7 @@ fun() {
 echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
 }
 
-so=`fun detail_myshow_saleorder.sql`
+spo=`fun detail_myshow_salepayorder.sql`
 dmp=`fun dim_myshow_performance.sql`
 dc=`fun dim_myshow_customer.sql`
 
@@ -16,28 +16,30 @@ name='$name'
 
 echo "
 select
-    substr(so.pay_time,1,7) mt,
+    substr(spo.dt,1,7) as mt,
     dc.customer_type_name,
-    customer_lvl1_name,
+    dc.customer_lvl1_name,
     dmp.city_name,
     dmp.performance_name,
-    sum(TotalPrice) TotalPrice
+    count(distinct spo.order_id) as order_num,
+    sum(spo.salesplan_count*spo.setnumber) as ticket_num,
+    sum(spo.TotalPrice) as TotalPrice,
+    sum(spo.grossprofit) as grossprofit
 from
     (
-    $so
-    ) so
+    $spo
+    ) as spo
     join
     (
     $dmp
+    and performance_name like '%$name%'
     ) dmp
-    on so.performance_id=dmp.performance_id
-    join 
+    on spo.performance_id=dmp.performance_id
+    left join 
     (
     $dc
     ) dc
-    on so.customer_id=dc.customer_id
-where
-    dmp.performance_name like '%$name%'
+    on spo.customer_id=dc.customer_id
 group by
     1,2,3,4,5
 $lim">${attach}
