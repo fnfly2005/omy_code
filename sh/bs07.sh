@@ -5,10 +5,10 @@ fun() {
 echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
 }
 
-dss=`fun detail_myshow_salesplan.sql`
+ss=`fun detail_myshow_salesplan.sql`
 spo=`fun detail_myshow_salepayorder.sql`
-dp=`fun dim_myshow_performance.sql` 
-dc=`fun dim_myshow_customer.sql`
+per=`fun dim_myshow_performance.sql` 
+cus=`fun dim_myshow_customer.sql`
 file="bs07"
 lim=";"
 attach="${path}doc/${file}.sql"
@@ -26,16 +26,16 @@ $lim">${attach}
 
 echo "select
     count(distinct shop_id) as_num,
-    count(distinct case when dc.customer_type_id=2 then shop_id end) s_num
+    count(distinct case when cus.customer_type_id=2 then shop_id end) s_num
 from
     (
-    $dss
-    ) as dss
+    $ss
+    ) as ss
     left join
     (
-    $dc
-    ) as dc 
-    on dc.customer_id=dss.customer_id
+    $cus
+    ) as cus 
+    on cus.customer_id=ss.customer_id
     ">>${attach}
 echo "
 select substr(x.pay_time,1,7) mt,

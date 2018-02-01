@@ -9,19 +9,16 @@ spo=`fun detail_myshow_salepayorder.sql`
 per=`fun dim_myshow_performance.sql`
 cus=`fun dim_myshow_customer.sql`
 
-file="bd09"
+file="bd10"
 lim=";"
 attach="${path}doc/${file}.sql"
-name='$name'
+shop='$shop'
 
 echo "
 select
     spo.dt,
     cus.customer_type_name,
     cus.customer_lvl1_name,
-    per.area_1_level_name,
-    per.area_2_level_name,
-    per.province_name,
     per.city_name,
     per.category_name,
     per.shop_name,
@@ -33,11 +30,11 @@ select
 from
     (
     $spo
-    ) as spo
+    ) spo
     join
     (
     $per
-    and performance_name like '%$name%'
+    and shop_name like '%$shop%'
     ) per
     on spo.performance_id=per.performance_id
     left join 
@@ -49,9 +46,6 @@ group by
     spo.dt,
     cus.customer_type_name,
     cus.customer_lvl1_name,
-    per.area_1_level_name,
-    per.area_2_level_name,
-    per.province_name,
     per.city_name,
     per.category_name,
     per.shop_name,
