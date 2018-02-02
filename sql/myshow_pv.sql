@@ -1,6 +1,8 @@
 /*埋点字典表*/
 select
-    value
+    page_tag1,
+    value,
+    name
 from
     upload_table.myshow_pv
 where

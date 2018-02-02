@@ -1,7 +1,10 @@
 /*新美大流量宽表*/
 select
     partition_date as dt,
-    substr(stat_time,12,2) as ht,
+    stat_time,
+    app_name,
+    page_identifier,
+    os,
     custom,
     union_id
 from mart_flow.detail_flow_pv_wide_report
@@ -17,5 +20,4 @@ where partition_date>='$time1'
     select value
     from upload_table.myshow_pv
     where key='page_identifier'
-    and page_tag1>=0
     )

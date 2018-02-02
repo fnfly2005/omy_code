@@ -13,7 +13,8 @@ file="bs07"
 lim=";"
 attach="${path}doc/${file}.sql"
 
-echo "select
+echo "
+select
     substr(partition_date,1,7) as mt,
     sum(setnumber*salesplan_count) as t_num
 from
@@ -24,7 +25,8 @@ group by
     1
 $lim">${attach}
 
-echo "select
+echo "
+select
     count(distinct shop_id) as_num,
     count(distinct case when cus.customer_type_id=2 then shop_id end) s_num
 from
@@ -37,8 +39,10 @@ from
     ) as cus 
     on cus.customer_id=ss.customer_id
     ">>${attach}
+
 echo "
-select substr(x.pay_time,1,7) mt,
+select 
+    substr(x.pay_time,1,7) mt,
     sum(quantity) sq
 from mart_movie.detail_maoyan_order_new_info x
 join mart_movie.detail_maoyan_order_sale_cost_new_info y
