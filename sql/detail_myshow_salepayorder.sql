@@ -14,7 +14,7 @@ select
     expressfee,
     project_id,
     bill_id,
-    substr(pay_time,12,2) as ht
+    salesplan_id
 from
     mart_movie.detail_myshow_salepayorder
 where
