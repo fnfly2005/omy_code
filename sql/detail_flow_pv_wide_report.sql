@@ -8,8 +8,8 @@ select
     custom,
     union_id
 from mart_flow.detail_flow_pv_wide_report
-where partition_date>='$time1'
-    and partition_date<'$time2'
+where partition_date>='$$today{-1d}'
+    and partition_date<'$$today{-0d}'
     and partition_log_channel='movie'
     and partition_app in (
     select key

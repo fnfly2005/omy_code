@@ -12,5 +12,5 @@ from
     mart_movie.detail_myshow_salesplan
 where
     salesplan_id is not null
-    and partition_date>='$time1'
-    and partition_date<'$time2'
+    and partition_date>='$$today{-1d}'
+    and partition_date<'$$today{-0d}'
