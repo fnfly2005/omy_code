@@ -1,7 +1,8 @@
 /*埋点字典表*/
 select
     nav_flag,
-    value
+    value,
+    page_tag1
 from
     upload_table.myshow_pv
 where

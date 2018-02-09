@@ -13,9 +13,12 @@ partition_app,dianping_nova,点评,点评,点评
 partition_app,other_app,其他,其他,其他
 partition_app,dp_m,点评,点评,点评
 partition_app,group,美团,美团,美团
+nav_flag,0,平台,平台,平台
 nav_flag,1,导航,导航,导航
 nav_flag,2,详情,详情,详情
-nav_flag,3,其他,其他,其他
+nav_flag,3,购票,购票,购票
+nav_flag,4,下单,下单,下单
+nav_flag,5,其他,其他,其他
 page_tag1,-2,电影,电影,电影
 page_tag1,-1,平台,平台,平台
 page_tag1,0,演出,演出,演出

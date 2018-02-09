@@ -1,0 +1,124 @@
+#!/bin/bash
+path="/Users/fannian/Documents/my_code/"
+t1='$time1'
+fun() {
+echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
+}
+
+spo=`fun detail_myshow_salepayorder.sql` 
+mdk=`fun topic_movie_deal_kpi_daily.sql`
+mp=`fun myshow_pv.sql`
+md=`fun myshow_dictionary.sql`
+
+file="xk02"
+lim=";"
+attach="${path}doc/${file}.sql"
+
+echo "
+select
+    sp3.dt,
+    sp3.bu,
+    fp2.uv,
+    sp3.order_num,
+    sp3.ticket_num,
+    sp3.totalprice
+from (
+    select
+        dt,
+        coalesce(bu,'全部') as bu,
+        order_num,
+        ticket_num,
+        totalprice
+    from (
+        select
+            dt,
+            bu,
+            sum(order_num) as order_num,
+            sum(ticket_num) as ticket_num,
+            sum(totalprice) as totalprice
+        from (
+            select
+                spo.dt,
+                '演出' as bu,
+                count(distinct spo.order_id) as order_num,
+                sum(spo.salesplan_count*spo.setnumber) as ticket_num,
+                sum(spo.totalprice) as totalprice
+            from
+                (
+                $spo
+                and sellchannel=8
+                ) spo
+            group by
+                spo.dt,
+                '演出'
+            union all
+            select
+                '\$\$today{-1d}' as dt,
+                '电影' as bu,
+                mdk.order_num,
+                mdk.ticket_num,
+                mdk.gmv as totalprice
+            from (
+                $mdk
+                ) as mdk
+            ) as sp1
+        group by
+            dt,
+            bu
+        grouping sets(
+            dt,
+            (dt,bu)
+        ) as sp2
+    ) as sp3
+    left join (
+        select
+            dt,
+            coalesce(bu,'全部') as bu,
+            uv
+        from (
+            select
+                dt,
+                md.value1 as bu,
+                count(distinct union_id) as uv
+            from (
+                select
+                    partition_date as dt,
+                    page_identifier,
+                    union_id
+                from
+                    mart_flow.detail_flow_pv_wide_report
+                where partition_date='\$\$today{-1d}'
+                    and partition_log_channel='movie'
+                    and partition_app='other_app'
+                    and app_name='gewara'
+                group by
+                    partition_date,
+                    page_identifier,
+                    union_id
+                ) as fpw
+                join (
+                    $mp
+                    and page='native'
+                    ) as mp
+                on fpw.page_identifier=mp.value
+                left join (
+                    $md
+                    and key_name='page_tag1'
+                    ) as md
+                on mp.page_tag1=md.key
+            group by
+                dt,
+                md.value1
+            grouping sets (
+                (dt, md.value1),
+                dt
+                )
+            ) as fp1
+        where bu<>'平台'
+    ) as fp2
+    on sp3.dt=fp2.dt
+    and sp3.bu=fp2.bu
+$lim">${attach}
+
+echo "succuess,detail see ${attach}"
+
