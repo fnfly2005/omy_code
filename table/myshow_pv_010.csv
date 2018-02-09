@@ -48,6 +48,7 @@ page_identifier,c_wh7rogdp,我的卖品订单详情页,native,5,-2,0
 page_identifier,c_BvlYz,申请退款页,native,5,-2,0
 page_identifier,c_y02b19d,退款详情页,native,5,-2,0
 page_identifier,com.gewara.trade.cinema.MainCinemaListFragment,电影首页,native,1,-2,0
+page_identifier,com.gewara.trade.cinema.c,电影首页,native,1,-2,0
 page_identifier,com.gewara.trade.cinema.MovieCinemaListActivity,上映影院与购票页,native,2,-2,0
 page_identifier,com.gewara.trade.cinema.MoviePoiCinemaActivity,电影排片页,native,2,-2,0
 page_identifier,com.gewara.trade.seat.MovieSelectSeatActivity,电影选座页,native,3,-2,0

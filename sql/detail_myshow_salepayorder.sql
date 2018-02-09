@@ -18,5 +18,5 @@ select
 from
     mart_movie.detail_myshow_salepayorder
 where
-    partition_date>='$$today{-1d}'
-    and partition_date<'$$today{0d}'
+    partition_date>='$$begindate'
+    and partition_date<'$$enddate'

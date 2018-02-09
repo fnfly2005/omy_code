@@ -1,4 +1,5 @@
 #!/bin/bash
+#分平台流量销售
 path="/Users/fannian/Documents/my_code/"
 t1='$time1'
 fun() {
@@ -50,7 +51,7 @@ from (
         select
             substr(dt,1,7) as mt,
             value2 as pt,
-            sum(uv) as uv
+            avg(uv) as uv
         from (
             select
                 partition_date as dt,
@@ -59,8 +60,8 @@ from (
             from
                 mart_flow.detail_flow_pv_wide_report
             where
-                partition_date>='\$time1'
-                and partition_date<'\$time2'
+                partition_date>='\$\$begindate'
+                and partition_date<'\$\$enddate'
                 and partition_log_channel='movie'
                 and partition_app in (
                 select key

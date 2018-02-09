@@ -1,11 +1,11 @@
 /*流量分页面*/
 select
-    partition_date,
+    partition_date as dt,
     new_page_name,
     pv,
     uv
 from
     mart_movie.aggr_myshow_pv_page
 where
-    partition_date>='$time1'
-    and partition_date<'$time2'
+    partition_date>='$$begindate'
+    and partition_date<'$$enddate'

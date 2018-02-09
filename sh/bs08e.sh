@@ -19,6 +19,7 @@ echo "
 select
     substr(sp1.dt,1,7) as mt,
     sp1.customer_type_name,
+    sp1.customer_lvl1_name,
     sum(order_num) as order_num,
     sum(totalprice) as totalprice,
     avg(sp_num) as sp_num,
@@ -29,6 +30,7 @@ from (
     select
         dt,
         customer_type_name,
+        customer_lvl1_name,
         count(distinct order_id) as order_num,
         sum(totalprice) as totalprice,
         count(distinct performance_id) as sp_num,
@@ -44,30 +46,34 @@ from (
         ) as cus
         using(customer_id)
     group by
-        1,2
+        1,2,3
     union all
     select
         dt,
-        '全部' as customer_type_name,
+        customer_type_name,
+        'all' as customer_lvl1_name,
         count(distinct order_id) as order_num,
         sum(totalprice) as totalprice,
         count(distinct performance_id) as sp_num,
         sum(grossprofit) as grossprofit,
         sum(salesplan_count*setnumber) as ticket_num
-    from (
+    from
+        (
         $spo
         ) as spo
-        left join (
+        left join 
+        (
         $cus
         ) as cus
         using(customer_id)
     group by
-        1,2
+        1,2,3
     ) as sp1
     left join (
     select
         dt,
         customer_type_name,
+        customer_lvl1_name,
         count(distinct performance_id) as ap_num
     from (
         $ss
@@ -78,11 +84,12 @@ from (
         ) as cus
         using(customer_id)
     group by
-        1,2
+        1,2,3
     union all
     select
         dt,
-        '全部' as customer_type_name,
+        customer_type_name,
+        'all' as customer_lvl1_name,
         count(distinct performance_id) as ap_num
     from (
         $ss
@@ -93,12 +100,13 @@ from (
         ) as cus
         using(customer_id)
     group by
-        1,2
+        1,2,3
        ) as ss1
     on sp1.dt=ss1.dt
     and sp1.customer_type_name=ss1.customer_type_name
+    and sp1.customer_lvl1_name=ss1.customer_lvl1_name
 group by
-    1,2
+    1,2,3
 $lim">${attach}
 
 echo "succuess,detail see ${attach}"

@@ -1,4 +1,5 @@
 #!/bin/bash
+#TOP项目数据
 path="/Users/fannian/Documents/my_code/"
 t1='$time1'
 fun() {
@@ -14,33 +15,25 @@ attach="${path}doc/${file}.sql"
 echo "
 select
     mt,
+    performance_id,
     performance_name,
     totalprice,
-    rank
+    row_number() over(partition by mt order by totalprice desc) as rank
 from (
     select
-        mt,
-        performance_id,
+        substr(dt,1,7) as mt,
+        spo.performance_id,
         performance_name,
-        totalprice,
-        row_number() over(partition by mt order by totalprice desc) as rank
+        sum(totalprice) as totalprice
     from (
-        select
-            substr(dt,1,7) as mt,
-            spo.performance_id,
-            performance_name,
-            sum(totalprice) as totalprice
-        from (
-            $spo
-            ) as spo
-            left join (
-            $per
-            ) as per
-            using(performance_id)
-        group by
-            1,2,3
-        ) as s1
-    ) as s2
-where rank<=30
-$lim">>${attach}
+        $spo
+        ) as spo
+        left join (
+        $per
+        ) as per
+        using(performance_id)
+    group by
+        1,2,3
+    ) as s1
+$lim">${attach}
 echo "succuess,detail see ${attach}"

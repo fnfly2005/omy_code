@@ -11,8 +11,8 @@ select
 from 
     mart_movie.aggr_myshow_pv_platform
 where 
-    partition_date>='$time1'
-    and partition_date<'$time2'
+    partition_date>='$$begindate'
+    and partition_date<'$$enddate'
 group by 
     1,
     2
