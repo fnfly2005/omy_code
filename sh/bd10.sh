@@ -22,6 +22,7 @@ select
     per.city_name,
     per.category_name,
     per.shop_name,
+    per.performance_id,
     per.performance_name,
     count(distinct spo.order_id) as order_num,
     sum(spo.salesplan_count*spo.setnumber) as ticket_num,
@@ -49,6 +50,7 @@ group by
     per.city_name,
     per.category_name,
     per.shop_name,
+    per.performance_id,
     per.performance_name
 order by
     spo.dt

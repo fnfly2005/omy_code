@@ -26,60 +26,53 @@ from (
     select
         dt,
         coalesce(bu,'全部') as bu,
-        order_num,
-        ticket_num,
-        totalprice
+        sum(order_num) as order_num,
+        sum(ticket_num) as ticket_num,
+        sum(totalprice) as totalprice
     from (
         select
-            dt,
-            bu,
-            sum(order_num) as order_num,
-            sum(ticket_num) as ticket_num,
-            sum(totalprice) as totalprice
-        from (
-            select
-                spo.dt,
-                '演出' as bu,
-                count(distinct spo.order_id) as order_num,
-                sum(spo.salesplan_count*spo.setnumber) as ticket_num,
-                sum(spo.totalprice) as totalprice
-            from
-                (
-                $spo
-                and sellchannel=8
-                ) spo
-            group by
-                spo.dt,
-                '演出'
-            union all
-            select
-                '\$\$today{-1d}' as dt,
-                '电影' as bu,
-                mdk.order_num,
-                mdk.ticket_num,
-                mdk.gmv as totalprice
-            from (
-                $mdk
-                ) as mdk
-            ) as sp1
+            spo.dt,
+            '演出' as bu,
+            count(distinct spo.order_id) as order_num,
+            sum(spo.salesplan_count*spo.setnumber) as ticket_num,
+            sum(spo.totalprice) as totalprice
+        from
+            (
+            $spo
+            and sellchannel=8
+            ) spo
         group by
-            dt,
-            bu
-        grouping sets(
-            dt,
-            (dt,bu)
-        ) as sp2
+            spo.dt,
+            '演出'
+        union all
+        select
+            '\$\$today{-1d}' as dt,
+            '电影' as bu,
+            mdk.order_num,
+            mdk.ticket_num,
+            mdk.gmv as totalprice
+        from (
+            $mdk
+            ) as mdk
+        ) as sp1
+    group by
+        dt,
+        bu
+    grouping sets(
+        dt,
+        (dt,bu)
+        )
     ) as sp3
     left join (
         select
             dt,
             coalesce(bu,'全部') as bu,
-            uv
+            count(distinct union_id) as uv
         from (
             select
                 dt,
-                md.value1 as bu,
-                count(distinct union_id) as uv
+                coalesce(md.value1,'平台') as bu,
+                union_id
             from (
                 select
                     partition_date as dt,
@@ -96,25 +89,30 @@ from (
                     page_identifier,
                     union_id
                 ) as fpw
-                join (
+                left join (
                     $mp
                     and page='native'
+                    and page_tag1<>-1
                     ) as mp
                 on fpw.page_identifier=mp.value
                 left join (
                     $md
                     and key_name='page_tag1'
+                    and key in (-2,0)
                     ) as md
                 on mp.page_tag1=md.key
             group by
                 dt,
-                md.value1
-            grouping sets (
-                (dt, md.value1),
-                dt
-                )
+                coalesce(md.value1,'平台'),
+                union_id
             ) as fp1
-        where bu<>'平台'
+        group by
+            dt,
+            bu
+        grouping sets (
+            dt,
+            (dt,bu)
+            )
     ) as fp2
     on sp3.dt=fp2.dt
     and sp3.bu=fp2.bu
