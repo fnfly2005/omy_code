@@ -42,6 +42,7 @@ from (
         from
             (
             $spo
+            and sellchannel<>8
             ) spo
         group by
             spo.dt,
@@ -51,27 +52,30 @@ from (
     left join (
     select
         partition_date as dt,
-        custom['performance_id'] as performance_id,
+        case when app_name<>'maoyan_wxwallet_i' 
+            then custom['performance_id']
+        else custom['id'] end as performance_id,
         count(distinct union_id) as uv
     from
         mart_flow.detail_flow_pv_wide_report
-    where partition_date='$time1'
+    where partition_date='\$\$today{-1d}'
         and partition_log_channel='movie'
         and partition_app in (
         select key
         from upload_table.myshow_dictionary
         where key_name='partition_app'
         )
+        and app_name<>'gewara'
         and page_identifier in (
         select value
         from upload_table.myshow_pv
         where key='page_identifier'
         and nav_flag=2
         and page_tag1=0
+        and page<>'native'
         )
     group by
-        partition_date,
-        custom['performance_id'] 
+        1,2
     ) as fpw
     on sp1.dt=fpw.dt 
     and sp1.performance_id=fpw.performance_id

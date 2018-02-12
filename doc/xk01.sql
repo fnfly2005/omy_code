@@ -1,69 +1,101 @@
 
 select
-    sp1.dt,
-    per.performance_name,
-    sp1.order_num,
-    sp1.ticket_num,
-    sp1.totalprice,
-    sp1.grossprofit,
-    fpw.uv
+    fp1.dt,
+    fp1.pt,
+    fp1.uv,
+    fp1.first_uv,
+    fp1.detail_uv,
+    fp1.order_uv,
+    sp1.order_num
 from (
     select
         dt,
-        performance_id,
-        order_num,
-        ticket_num,
-        totalprice,
-        grossprofit,
-        row_number() over (partition by dt order by totalprice desc) as rank
+        coalesce(md.value2,'全部') as pt,
+        sum(fp0.uv) as uv,
+        sum(fp0.first_uv) as first_uv,
+        sum(fp0.detail_uv) as detail_uv,
+        sum(fp0.order_uv) as order_uv
+    from (
+        select
+            dt,
+            app_name,
+            count(distinct union_id) as uv,
+            count(distinct case when nav_flag=1 then union_id end) as first_uv,
+            count(distinct case when nav_flag=2 then union_id end) as detail_uv,
+            count(distinct case when nav_flag=4 then union_id end) as order_uv
+        from (
+            select
+                partition_date as dt,
+                app_name,
+                page_identifier,
+                union_id
+            from
+                mart_flow.detail_flow_pv_wide_report
+            where partition_date='$$today{-1d}'
+                and partition_log_channel='movie'
+                and partition_app in (
+                select key
+                from upload_table.myshow_dictionary
+                where key_name='partition_app'
+                )
+                and page_identifier in (
+                select value
+                from upload_table.myshow_pv
+                where key='page_identifier'
+                and page_tag1>=0
+                )
+            group by
+                partition_date,
+                app_name,
+                page_identifier,
+                union_id
+            ) as fpw
+            left join (
+                select nav_flag, value, page_tag1 from upload_table.myshow_pv where key='page_identifier'
+                and page_tag1>=0
+                ) mp
+            on mp.value=fpw.page_identifier
+        group by
+            dt,
+            app_name
+        ) as fp0
+        left join (
+            select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
+            and key_name='app_name'
+            ) md
+        on fp0.app_name=md.key
+    group by
+        dt,
+        value2
+    ) as fp1
+    left join (
+    select
+        sp0.dt,
+        md.value2 as pt,
+        sum(sp0.order_num) as order_num
     from (
         select
             spo.dt,
-            performance_id, 
-            count(distinct spo.order_id) as order_num,
-            sum(spo.salesplan_count*spo.setnumber) as ticket_num,
-            sum(spo.totalprice) as totalprice,
-            sum(spo.grossprofit) as grossprofit
+            spo.sellchannel,
+            count(distinct spo.order_id) as order_num
         from
             (
-            select partition_date as dt, order_id, sellchannel, customer_id, performance_id, meituan_userid, show_id, totalprice, grossprofit, setnumber, salesplan_count, expressfee, project_id, bill_id, salesplan_id from mart_movie.detail_myshow_salepayorder where partition_date>='$time1' and partition_date<'$time2'
+            select partition_date as dt, order_id, sellchannel, customer_id, performance_id, meituan_userid, show_id, totalprice, grossprofit, setnumber, salesplan_count, expressfee, project_id, bill_id, salesplan_id from mart_movie.detail_myshow_salepayorder where partition_date>='$$begindate' and partition_date<'$$enddate'
             ) spo
         group by
             spo.dt,
-            performance_id
+            spo.sellchannel
         ) as sp0
-    ) as sp1
-    left join (
-    select
-        partition_date as dt,
-        custom['performance_id'] as performance_id,
-        count(distinct union_id) as uv
-    from
-        mart_flow.detail_flow_pv_wide_report
-    where partition_date=''
-        and partition_log_channel='movie'
-        and partition_app in (
-        select key
-        from upload_table.myshow_dictionary
-        where key_name='partition_app'
-        )
-        and page_identifier in (
-        select value
-        from upload_table.myshow_pv
-        where key='page_identifier'
-        and nav_flag=2
-        and page_tag1=0
-        )
+        left join
+        (
+        select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
+        and key_name='sellchannel'
+        ) as md
+        on sp0.sellchannel=md.key
     group by
-        partition_date,
-        custom['performance_id'] 
-    ) as fpw
-    on sp1.dt=fpw.dt 
-    and sp1.performance_id=fpw.performance_id
-    left join (
-    select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, city_id, city_name, shop_name from mart_movie.dim_myshow_performance where performance_id is not null
-    ) as per
-    on per.performance_id=sp1.performance_id
-where
-    sp1.rank<=10
+        sp0.dt,
+        md.value2
+    ) as sp1
+    on sp1.dt=fp1.dt
+    and sp1.pt=fp1.pt
 ;

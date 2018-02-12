@@ -24,7 +24,8 @@ select
 from (
     select
         fpw.dt,
-        md.value2 as pt,
+        case when md.value2 is null then '其他'
+        else md.value2 end as pt,
         sum(fpw.uv) as uv,
         sum(fpw.pv) as pv
     from (
@@ -35,8 +36,7 @@ from (
             count(1) as pv
         from
             mart_flow.detail_flow_pv_wide_report
-        where partition_date>='\$time1'
-            and partition_date<'\$time2'
+        where partition_date='\$\$today{-1d}'
             and partition_log_channel='movie'
             and partition_app in (
             select key
@@ -59,8 +59,7 @@ from (
         ) md
     on fpw.app_name=md.key
     group by
-        fpw.dt,
-        md.value2
+        1,2
     ) as fp1
     left join (
     select
