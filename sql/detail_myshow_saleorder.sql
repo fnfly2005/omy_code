@@ -1,7 +1,9 @@
 /*订单明细表*/
 select
     order_id,
+    usermobileno,
     sellchannel,
+    city_id,
     totalprice,
     customer_id,
     performance_id,
