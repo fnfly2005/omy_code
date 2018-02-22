@@ -3,10 +3,10 @@ app_name,dianping_nova,点评,点评,dp
 app_name,movie,猫眼,猫眼,mt
 app_name,dianping_movie_wx,微信点评,微信吃喝玩乐,dp
 app_name,maoyan_wxwallet_i,微信钱包,微信演出赛事,wx
-app_name,dp_m,其他,其他,dp
-app_name,dp_m_qqcard,其他,其他,dp
-app_name,dp_m_wxcard,其他,其他,dp
-app_name,maoyan_i,其他,其他,mt
+app_name,dp_m,其他,点评,dp
+app_name,dp_m_qqcard,其他,点评,dp
+app_name,dp_m_wxcard,其他,点评,dp
+app_name,maoyan_i,其他,猫眼,mt
 app_name,gewara,格瓦拉,格瓦拉,gwl
 partition_app,movie,猫眼,猫眼,猫眼
 partition_app,dianping_nova,点评,点评,点评
@@ -31,7 +31,7 @@ page_tag1,6,自主,平台,平台
 sellchannel,1,点评,点评,dp
 sellchannel,2,美团,美团,mt
 sellchannel,3,微信点评,微信吃喝玩乐,dp
-sellchannel,4,微信搜索_小程序,其他,wx
+sellchannel,4,微信搜索_小程序,微信演出赛事,wx
 sellchannel,5,猫眼,猫眼,mt
 sellchannel,6,微信钱包_h5,微信演出赛事,wx
 sellchannel,7,微信钱包_小程序,微信演出赛事,wx

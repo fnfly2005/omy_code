@@ -1,4 +1,20 @@
+#!/bin/bash
+path="/Users/fannian/Documents/my_code/"
+t1='$time1'
+fun() {
+echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
+}
 
+spo=`fun detail_myshow_salepayorder.sql` 
+md=`fun myshow_dictionary.sql`
+mp=`fun myshow_pv.sql`
+mck=`fun topic_movie_deal_kpi_daily.sql`
+
+file="bs16"
+lim=";"
+attach="${path}doc/${file}.sql"
+
+echo "
 select
     fp1.dt,
     fp1.first_uv,
@@ -27,7 +43,8 @@ from (
                 union_id
             from
                 mart_flow.detail_flow_pv_wide_report
-            where partition_date='$$today{-1d}'
+            where partition_date>='\$\$begindate'
+                and partition_date<'\$\$enddate'
                 and partition_log_channel='movie'
                 and partition_app='other_app'
                 and app_name='gewara'
@@ -44,7 +61,7 @@ from (
                 union_id
             ) as fpw
             left join (
-                select nav_flag, value, page_tag1 from upload_table.myshow_pv where key='page_identifier'
+                $mp
                 and page='native'
                 and page_tag1>-2
                 ) mp
@@ -60,11 +77,13 @@ from (
             spo.dt,
             count(distinct spo.order_id) as order_num
         from (
-            select partition_date as dt, order_id, sellchannel, customer_id, performance_id, meituan_userid, show_id, totalprice, grossprofit, setnumber, salesplan_count, expressfee, project_id, bill_id, salesplan_id from mart_movie.detail_myshow_salepayorder where partition_date>='$$begindate' and partition_date<'$$enddate'
+            $spo
             and sellchannel=8
             ) spo
         group by
             spo.dt
     ) as sp1
     on sp1.dt=fp1.dt
-;
+$lim">${attach}
+
+echo "succuess,detail see ${attach}"
