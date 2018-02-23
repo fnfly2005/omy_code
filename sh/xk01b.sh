@@ -17,7 +17,6 @@ echo "
 select
     fp1.dt,
     fp1.pt,
-    fp1.pv,
     fp1.uv,
     sp1.order_num,
     sp1.totalprice
@@ -26,22 +25,22 @@ from (
         fpw.dt,
         case when md.value2 is null then '其他'
         else md.value2 end as pt,
-        sum(fpw.uv) as uv,
-        sum(fpw.pv) as pv
+        sum(fpw.uv) as uv
     from (
         select
             partition_date as dt,
             app_name,
-            count(distinct union_id) as uv,
-            count(1) as pv
+            count(distinct union_id) as uv
         from
             mart_flow.detail_flow_pv_wide_report
         where partition_date='\$\$today{-1d}'
             and partition_log_channel='movie'
             and partition_app in (
-            select key
-            from upload_table.myshow_dictionary
-            where key_name='partition_app'
+            'movie',
+            'dianping_nova',
+            'other_app',
+            'dp_m',
+            'group'
             )
             and page_identifier in (
             select value

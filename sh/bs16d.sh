@@ -1,4 +1,16 @@
+#!/bin/bash
+path="/Users/fannian/Documents/my_code/"
+t1='$time1'
+fun() {
+echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
+}
 
+md=`fun myshow_dictionary.sql`
+file="bs16"
+lim=";"
+attach="${path}doc/${file}.sql"
+
+echo "
 select
     dt,
     md.value2 as pt,
@@ -17,8 +29,8 @@ from (
     from
         mart_flow.detail_flow_mv_wide_report
     where
-        partition_date>='$$begindate'
-        and partition_date<'$$enddate'
+        partition_date>='\$\$begindate'
+        and partition_date<'\$\$enddate'
         and partition_log_channel='movie'
         and partition_etl_source='2_5x'
         and partition_app in (
@@ -32,7 +44,7 @@ from (
         1,2,3
     ) as fmw
     join (
-        select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
+        $md
         and key_name='app_name'
         ) as md
     on md.key=fmw.app_name
@@ -54,4 +66,7 @@ from (
     on mp.event_id=fmw.event_id
 group by 
     1,2,3,4,5
-;
+$lim">${attach}
+
+echo "succuess,detail see ${attach}"
+

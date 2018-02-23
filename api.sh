@@ -10,9 +10,9 @@ file=""
 lim=";"
 attach="${path}doc/${file}.sql"
 
-echo "select
-from
-    (
+echo "
+select
+from (
     )
 $lim">${attach}
 
