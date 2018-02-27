@@ -2,7 +2,8 @@
 select
     nav_flag,
     value,
-    page_tag1
+    page_tag1,
+    page_tag2
 from
     upload_table.myshow_pv
 where

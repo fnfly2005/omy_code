@@ -17,6 +17,7 @@ select
     mp.bu,
     mp.p_name,
     mp.m_name,
+    mp.m_no,
     sum(uv) as uv,
     sum(pv) as pv
 from (
@@ -40,6 +41,7 @@ from (
         'dp_m',
         'group'
         )
+        and event_type='click'
     group by
         1,2,3
     ) as fmw
@@ -51,21 +53,22 @@ from (
     join (
     select 
         case when mp1.page_tag1=0 then '演出'
-        when mp1.page_tag1=-1 then '平台' 
-        else '电影' end as bu,
+        else '平台' end as bu,
         mp1.name as p_name,
         mp2.value as event_id,
-        mp2.name as m_name
+        mp2.name as m_name,
+        mp2.page_tag2 as m_no
     from upload_table.myshow_pv as mp1
         join upload_table.myshow_pv as mp2
         on mp1.value=mp2.page
         and mp1.key='page_identifier'
         and mp2.key='event_id'
         and mp1.nav_flag<=1
+        and mp1.page_tag1>-2
     ) mp 
     on mp.event_id=fmw.event_id
 group by 
-    1,2,3,4,5
+    1,2,3,4,5,6
 $lim">${attach}
 
 echo "succuess,detail see ${attach}"
