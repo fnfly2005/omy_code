@@ -5,6 +5,7 @@ select
    customer_type_name,
    customer_lvl1_name,
    customer_name,
+   customer_shortname,
    customer_code
 from
     mart_movie.dim_myshow_customer

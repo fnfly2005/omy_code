@@ -1,5 +1,6 @@
 /*新美大流量MV宽表*/
 select
+    partition_etl_source,
     partition_date as dt,
     custom,
     union_id

@@ -16,6 +16,7 @@ attach="${path}doc/${file}.sql"
 echo "
 select
     sp1.dt, 
+    sp1.plat,
     per.area_1_level_name,
     per.area_2_level_name,
     per.province_name,
@@ -32,6 +33,9 @@ select
 from (
     select
         spo.dt,
+        case when sellchannel<>8 then 'other'
+            else 'gewara'
+        end as plat,
         performance_id,
         count(distinct spo.order_id) as order_num,
         sum(spo.salesplan_count*spo.setnumber) as ticket_num,
@@ -40,7 +44,6 @@ from (
     from
         (
         $spo
-        and sellchannel<>8
         ) spo
     group by
         1,2
@@ -52,6 +55,7 @@ from (
     left join (
         select
             partition_date as dt,
+            'other' as plat,
             case when app_name='maoyan_wxwallet_i' then custom['id'] 
             else custom['performance_id'] end as performance_id,
             approx_distinct(union_id) as uv
@@ -71,10 +75,11 @@ from (
             and page in ('h5','mini_programs')
             )
         group by
-            1,2
+            1,2,3
         ) as fpw
     on sp1.dt=fpw.dt
     and sp1.performance_id=fpw.performance_id
+    and sp1.plat=fpw.plat
 $lim">${attach}
 
 echo "succuess,detail see ${attach}"
