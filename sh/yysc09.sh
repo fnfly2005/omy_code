@@ -15,7 +15,7 @@ attach="${path}doc/${file}.sql"
 echo "
 select
     dt,
-    fromtag,
+    fromTag,
     performance_name,
     fpw.performance_id,
     uv,
@@ -23,11 +23,7 @@ select
 from (
     select
         partition_date as dt,
-        case when regexp_like(url_parameters,'[Ff]romTag=') then split_part(regexp_extract(url_parameters,'[Ff]romTag=[^&]+'),'=',2)
-        when regexp_like(substr(url,40,40),'fromTag%3D') then split_part(regexp_extract(substr(url,40,40),'fromTag%3D[^%]+'),'%3D',2)
-        when regexp_like(substr(url,40,40),'from=') then split_part(regexp_extract(substr(url,40,40),'from=[^&]+'),'=',2)
-        else 'other'
-        end as fromtag,
+        custom['fromTag'] as fromTag,
         case when app_name<>'maoyan_wxwallet_i'
                 then custom['performance_id']
             else custom['id'] end as performance_id,
