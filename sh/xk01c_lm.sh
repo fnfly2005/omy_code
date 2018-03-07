@@ -1,4 +1,19 @@
+#!/bin/bash
+path="/Users/fannian/Documents/my_code/"
+t1='$time1'
+fun() {
+echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
+}
 
+spo=`fun detail_myshow_salepayorder.sql` 
+ss=`fun detail_myshow_salesplan.sql`
+cus=`fun dim_myshow_customer.sql`
+
+file="xk01"
+lim=";"
+attach="${path}doc/${file}.sql"
+
+echo "
 select
     substr(ss1.dt,1,7) as mt,
     ss1.customer_type_name,
@@ -29,11 +44,11 @@ from (
             count(distinct ss.salesplan_id) as as_num
         from
             (
-            select partition_date as dt, performance_id, customer_id, shop_id, show_id, salesplan_sellout_flag, project_id, salesplan_id from mart_movie.detail_myshow_salesplan where salesplan_id is not null and partition_date>='$$begindate' and partition_date<'$$enddate'
+            $ss
             and salesplan_sellout_flag=0
             ) ss
             left join (
-            select customer_id, customer_type_id, customer_type_name, customer_lvl1_name, customer_name, customer_shortname, customer_code from mart_movie.dim_myshow_customer where customer_id is not null
+            $cus
             ) cus
             on ss.customer_id=cus.customer_id
         group by
@@ -68,10 +83,10 @@ from (
                 sum(spo.grossprofit) as grossprofit
             from
                 (
-                select partition_date as dt, order_id, sellchannel, customer_id, performance_id, meituan_userid, show_id, totalprice, grossprofit, setnumber, salesplan_count, expressfee, project_id, bill_id, salesplan_id from mart_movie.detail_myshow_salepayorder where partition_date>='$$begindate' and partition_date<'$$enddate'
+                $spo
                 ) spo
                 left join (
-                select customer_id, customer_type_id, customer_type_name, customer_lvl1_name, customer_name, customer_shortname, customer_code from mart_movie.dim_myshow_customer where customer_id is not null
+                $cus
                 ) cus
                 on spo.customer_id=cus.customer_id
             group by
@@ -91,4 +106,7 @@ group by
     substr(ss1.dt,1,7),
     ss1.customer_type_name,
     ss1.customer_lvl1_name
-;
+$lim">${attach}
+
+echo "succuess,detail see ${attach}"
+
