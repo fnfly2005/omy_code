@@ -1,10 +1,10 @@
 /*快递记录表*/
 select
     OrderID,
+    CityName,
     ExpressFee
 from
     S_OrderDelivery
 where
-    OrderDeliveryID is not null
-    and CreateTime>='-time3'
-    and CreateTime<'-time2'
+    OrderID>=-time1
+    and OrderID<-time2

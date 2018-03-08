@@ -9,6 +9,5 @@ select
 from
     S_OrderSalesPlanSnapshot
 where
-    OrderID is not null
-    and CreateTime>='-time3'
-    and CreateTime<'-time2'
+    OrderID>=-time1
+    and OrderID<-time2

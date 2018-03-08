@@ -2,6 +2,7 @@
 select
     order_id,
     usermobileno,
+    recipientidno,
     sellchannel,
     city_id,
     totalprice,
@@ -13,7 +14,8 @@ select
     consumed_time,
     show_endtime,
     show_starttime,
-    order_create_time
+    order_create_time,
+    order_refund_status
 from
     mart_movie.detail_myshow_saleorder
 where

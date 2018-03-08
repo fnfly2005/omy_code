@@ -5,10 +5,12 @@ select
     case SellChannel
         when 1 then "点评"
         when 2 then "美团"
-        when 3 then "微信"
-        when 4 then "小程序"
+        when 3 then "微信吃喝玩乐"
+        when 4 then "微信演出赛事"
         when 5 then "猫眼"
         when 6 then "微信演出赛事"
+        when 7 then "微信演出赛事"
+        when 8 then "格瓦拉"
     else "其他" end SellChannel,
     case RefundStatus
         when 0 then "未发起"
@@ -29,7 +31,6 @@ select
 from
     S_Order
 where
-    ReserveStatus in (7,9)
-    and PaidTime is not null
-    and PaidTime>='-time1'
-    and PaidTime<'-time2'
+    PaidTime is not null
+    and OrderID>=-time1
+    and OrderID<-time2

@@ -52,7 +52,7 @@ from (
     left join (
     select
         partition_date as dt,
-        case when app_name<>'maoyan_wxwallet_i' 
+        case when page_identifier<>'pages/show/detail/index'
             then custom['performance_id']
         else custom['id'] end as performance_id,
         count(distinct union_id) as uv
@@ -61,9 +61,11 @@ from (
     where partition_date='\$\$today{-1d}'
         and partition_log_channel='movie'
         and partition_app in (
-        select key
-        from upload_table.myshow_dictionary
-        where key_name='partition_app'
+        'movie',
+        'dianping_nova',
+        'other_app',
+        'dp_m',
+        'group'
         )
         and app_name<>'gewara'
         and page_identifier in (
