@@ -17,7 +17,6 @@ echo "
 select
     fp1.dt,
     fp1.pt,
-    fp1.uv,
     fp1.first_uv,
     fp1.detail_uv,
     fp1.order_uv,
@@ -26,7 +25,6 @@ from (
     select
         dt,
         coalesce(md.value2,'全部') as pt,
-        sum(fp0.uv) as uv,
         sum(fp0.first_uv) as first_uv,
         sum(fp0.detail_uv) as detail_uv,
         sum(fp0.order_uv) as order_uv
@@ -34,10 +32,9 @@ from (
         select
             dt,
             app_name,
-            count(distinct union_id) as uv,
-            count(distinct case when nav_flag=1 then union_id end) as first_uv,
-            count(distinct case when nav_flag=2 then union_id end) as detail_uv,
-            count(distinct case when nav_flag=4 then union_id end) as order_uv
+            approx_distinct(case when nav_flag=1 then union_id end) as first_uv,
+            approx_distinct(case when nav_flag=2 then union_id end) as detail_uv,
+            approx_distinct(case when nav_flag=4 then union_id end) as order_uv
         from (
             select
                 partition_date as dt,
@@ -49,9 +46,11 @@ from (
             where partition_date='\$\$today{-1d}'
                 and partition_log_channel='movie'
                 and partition_app in (
-                select key
-                from upload_table.myshow_dictionary
-                where key_name='partition_app'
+                'movie',
+                'dianping_nova',
+                'other_app',
+                'dp_m',
+                'group'
                 )
                 and page_identifier in (
                 select value
@@ -59,11 +58,6 @@ from (
                 where key='page_identifier'
                 and page_tag1>=0
                 )
-            group by
-                partition_date,
-                app_name,
-                page_identifier,
-                union_id
             ) as fpw
             left join (
                 $mp

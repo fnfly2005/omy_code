@@ -1,15 +1,30 @@
+#!/bin/bash
+path="/Users/fannian/Documents/my_code/"
+t1='$time1'
+fun() {
+echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
+}
 
+spo=`fun detail_myshow_salepayorder.sql` 
+md=`fun myshow_dictionary.sql`
+mp=`fun myshow_pv.sql`
+
+file="xk01"
+lim=";"
+attach="${path}doc/${file}.sql"
+
+echo "
 select
-    fp1.dt,
+    substr(fp1.dt,1,7) mt,
     fp1.pt,
-    fp1.first_uv,
-    fp1.detail_uv,
-    fp1.order_uv,
-    sp1.order_num
+    avg(fp1.first_uv) first_uv,
+    avg(fp1.detail_uv) detail_uv,
+    avg(fp1.order_uv) order_uv,
+    avg(sp1.order_num) order_num
 from (
     select
         dt,
-        coalesce(md.value2,'全部') as pt,
+        coalesce(md.value2,'其他') as pt,
         sum(fp0.first_uv) as first_uv,
         sum(fp0.detail_uv) as detail_uv,
         sum(fp0.order_uv) as order_uv
@@ -28,7 +43,8 @@ from (
                 union_id
             from
                 mart_flow.detail_flow_pv_wide_report
-            where partition_date='$$today{-1d}'
+            where partition_date>='\$\$monthfirst{-1m}'
+                and partition_date<'\$\$monthfirst'
                 and partition_log_channel='movie'
                 and partition_app in (
                 'movie',
@@ -45,7 +61,7 @@ from (
                 )
             ) as fpw
             left join (
-                select nav_flag, value, page_tag1, page_tag2 from upload_table.myshow_pv where key='page_identifier'
+                $mp
                 and page_tag1>=0
                 ) mp
             on mp.value=fpw.page_identifier
@@ -54,7 +70,7 @@ from (
             app_name
         ) as fp0
         left join (
-            select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
+            $md
             and key_name='app_name'
             ) md
         on fp0.app_name=md.key
@@ -74,7 +90,7 @@ from (
             count(distinct spo.order_id) as order_num
         from
             (
-            select partition_date as dt, order_id, sellchannel, customer_id, performance_id, meituan_userid, show_id, totalprice, grossprofit, setnumber, salesplan_count, expressfee, project_id, bill_id, salesplan_id from mart_movie.detail_myshow_salepayorder where partition_date>='$$begindate' and partition_date<'$$enddate'
+            $spo
             ) spo
         group by
             spo.dt,
@@ -82,7 +98,7 @@ from (
         ) as sp0
         left join
         (
-        select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
+        $md
         and key_name='sellchannel'
         ) as md
         on sp0.sellchannel=md.key
@@ -92,4 +108,8 @@ from (
     ) as sp1
     on sp1.dt=fp1.dt
     and sp1.pt=fp1.pt
-;
+group by
+    1,2
+$lim">${attach}
+
+echo "succuess,detail see ${attach}"
