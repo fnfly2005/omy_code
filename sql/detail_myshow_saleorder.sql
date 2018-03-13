@@ -1,6 +1,7 @@
 /*订单明细表*/
 select
     order_id,
+    maoyan_order_id,
     usermobileno,
     recipientidno,
     sellchannel,

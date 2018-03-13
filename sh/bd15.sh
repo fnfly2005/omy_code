@@ -18,6 +18,8 @@ select
     usermobileno,
     UserName,
     IDNumber,
+    maoyan_order_id,
+    order_create_time,
     value2
 from (
     $so
@@ -33,7 +35,7 @@ from (
     ) md
     on md.key=so.order_refund_status
 group by
-    1,2,3,4
+    1,2,3,4,5,6
 $lim">${attach}
 
 echo "succuess,detail see ${attach}"
