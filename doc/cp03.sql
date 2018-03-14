@@ -84,6 +84,8 @@ from (
     and key_name='fromTag'
     ) md
     on fpw.fromTag=md.key
+where
+    value2 is null
 group by
     1,2,3
 ;

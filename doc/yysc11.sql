@@ -1,23 +1,45 @@
 
 select
-    csd.mobile_phone,
-    cit.city_name,
-    cit.province_name
+    area_2_level_name,
+    province_name,
+    '全部' city_name,
+    approx_distinct(usermobileno) user_num
 from (
     select city_id, mt_city_id, city_name, province_name, area_2_level_name from mart_movie.dim_myshow_city where city_id is not null
-    and province_name like '%$name%'
-    ) cit
+    ) ci
     join (
-    select cinema_id, city_id from mart_movie.dim_cinema where cinema_id is not null
-    ) cin
-    on cin.city_id=cit.mt_city_id
-    join (
-    select cinema_id, mobile_phone from mart_movie.aggr_discount_card_seat_dwd where pay_time>'2018-02-01' and pay_time>='$$begindate' and pay_time<'$$enddate'
-    ) csd
-    on csd.cinema_id=cin.cinema_id
+        select 
+            usermobileno,
+            city_id
+        from 
+            mart_movie.detail_myshow_saleorder
+        where 
+            order_create_time>='$$begindate'
+            and order_create_time<'$$enddate'
+    ) so
+    on so.city_id=ci.city_id
 group by
-    csd.mobile_phone,
-    cit.city_name,
-    cit.province_name
-limit 400000
+    1,2,3
+union all
+select
+    area_2_level_name,
+    province_name,
+    city_name,
+    approx_distinct(usermobileno) user_num
+from (
+    select city_id, mt_city_id, city_name, province_name, area_2_level_name from mart_movie.dim_myshow_city where city_id is not null
+    ) ci
+    join (
+        select 
+            usermobileno,
+            city_id
+        from 
+            mart_movie.detail_myshow_saleorder
+        where 
+            order_create_time>='$$begindate'
+            and order_create_time<'$$enddate'
+    ) so
+    on so.city_id=ci.city_id
+group by
+    1,2,3
 ;

@@ -1,17 +1,31 @@
 
 select
-    usermobileno,
-    city_name,
-    province_name
-from
-    (
-    select order_id, usermobileno, sellchannel, city_id, totalprice, customer_id, performance_id, meituan_userid, dianping_userid, pay_time, consumed_time, show_endtime, show_starttime, order_create_time from mart_movie.detail_myshow_saleorder where pay_time is not null and pay_time>='$$begindate' and pay_time<'$$enddate'
-    ) so
-    join (
-    select city_id, city_name, province_name from mart_movie.dim_myshow_city where city_id is not null
-    and province_name like '%$name%'
+    so.usermobileno,
+    ci.city_name
+from (
+    select
+        city_id,
+        city_name
+    from (
+        select city_id, mt_city_id, city_name, province_name, area_2_level_name from mart_movie.dim_myshow_city where city_id is not null
+        and province_name in ('$name')
+        union all
+        select city_id, mt_city_id, city_name, province_name, area_2_level_name from mart_movie.dim_myshow_city where city_id is not null
+        and city_name in ('$name')
+        ) c1
+    group by
+        1,2
     ) ci
+    join (
+    select
+        usermobileno,
+        city_id
+    from
+        mart_movie.detail_myshow_saleorder
+    where order_create_time>='$$begindate'
+        and order_create_time<'$$enddate'
+    group by
+        1,2
+    ) so
     on so.city_id=ci.city_id
-group by
-    1,2,3
 ;

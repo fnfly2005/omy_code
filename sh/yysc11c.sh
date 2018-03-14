@@ -16,17 +16,46 @@ echo "
 select
     area_2_level_name,
     province_name,
+    '全部' city_name,
     approx_distinct(usermobileno) user_num
-from
-    (
-    $so
-    ) so
-    join (
+from (
     $ci
     ) ci
+    join (
+        select 
+            usermobileno,
+            city_id
+        from 
+            mart_movie.detail_myshow_saleorder
+        where 
+            order_create_time>='\$\$begindate'
+            and order_create_time<'\$\$enddate'
+    ) so
     on so.city_id=ci.city_id
 group by
-    1,2
+    1,2,3
+union all
+select
+    area_2_level_name,
+    province_name,
+    city_name,
+    approx_distinct(usermobileno) user_num
+from (
+    $ci
+    ) ci
+    join (
+        select 
+            usermobileno,
+            city_id
+        from 
+            mart_movie.detail_myshow_saleorder
+        where 
+            order_create_time>='\$\$begindate'
+            and order_create_time<'\$\$enddate'
+    ) so
+    on so.city_id=ci.city_id
+group by
+    1,2,3
 $lim">${attach}
 
 echo "succuess,detail see ${attach}"

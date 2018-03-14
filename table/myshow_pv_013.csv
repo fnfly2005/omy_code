@@ -92,8 +92,8 @@ event_id,b_1mR6c,联系渠道客服,c_8UWcP,3,5,0
 event_id,b_gV1YC,确认选票,c_8UWcP,3,5,0
 event_id,b_35NmM,地址,c_EIA9h,3,5,0
 event_id,b_MSAJQ,联系渠道客服,c_EIA9h,3,5,0
-event_id,b_kxoPe,立即支付,c_EIA9h,3,5,0
-event_id,b_WLx9n,立即支付下单,c_EIA9h,3,5,0
+event_id,b_kxoPe,立即支付_点击,c_EIA9h,3,5,0
+event_id,b_WLx9n,立即支付_下单,c_EIA9h,3,5,0
 event_id,b_dO1gp,支付模块,c_l1Ub4,3,5,0
 event_id,b_zxCDd,演出详情链接模块,c_l1Ub4,3,5,0
 event_id,b_a32uu,联系渠道客服,c_l1Ub4,3,5,0
