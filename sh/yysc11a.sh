@@ -16,26 +16,38 @@ attach="${path}doc/${file}.sql"
 
 echo "
 select
-    csd.mobile_phone,
-    cit.city_name,
-    cit.province_name
+    mobile_phone,
+    row_number() over (order by 1) rank
 from (
-    $cit
-    and province_name like '%\$name%'
-    ) cit
-    join (
-    $cin
-    ) cin
-    on cin.city_id=cit.mt_city_id
-    join (
-    $csd
-    ) csd
-    on csd.cinema_id=cin.cinema_id
-group by
-    csd.mobile_phone,
-    cit.city_name,
-    cit.province_name
-limit 400000
+    select distinct
+        csd.mobile_phone
+    from (
+        select distinct
+            mt_city_id
+        from (
+            $cit
+            and province_name in ('\$name')
+            union all
+            $cit
+            and city_name in ('\$name')
+            ) c1
+        ) cit
+        left join (
+        $cin
+        ) cin
+        on cin.city_id=cit.mt_city_id
+        left join (
+        $csd
+        ) csd
+        on csd.cinema_id=cin.cinema_id
+        left join upload_table.myshow_mark mm
+        on mm.usermobileno=csd.mobile_phone
+        and \$id=1
+    where
+        mm.usermobileno is null
+    ) iis
+where
+     mobile_phone is not null
 $lim">${attach}
 
 echo "succuess,detail see ${attach}"

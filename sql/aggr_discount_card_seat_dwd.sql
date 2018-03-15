@@ -5,6 +5,6 @@ select
 from 
     mart_movie.aggr_discount_card_seat_dwd
 where
-    pay_time>'2018-02-01'
-    and pay_time>='$$begindate'
-    and pay_time<'$$enddate'
+    mobile_phone is not null
+    and order_time>='$$begindate'
+    and order_time<'$$enddate'

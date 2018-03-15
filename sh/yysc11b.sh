@@ -16,26 +16,51 @@ attach="${path}doc/${file}.sql"
 
 echo "
 select
-    area_2_level_name,
-    province_name,
+    cit.province_name,
+    cit.city_name,
     sum(phone_num) as num
 from (
+    $cit
+    ) cit
+    left join (
     select
         cin.city_id,
         approx_distinct(mobile_phone) as phone_num
     from (
-        $csd
-        ) csd
-        join (
         $cin
         ) cin
-        using(cinema_id)
+        left join (
+        $csd
+        ) csd
+        on cin.cinema_id=csd.cinema_id
     group by
         1
     ) sc
-    join (
+    on sc.city_id=cit.mt_city_id
+group by
+    1,2
+union all
+select
+    cit.province_name,
+    '全部' city_name,
+    sum(phone_num) as num
+from (
     $cit
     ) cit
+    left join (
+    select
+        cin.city_id,
+        approx_distinct(mobile_phone) as phone_num
+    from (
+        $cin
+        ) cin
+        left join (
+        $csd
+        ) csd
+        on cin.cinema_id=csd.cinema_id
+    group by
+        1
+    ) sc
     on sc.city_id=cit.mt_city_id
 group by
     1,2
