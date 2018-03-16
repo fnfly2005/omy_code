@@ -11,7 +11,8 @@ from (
     and performance_id=$performance_id
     ) so
     left join (
-    select PerformanceID as performance_id, OrderID as order_id, UserName, IDNumber from origindb.dp_myshow__s_orderidentification where performanceid=$performance_id
+    select PerformanceID as performance_id, OrderID as order_id, UserName, IDNumber from origindb.dp_myshow__s_orderidentification where TicketNumber>0
+    and performanceid=$performance_id
     ) soi
     using(order_id)
     left join (

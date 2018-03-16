@@ -7,4 +7,4 @@ select
 from
     origindb.dp_myshow__s_orderidentification
 where
-    performanceid=$performance_id
+    TicketNumber>0

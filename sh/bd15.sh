@@ -27,6 +27,7 @@ from (
     ) so
     left join (
     $soi
+    and performanceid=\$performance_id
     ) soi
     using(order_id)
     left join (
