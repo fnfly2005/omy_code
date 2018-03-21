@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #coding:utf-8
 #csv数据文件去重
-def io_file (source_file):
+def ln_file (source_file):
     with open(source_file,'rb') as sf:
     #打开输出文件TF
         lines=sf.readlines()
@@ -10,4 +10,4 @@ def io_file (source_file):
         print len(lines)
 
 
-io_file ('/Users/fannian/Documents/data/pytest.csv')
+ln_file ('/Users/fannian/Documents/bind_mobile.csv')
