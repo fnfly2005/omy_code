@@ -93,3 +93,11 @@ customer_lvl1_id,5,牛魔王,牛魔王系统,渠道
 customer_lvl1_id,6,范特西,范特西系统,自营
 customer_lvl1_id,7,智慧剧院,智慧剧院,自营
 customer_lvl1_id,8,微票开放平台,微票开放平台,自营
+order_source,1,电影,猫眼,mt
+order_source,6,电影,微信吃喝玩乐,dp
+order_source,8,电影,格瓦拉,gwl
+channel_id,2,电影,美团,mt
+channel_id,3,电影,点评,dp
+channel_id,3000,电影,美团,mt
+channel_id,7001,电影,微信演出赛事,wx
+channel_id,7002,电影,手机QQ,qq
