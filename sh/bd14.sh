@@ -6,7 +6,7 @@ echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$
 }
 
 so=`fun detail_myshow_saleorder.sql` 
-ci=`fun dim_myshow_city.sql`
+per=`fun dim_myshow_performance.sql`
 
 file="bd14"
 lim=";"
@@ -24,25 +24,39 @@ from (
             so.usermobileno
         from (
             select distinct
-                city_id
+                performance_id
             from (
-                $ci
-                and province_name in ('\$name')
+                select
+                    performance_id
+                from
+                    mart_movie.dim_myshow_performance
+                where (
+                    category_name in ('\$category_name')
+                    or '全部' in ('\$category_name')
+                    )
+                    and province_name in ('\$area_name')
                 union all
-                $ci
-                and city_name in ('\$name')
+                select
+                    performance_id
+                from
+                    mart_movie.dim_myshow_performance
+                where (
+                    category_name in ('\$category_name')
+                    or '全部' in ('\$category_name')
+                    )
+                    and city_name in ('\$area_name')
                 ) c1
             ) ci
-            left join (
+            join (
             select
                 usermobileno,
-                city_id
+                performance_id
             from
                 mart_movie.detail_myshow_saleorder
             where order_create_time>='\$\$begindate'
                 and order_create_time<'\$\$enddate'
             ) so
-            on so.city_id=ci.city_id
+            on so.performance_id=ci.performance_id
             left join upload_table.myshow_mark mm
             on mm.usermobileno=so.usermobileno
             and \$id=1

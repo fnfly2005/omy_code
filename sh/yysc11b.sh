@@ -5,9 +5,7 @@ fun() {
 echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
 }
 
-si=`fun detail_order_seat_info.sql` 
-csd=`fun aggr_discount_card_seat_dwd.sql`
-cin=`fun dim_cinema.sql`
+mou=`fun dim_myshow_movieuser.sql`
 cit=`fun dim_myshow_city.sql`
 
 file="yysc11"
@@ -18,23 +16,20 @@ echo "
 select
     cit.province_name,
     cit.city_name,
-    sum(phone_num) as num
+    approx_percentile(phone_num,0.5) as num
 from (
     $cit
     ) cit
-    left join (
+    join (
     select
-        cin.city_id,
-        approx_distinct(mobile_phone) as phone_num
+        active_date,
+        mou.city_id,
+        approx_distinct(mobile) as phone_num
     from (
-        $cin
-        ) cin
-        left join (
-        $csd
-        ) csd
-        on cin.cinema_id=csd.cinema_id
+        $mou
+        ) mou
     group by
-        1
+        1,2
     ) sc
     on sc.city_id=cit.mt_city_id
 group by
@@ -43,23 +38,20 @@ union all
 select
     cit.province_name,
     '全部' city_name,
-    sum(phone_num) as num
+    approx_percentile(phone_num,0.5) as num
 from (
     $cit
     ) cit
-    left join (
+    join (
     select
-        cin.city_id,
-        approx_distinct(mobile_phone) as phone_num
+        active_date,
+        mou.city_id,
+        approx_distinct(mobile) as phone_num
     from (
-        $cin
-        ) cin
-        left join (
-        $csd
-        ) csd
-        on cin.cinema_id=csd.cinema_id
+        $mou
+        ) mou
     group by
-        1
+        1,2
     ) sc
     on sc.city_id=cit.mt_city_id
 group by

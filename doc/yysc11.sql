@@ -1,39 +1,31 @@
 
-select 
-    mobile_phone
+select
+    province_name,
+    coalesce(city_name,'全部') as city_name,
+    coalesce(category_name,'全部') as category_name,
+    count(distinct usermobileno) as user_num
 from (
-    select
-        mobile_phone,
-        row_number() over (order by 1) rank
-    from (
-        select distinct
-            csd.mobile_phone
-        from (
-            select distinct
-                mt_city_id
-            from (
-                select city_id, mt_city_id, city_name, province_name, area_2_level_name from mart_movie.dim_myshow_city where city_id is not null
-                and province_name in ('$name')
-                union all
-                select city_id, mt_city_id, city_name, province_name, area_2_level_name from mart_movie.dim_myshow_city where city_id is not null
-                and city_name in ('$name')
-                ) c1
-            ) cit
-            left join (
-            select cinema_id, city_id from mart_movie.dim_cinema
-            ) cin
-            on cin.city_id=cit.mt_city_id
-            left join (
-            select cinema_id, mobile_phone from mart_movie.aggr_discount_card_seat_dwd where mobile_phone is not null and order_time>='$$begindate' and order_time<'$$enddate'
-            ) csd
-            on csd.cinema_id=cin.cinema_id
-            left join upload_table.myshow_mark mm
-            on mm.usermobileno=csd.mobile_phone
-            and $id=1
-        where
-            mm.usermobileno is null
-        ) iis
-    ) as c
-where
-    rank<=$limit
+    select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, city_id, city_name, shop_name from mart_movie.dim_myshow_performance where performance_id is not null
+    ) per
+    join (
+        select 
+            usermobileno,
+            performance_id
+        from 
+            mart_movie.detail_myshow_saleorder
+        where 
+            order_create_time>='$$begindate'
+            and order_create_time<'$$enddate'
+        ) so
+    on so.performance_id=per.performance_id
+group by
+    category_name,
+    province_name,
+    city_name
+grouping set(
+    (province_name),
+    (province_name,city_name),
+    (category_name,province_name),
+    (category_name,province_name,city_name)
+    ) 
 ;
