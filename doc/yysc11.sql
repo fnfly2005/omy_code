@@ -1,31 +1,45 @@
 
 select
-    province_name,
-    coalesce(city_name,'全部') as city_name,
-    coalesce(category_name,'全部') as category_name,
-    count(distinct usermobileno) as user_num
+    cit.province_name,
+    cit.city_name,
+    approx_percentile(phone_num,0.5) as num
 from (
-    select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, city_id, city_name, shop_name from mart_movie.dim_myshow_performance where performance_id is not null
-    ) per
+    select city_id, mt_city_id, city_name, province_name, area_2_level_name from mart_movie.dim_myshow_city where city_id is not null
+    ) cit
     join (
-        select 
-            usermobileno,
-            performance_id
-        from 
-            mart_movie.detail_myshow_saleorder
-        where 
-            order_create_time>='$$begindate'
-            and order_create_time<'$$enddate'
-        ) so
-    on so.performance_id=per.performance_id
+    select
+        active_date,
+        mou.city_id,
+        approx_distinct(mobile) as phone_num
+    from (
+        select mobile, city_id, active_date from mart_movie.dim_myshow_movieuser where active_date>='$$begindate' and active_date<'$$enddate'
+        ) mou
+    group by
+        1,2
+    ) sc
+    on sc.city_id=cit.mt_city_id
 group by
-    category_name,
+    1,2
+union all
+select
     province_name,
-    city_name
-grouping set(
-    (province_name),
-    (province_name,city_name),
-    (category_name,province_name),
-    (category_name,province_name,city_name)
-    ) 
+    '全部' city_name,
+    approx_percentile(phone_num,0.5) as num
+from (
+    select
+        active_date,
+        cit.province_name,
+        approx_distinct(mobile) as phone_num
+    from (
+        select city_id, mt_city_id, city_name, province_name, area_2_level_name from mart_movie.dim_myshow_city where city_id is not null
+        ) cit
+        join (
+            select mobile, city_id, active_date from mart_movie.dim_myshow_movieuser where active_date>='$$begindate' and active_date<'$$enddate'
+            ) mou
+        on mou.city_id=cit.mt_city_id
+    group by
+        1,2
+    ) as cm
+group by
+    1,2
 ;
