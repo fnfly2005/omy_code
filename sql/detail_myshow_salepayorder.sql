@@ -12,6 +12,10 @@ select
     setnumber,
     salesplan_count,
     expressfee,
+    discountamount,
+    income,
+    expense,
+    totalticketprice,
     project_id,
     bill_id,
     salesplan_id
