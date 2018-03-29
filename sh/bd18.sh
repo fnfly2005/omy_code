@@ -15,10 +15,14 @@ lim=";"
 attach="${path}doc/${file}.sql"
 
 echo "
-select
-    count(distinct dsh.mt_main_poi_id) as poi_num,
-    count(distinct case when poa.mainpoiid is not null 
-        then dsh.mt_main_poi_id end) as xy_poi_num
+select distinct
+    msh.shop_id,
+    case when dsh.dp_shop_id is null then shop_name
+    else dp_shop_name end as shop_name,
+    dsh.dp_shop_first_cate_name,
+    dsh.dp_shop_second_cate_name,
+    poa.classname,
+    poa.typename
 from (
     $msh
     ) msh
@@ -28,7 +32,9 @@ from (
     on msh.shop_id=dsh.dp_shop_id
     left join (
         select 
-            mainpoiid
+            mainpoiid,
+            typename,
+            classname
         from (
             $pca
             ) pca

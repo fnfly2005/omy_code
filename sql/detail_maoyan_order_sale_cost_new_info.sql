@@ -1,8 +1,7 @@
 /*团购结算*/
-select
+select distinct
     order_id,
-    deal_id,
-    floor(sum(purchase_price)) as totalprice,
+    deal_id
 from
     mart_movie.detail_maoyan_order_sale_cost_new_info
 where

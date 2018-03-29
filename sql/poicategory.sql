@@ -1,7 +1,10 @@
 /*POI类目维度表*/
 select
-    typeid
+    typeid,
+    typename,
+    classid,
+    classname
 from
     dim.poicategory
 where
-    classid=3
+    classid in (3,1854)

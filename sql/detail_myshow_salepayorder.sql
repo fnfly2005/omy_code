@@ -18,7 +18,8 @@ select
     totalticketprice,
     project_id,
     bill_id,
-    salesplan_id
+    salesplan_id,
+    pay_time
 from
     mart_movie.detail_myshow_salepayorder
 where

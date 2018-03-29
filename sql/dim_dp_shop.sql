@@ -1,6 +1,11 @@
 /*点评商户维度表*/
 select
     dp_shop_id,
-    mt_main_poi_id
+    dp_shop_name,
+    mt_main_poi_id,
+    dp_shop_first_cate_name,
+    dp_shop_second_cate_name,
+    dp_shop_third_cate_name,
+    dp_shop_fourth_cate_name
 from
     dw.dim_dp_shop

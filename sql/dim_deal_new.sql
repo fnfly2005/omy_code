@@ -1,13 +1,10 @@
 /*团单项目维表*/
 select
-    category,
     deal_id,
-    bizacctid,
+    customerid as customer_code,
     title,
-    cityids
+    regexp_extract(cityids,'[0-9]+') as mt_city_id
 from
     mart_movie.dim_deal_new
 where
-    dealstatus='"online"' 
-    and endtime>concat(from_unixtime(unix_timestamp()-86400,'"yyyy-MM-dd' ),' 00:00:00"')  
-    and category = 12
+    category=12

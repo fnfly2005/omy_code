@@ -1,4 +1,18 @@
+#!/bin/bash
+path="/Users/fannian/Documents/my_code/"
+t1='$time1'
+fun() {
+echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
+}
 
+spo=`fun detail_myshow_salepayorder.sql` 
+cus=`fun dim_myshow_customer.sql`
+
+file="xk01"
+lim=";"
+attach="${path}doc/${file}.sql"
+
+echo "
 select
     substr(dt,1,7) as mt,
     coalesce(cus.customer_type_name,'全部') as customer_type_name,
@@ -9,10 +23,10 @@ select
     sum(spo.grossprofit) as grossprofit
 from
     (
-    select partition_date as dt, order_id, sellchannel, customer_id, performance_id, meituan_userid, show_id, totalprice, grossprofit, setnumber, salesplan_count, expressfee, discountamount, income, expense, totalticketprice, project_id, bill_id, salesplan_id, pay_time from mart_movie.detail_myshow_salepayorder where partition_date>='$$begindate' and partition_date<'$$enddate'
+    $spo
     ) spo
     left join (
-    select customer_id, customer_type_id, customer_type_name, customer_lvl1_name, customer_name, customer_shortname, customer_code from mart_movie.dim_myshow_customer where customer_id is not null
+    $cus
     ) cus
     on spo.customer_id=cus.customer_id
 group by
@@ -23,4 +37,6 @@ grouping sets(
 (substr(dt,1,7),cus.customer_type_name),
 (substr(dt,1,7),cus.customer_type_name,cus.customer_lvl1_name)
 )
-;
+$lim">${attach}
+
+echo "succuess,detail see ${attach}"
