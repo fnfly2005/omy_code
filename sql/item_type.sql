@@ -1,8 +1,10 @@
 /*项目类目表*/
 SELECT
-	it2.name as c_name,
-    it1.id
+    it1.id as type_id,
+    case when it2.id is null then it1.name 
+    else it2.name end as type_lv1_name,
+    it1.name as type_lv2_name
 FROM
-	item_type it1
-	JOIN item_type it2 
-    ON it1.pid = it2.id
+    item_type it1
+    left JOIN item_type it2 
+    ON it1.pid=it2.id

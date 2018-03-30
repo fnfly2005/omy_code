@@ -2,7 +2,6 @@
 select
     from_unixtime(payment_time/1000,'%Y-%m-%d') dt,
     order_id,
-    x_from,
     total_money/100 as total_money
 from
     order_form

@@ -45,7 +45,15 @@ from (
                     or '全部' in ('\$category_name')
                     )
                     and city_name in ('\$area_name')
+                union all
+                select
+                    performance_id
+                from
+                    mart_movie.dim_myshow_performance
+                where performance_id in (\$performance_id)
                 ) c1
+            where
+                performance_id not in (\$no_performance_id)
             ) ci
             join (
             select

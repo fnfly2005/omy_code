@@ -1,6 +1,10 @@
 /*演出场馆维度表*/
 select
     shop_id,
-    shop_name
+    shop_name,
+    city_name,
+    province_name,
+    area_2_level_name,
+    area_1_level_name
 from
     mart_movie.dim_myshow_shop

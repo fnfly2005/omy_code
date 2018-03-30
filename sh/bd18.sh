@@ -19,6 +19,10 @@ select distinct
     msh.shop_id,
     case when dsh.dp_shop_id is null then shop_name
     else dp_shop_name end as shop_name,
+    city_name,
+    province_name,
+    area_2_level_name,
+    area_1_level_name,
     dsh.dp_shop_first_cate_name,
     dsh.dp_shop_second_cate_name,
     poa.classname,

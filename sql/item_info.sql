@@ -1,10 +1,10 @@
 /*微格项目信息表*/
 select
-    id,
+    id as item_id,
+    item_no,
     title_cn,
     type_id,
-    source
+    venue_id,
+    city_id
 from
     item_info
-where
-    id is not null

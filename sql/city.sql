@@ -5,5 +5,3 @@ select
     province_id
 from
     city
-where
-    city_name is not null

@@ -7,35 +7,24 @@ t3=`date -j -f %s $(expr $(date -j -f%Y-%m-%d ${t1% *} +%s) - 86400) +"%Y-%m-%d 
 fut() {
 echo `grep -iv "\-time" ${path}sql/${1} | grep -iv "/\*"`
 }
-ii=`fut item_info.sql`
-of=`fut order_form.sql`
-rsf=`fut report_sales_from.sql`
+rsf=`fut report_sales_flow.sql`
 
-item="('1712073160')"
-
-file="wp_bd03"
+file="wp_bs01"
 lim=";"
 attach="${path}doc/${file}.sql"
+
 echo "
 select
-    dt,
-    x_from,
-    count(distinct of.order_id) so_num,
-    sum(of.total_money) so_gmv
-from (
-    $ii
-    and item_no in $item
-    ) ii
-    join (
-        $rsf
-        ) rsf
-    on rsf.item_id=ii.id
-    join (
-        $of
-        ) of
-    on of.order_id=rsf.order_id
-group by
-    1,2
+    from_unixtime(create_time/1000,'%Y-%m-%d') dt,
+    item_id,
+    order_id,
+    order_src,
+    user_id,
+    order_mobile,
+    receive_mobile,
+    pay_no,
+    (total_money/100) as total_money
+from
+    report_sales_flow
 $lim">${attach}
-
 echo "succuess,detail see ${attach}"
