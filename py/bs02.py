@@ -4,6 +4,8 @@
 
 import csv
 import pandas as pd
+import sys
+
 def io_file (source_file,target_file):
     with open(source_file,'rb') as sf,open(target_file,'wb') as tf:
     #打开输出文件TF
@@ -16,4 +18,9 @@ def io_file (source_file,target_file):
         data.to_csv(tf,sep=',',header=False,index=False)
         #输出到CSV
 
-io_file ('/Users/fannian/Documents/data/register_mobile.csv','/Users/fannian/Documents/register_mobile.csv')
+sa=sys.argv[1]
+#获取命令行参数1
+ta=sys.argv[2]
+#获取命令行参数2
+
+io_file (sa,ta)

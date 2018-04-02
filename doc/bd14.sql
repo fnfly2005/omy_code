@@ -38,8 +38,6 @@ from (
                     mart_movie.dim_myshow_performance
                 where performance_id in ($performance_id)
                 ) c1
-            where
-                performance_id not in ($no_performance_id)
             ) ci
             join (
             select
@@ -47,8 +45,8 @@ from (
                 performance_id
             from
                 mart_movie.detail_myshow_saleorder
-            where order_create_time>='$$begindate'
-                and order_create_time<'$$enddate'
+            where
+                performance_id not in ($no_performance_id)
             ) so
             on so.performance_id=ci.performance_id
             left join upload_table.myshow_mark mm

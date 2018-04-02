@@ -12,7 +12,7 @@ from (
             order_mobile,
             item_id
         from 
-            mart_movie.detail_wg_saleorder
+            upload_table.detail_wg_saleorder
         ) so
     on so.item_id=per.item_id
 group by

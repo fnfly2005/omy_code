@@ -1,0 +1,10 @@
+/*微格项目维表*/
+select
+    item_id,
+    item_no,
+    title_cn,
+    type_lv1_name,
+    city_name,
+    province_name
+from
+    upload_table.dim_wg_item
