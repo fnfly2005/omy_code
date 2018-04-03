@@ -61,7 +61,7 @@ from (
     group by
         1,2
     ) as fp1
-    left join (
+    join (
     select
         sp0.dt,
         md.value2 as pt,

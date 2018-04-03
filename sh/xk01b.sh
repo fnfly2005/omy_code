@@ -22,46 +22,6 @@ select
     sp1.totalprice
 from (
     select
-        fpw.dt,
-        case when md.value2 is null then '其他'
-        else md.value2 end as pt,
-        sum(fpw.uv) as uv
-    from (
-        select
-            partition_date as dt,
-            app_name,
-            count(distinct union_id) as uv
-        from
-            mart_flow.detail_flow_pv_wide_report
-        where partition_date='\$\$today{-1d}'
-            and partition_log_channel='movie'
-            and partition_app in (
-            'movie',
-            'dianping_nova',
-            'other_app',
-            'dp_m',
-            'group'
-            )
-            and page_identifier in (
-            select value
-            from upload_table.myshow_pv
-            where key='page_identifier'
-            and page_tag1>=0
-            )
-        group by
-            partition_date,
-            app_name
-        ) as fpw
-    left join (
-        $md
-        and key_name='app_name'
-        ) md
-    on fpw.app_name=md.key
-    group by
-        1,2
-    ) as fp1
-    left join (
-    select
         sp0.dt,
         md.value2 as pt,
         sum(sp0.order_num) as order_num,
@@ -90,9 +50,48 @@ from (
         sp0.dt,
         md.value2
     ) as sp1
+    join (
+        select
+            fpw.dt,
+            case when md.value2 is null then '其他'
+            else md.value2 end as pt,
+            sum(fpw.uv) as uv
+        from (
+            select
+                partition_date as dt,
+                app_name,
+                count(distinct union_id) as uv
+            from
+                mart_flow.detail_flow_pv_wide_report
+            where partition_date='\$\$today{-1d}'
+                and partition_log_channel='movie'
+                and partition_app in (
+                'movie',
+                'dianping_nova',
+                'other_app',
+                'dp_m',
+                'group'
+                )
+                and page_identifier in (
+                select value
+                from upload_table.myshow_pv
+                where key='page_identifier'
+                and page_tag1>=0
+                )
+            group by
+                partition_date,
+                app_name
+            ) as fpw
+        left join (
+            $md
+            and key_name='app_name'
+            ) md
+        on fpw.app_name=md.key
+        group by
+            1,2
+        ) as fp1
     on sp1.dt=fp1.dt
     and sp1.pt=fp1.pt
 $lim">${attach}
 
 echo "succuess,detail see ${attach}"
-

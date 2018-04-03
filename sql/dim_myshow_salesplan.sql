@@ -1,0 +1,10 @@
+/*销售计划维表*/
+select
+    shop_id,
+    category_name,
+    show_starttime,
+    performance_id,
+    show_id,
+    ticket_price
+from
+    mart_movie.dim_myshow_salesplan

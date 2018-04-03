@@ -1,6 +1,7 @@
 #!/usr/bin/python
 #coding:utf-8
-#csv数据文件去重
+#csv数据文件计数
+import sys
 def ln_file (source_file):
     with open(source_file,'rb') as sf:
     #打开输出文件TF
@@ -9,5 +10,7 @@ def ln_file (source_file):
 
         print len(lines)
 
+sa=sys.argv[1]
+#获取命令行参数1
 
-ln_file ('/Users/fannian/Documents/bind_mobile.csv')
+ln_file (sa)

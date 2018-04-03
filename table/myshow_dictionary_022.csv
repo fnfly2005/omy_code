@@ -57,6 +57,9 @@ sellchannel,5,猫眼,猫眼,mt
 sellchannel,6,微信钱包_h5,微信演出赛事,wx
 sellchannel,7,微信钱包_小程序,微信演出赛事,wx
 sellchannel,8,格瓦拉,格瓦拉,gwl
+sellchannel,9,范特西,批量出票,fx
+sellchannel,10,商户,批量出票,fx
+sellchannel,11,分销,分销,fx
 performance_ticketstatus,1,未上线,未上线,未上线
 performance_ticketstatus,2,预售,预售,预售
 performance_ticketstatus,3,在售中,在售中,在售中

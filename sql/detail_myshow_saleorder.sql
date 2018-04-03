@@ -16,7 +16,9 @@ select
     show_endtime,
     show_starttime,
     order_create_time,
-    order_refund_status
+    order_refund_status,
+    setnumber,
+    salesplan_count
 from
     mart_movie.detail_myshow_saleorder
 where
