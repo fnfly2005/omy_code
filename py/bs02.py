@@ -1,6 +1,7 @@
 #!/usr/bin/python
 #coding:utf-8
 #csv数据文件去重
+#参数1 源文件 参数2 目标文件
 
 import csv
 import pandas as pd

@@ -20,17 +20,11 @@ from (
                     category_name in ('$category_name')
                     or '全部' in ('$category_name')
                     )
-                    and province_name in ('$area_name')
-                union all
-                select
-                    performance_id
-                from
-                    mart_movie.dim_myshow_performance
-                where (
-                    category_name in ('$category_name')
-                    or '全部' in ('$category_name')
-                    )
-                    and city_name in ('$area_name')
+                    and (
+                        province_name in ('$area_name')
+                        or city_name in ('$area_name')
+                        or '全部' in ('$area_name')
+                        )
                 union all
                 select
                     performance_id
@@ -47,6 +41,7 @@ from (
                 mart_movie.detail_myshow_saleorder
             where
                 performance_id not in ($no_performance_id)
+                and sellchannel in ($sellchannel_id)
             ) so
             on so.performance_id=ci.performance_id
             left join upload_table.myshow_mark mm

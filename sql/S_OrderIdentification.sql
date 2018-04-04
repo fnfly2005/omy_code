@@ -9,4 +9,3 @@ from
     S_OrderIdentification
 where
     OrderID>=-time1
-    and OrderID<-time2
