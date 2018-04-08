@@ -5,6 +5,7 @@ select
     title_cn,
     type_lv1_name,
     city_name,
-    province_name
+    province_name,
+    venue_name
 from
     upload_table.dim_wg_item

@@ -1,0 +1,9 @@
+/*用户项目兴趣表*/
+select
+    user_id,
+    item_id,
+    type,
+    rate,
+    create_time
+from
+    item_interests

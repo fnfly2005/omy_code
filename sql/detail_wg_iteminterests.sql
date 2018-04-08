@@ -1,0 +1,9 @@
+/*微格用户兴趣项目*/
+select
+    dt,
+    item_id,
+    user_id,
+    type,
+    rate
+from
+    detail_wg_iteminterests
