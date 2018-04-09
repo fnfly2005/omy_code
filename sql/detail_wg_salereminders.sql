@@ -2,6 +2,6 @@
 select
     dt,
     item_id,
-    moblie
+    mobile
 from
-    detail_wg_salereminder
+    upload_table.detail_wg_salereminders

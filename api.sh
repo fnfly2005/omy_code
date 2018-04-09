@@ -68,6 +68,7 @@ exit 0
 fi
 #拆分文件
 split -b 7m 00output/hd04_andriod.csv andriod
+split -l 100000 00output/hd04_andriod.csv andriod
 #循环
 mode="0"
 min=0

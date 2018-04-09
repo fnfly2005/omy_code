@@ -4,4 +4,4 @@ select
     item_id,
     user_id
 from
-    detail_wg_itemattentions
+    upload_table.detail_wg_itemattentions

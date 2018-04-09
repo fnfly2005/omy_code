@@ -4,4 +4,4 @@ select
     mobile,
     dt
 from
-    detail_wg_outstockrecord
+    upload_table.detail_wg_outstockrecords

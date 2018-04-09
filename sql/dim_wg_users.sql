@@ -4,4 +4,4 @@ select
     mobile,
     dt
 from
-    dim_wg_user
+    upload_table.dim_wg_users

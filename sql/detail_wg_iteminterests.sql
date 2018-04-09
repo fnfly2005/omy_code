@@ -6,4 +6,4 @@ select
     type,
     rate
 from
-    detail_wg_iteminterests
+    upload_table.detail_wg_iteminterests
