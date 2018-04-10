@@ -5,27 +5,28 @@ fun() {
 echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
 }
 
-ss=`fun detail_myshow_salesplan.sql`
-spo=`fun detail_myshow_salepayorder.sql`
-per=`fun dim_myshow_performance.sql` 
-cus=`fun dim_myshow_customer.sql`
+oni=`fun detail_maoyan_order_new_info.sql`
+cni=`fun detail_maoyan_order_sale_cost_new_info.sql`
+
 file="bs07"
 lim=";"
 attach="${path}doc/${file}.sql"
 
 echo "
 select 
-    substr(x.pay_time,1,7) mt,
-    sum(quantity) sq
-from mart_movie.detail_maoyan_order_new_info x
-join mart_movie.detail_maoyan_order_sale_cost_new_info y
-on x.order_id=y.order_id
-join mart_movie.dim_deal_new z
-on y.deal_id=z.deal_id
-WHERE x.pay_time>='\$\$monthfirst{-1m}'
-and x.pay_time<'\$\$monthfirst'
-and z.category=12
-group by
+    substr(dt,1,7) as mt,
+    sum(total_money) as total_money,
+    count(distinct oni.order_id) as order_num,
+    sum(quantity) sku_num,
+    count(distinct deal_id) dea_num
+from (
+    $oni
+    ) oni
+    join (
+    $cni
+    ) cni
+    on oni.order_id=cni.order_id
+group by 
     1
-    ">${attach}
+$lim">${attach}
 echo "succuess,detail see ${attach}"

@@ -5,7 +5,7 @@ select
     order_id,
     order_src,
     user_id,
-    order_mobile,
+    order_mobile mobile,
     receive_mobile,
     pay_no,
     total_money

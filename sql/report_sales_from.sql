@@ -1,8 +1,9 @@
 /*订单来源报表*/
 select
+    date as dt,
     `from` x_from,
     item_id,
-    pay_money,
+    pay_money/100  pay_money,
     order_id
 from
     report_sales_from

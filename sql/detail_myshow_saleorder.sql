@@ -2,7 +2,7 @@
 select
     order_id,
     maoyan_order_id,
-    usermobileno,
+    usermobileno as mobile,
     recipientidno,
     sellchannel,
     city_id,

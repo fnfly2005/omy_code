@@ -1,5 +1,5 @@
 /*团购结算*/
-select distinct
+select
     order_id,
     deal_id
 from

@@ -4,6 +4,7 @@ select
     category_name,
     show_starttime,
     performance_id,
+    performance_name,
     show_id,
     ticket_price
 from

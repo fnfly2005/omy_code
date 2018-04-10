@@ -8,8 +8,8 @@ fut() {
 echo `grep -iv "\-time" ${path}sql/${1} | grep -iv "/\*"`
 }
 ii=`fut item_info.sql`
-of=`fut order_form.sql`
 rsf=`fut report_sales_from.sql`
+tic=`fut order_ticket.sql`
 
 item="('1712073160')"
 
@@ -20,22 +20,36 @@ echo "
 select
     dt,
     x_from,
-    count(distinct of.order_id) so_num,
-    sum(of.total_money) so_gmv
+    price_name,
+    sum(pay_money) as pay_money,
+    sum(sku_num) as sku_num
 from (
-    $ii
-    and item_no in $item
-    ) ii
+    $rsf
+    and item_id in (
+        select id
+        from item_info
+        where item_no in $item
+        )
+    ) rsf
     join (
-        $rsf
-        ) rsf
-    on rsf.item_id=ii.id
-    join (
-        $of
-        ) of
-    on of.order_id=rsf.order_id
+        select
+            price_id,
+            price_name,
+            order_id,
+            count(1) sku_num
+        from
+            order_ticket
+        where item_id in (
+            select id
+            from item_info
+            where item_no in $item
+            )
+        group by
+            1,2,3
+        ) tic
+    on tic.order_id=rsf.order_id
 group by
-    1,2
+    1,2,3
 $lim">${attach}
 
 echo "succuess,detail see ${attach}"
