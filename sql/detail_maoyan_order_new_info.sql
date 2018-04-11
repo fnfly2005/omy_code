@@ -1,12 +1,13 @@
 /*猫眼团单订单*/
 select
-    substr(pay_time,1,10) dt,
     order_id,
     user_id,
     poi_id,
-    quantity,
     mobile_phone,
     order_time,
+    case when pay_time>='$$begindate'
+        and pay_time<'$$enddate' then 1
+    else 0 end today_flag,
     total_money/100 total_money,
     channel,
     case when channel_name is null then '其他'
@@ -16,5 +17,5 @@ from
 where
     pay_time is not null
     and category=12
-    and pay_time>='$$begindate'
-    and pay_time<'$$enddate'
+    and modified>='$$begindate'
+    and modified<'$$enddate'
