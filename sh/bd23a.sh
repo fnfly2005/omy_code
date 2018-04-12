@@ -1,4 +1,18 @@
+#!/bin/bash
+path="/Users/fannian/Documents/my_code/"
+t1='$time1'
+fun() {
+echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
+}
 
+so=`fun detail_myshow_saleorder.sql` 
+per=`fun dim_myshow_performance.sql`
+
+file="bd14"
+lim=";"
+attach="${path}doc/${file}.sql"
+
+echo "
 select 
     meituan_userid
 from (
@@ -11,7 +25,7 @@ from (
             from
                 mart_movie.detail_myshow_saleorder
             where
-                sellchannel in ($sellchannel_id)
+                sellchannel in (\$sellchannel_id)
                 and performance_id in (
                         select distinct
                             performance_id
@@ -21,26 +35,28 @@ from (
                             from
                                 mart_movie.dim_myshow_performance
                             where (
-                                category_name in ('$category_name')
-                                or '全部' in ('$category_name')
+                                category_name in ('\$category_name')
+                                or '全部' in ('\$category_name')
                                 )
                                 and (
-                                    province_name in ('$area_name')
-                                    or city_name in ('$area_name')
-                                    or '全部' in ('$area_name')
+                                    province_name in ('\$area_name')
+                                    or city_name in ('\$area_name')
+                                    or '全部' in ('\$area_name')
                                     )
                             union all
                             select
                                 performance_id
                             from
                                 mart_movie.dim_myshow_performance
-                            where performance_id in ($performance_id)
+                            where performance_id in (\$performance_id)
                             ) c1
                         where
-                            performance_id not in ($no_performance_id)
+                            performance_id not in (\$no_performance_id)
                     )
         ) as cs
     ) as c
 where
-    rank<=$limit
-;
+    rank<=\$limit
+$lim">${attach}
+
+echo "succuess,detail see ${attach}"

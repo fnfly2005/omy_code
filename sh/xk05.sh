@@ -6,11 +6,11 @@ echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$
 }
 
 dms=`fun detail_myshow_salesplan.sql`
-dmp=`fun dim_myshow_performance.sql`
+dsp=`fun dim_myshow_salesplan.sql`
 dc=`fun dim_myshow_customer.sql`
 dpr=`fun dim_myshow_project.sql`
 
-file="bd11"
+file="xk05"
 lim=";"
 attach="${path}doc/${file}.sql"
 
@@ -28,10 +28,23 @@ echo "select
     shop_name,
     case when dpr.bd_name is null then '无'
     else dpr.bd_name end as bd_name
-from
-    (
-    $dms
-    and salesplan_sellout_flag=0
+from (
+    select
+        partition_date as dt,
+        performance_id,
+        ticketclass_id,
+        customer_id,
+        shop_id,
+        show_id,
+        salesplan_sellout_flag,
+        project_id,
+        salesplan_id
+    from
+        mart_movie.detail_myshow_salesplan
+    where
+        salesplan_id is not null
+        and partition_date>='\$\$begindate'
+        and partition_date<'\$\$enddate'
     ) dms
     left join
     (
