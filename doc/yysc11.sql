@@ -17,35 +17,43 @@ from (
                 active_date>='$$begindate'
                 and active_date<'$$enddate'
                 and city_id in (
-                        select distinct
-                            mt_city_id
-                        from (
-                            select city_id, mt_city_id, city_name, province_name, area_2_level_name from mart_movie.dim_myshow_city where city_id is not null
-                            and province_name in ('$name')
-                            union all
-                            select city_id, mt_city_id, city_name, province_name, area_2_level_name from mart_movie.dim_myshow_city where city_id is not null
-                            and city_name in ('$name')
-                            ) c1
-                        )
+                    select 
+                        mt_city_id
+                    from (
+                        select city_id, mt_city_id, city_name, province_name, area_2_level_name from mart_movie.dim_myshow_city where city_id is not null
+                        and province_name in ('$name')
+                        union all
+                        select city_id, mt_city_id, city_name, province_name, area_2_level_name from mart_movie.dim_myshow_city where city_id is not null
+                        and city_name in ('$name')
+                        ) c1
+                    )
+                and (
+                    movie_id in ($movie_id)
+                    or -99 in ($movie_id)
+                    )
             union all
             select
                 mobile
             from
-                mart_movie.dim_myshow_movieuser
+                mart_movie.dim_myshow_movieusera
             where
                 active_date>='$$begindate'
                 and active_date<'$$enddate'
                 and city_id in (
-                        select distinct
-                            mt_city_id
-                        from (
-                            select city_id, mt_city_id, city_name, province_name, area_2_level_name from mart_movie.dim_myshow_city where city_id is not null
-                            and province_name in ('$name')
-                            union all
-                            select city_id, mt_city_id, city_name, province_name, area_2_level_name from mart_movie.dim_myshow_city where city_id is not null
-                            and city_name in ('$name')
-                            ) c1
-                        )
+                    select distinct
+                        mt_city_id
+                    from (
+                        select city_id, mt_city_id, city_name, province_name, area_2_level_name from mart_movie.dim_myshow_city where city_id is not null
+                        and province_name in ('$name')
+                        union all
+                        select city_id, mt_city_id, city_name, province_name, area_2_level_name from mart_movie.dim_myshow_city where city_id is not null
+                        and city_name in ('$name')
+                        ) c1
+                    )
+                and (
+                    movie_id in ($movie_id)
+                    or -99 in ($movie_id)
+                    )
             ) mu
         ) mou
         left join upload_table.myshow_mark mm

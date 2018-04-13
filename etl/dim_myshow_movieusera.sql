@@ -12,7 +12,7 @@ from (
         user_id,
         max(order_id) as order_id
     from
-        mart_movie.aggr_discount_card_seat_dwd
+        mart_movie.detail_order_seat_info
     where mobile_phone is not null
         and to_date(order_time)>='$now.month_begin_date.date'
         and to_date(order_time)<='$now.month_end_date.date'
@@ -28,7 +28,7 @@ from (
             order_source,
             substr(order_time,1,10) as active_date
         from
-            mart_movie.aggr_discount_card_seat_dwd
+            mart_movie.detail_order_seat_info
         where to_date(order_time)>='$now.month_begin_date.date'
         and to_date(order_time)<='$now.month_end_date.date'
         ) as do2

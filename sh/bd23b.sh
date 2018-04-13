@@ -7,33 +7,33 @@ echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$
 
 mou=`fun dim_myshow_movieuser.sql`
 cit=`fun dim_myshow_city.sql`
+cin=`fun dim_cinema.sql`
 mov=`fun dim_movie.sql`
 
-file="yysc11"
+file="bd23"
 lim=";"
 attach="${path}doc/${file}.sql"
 
 echo "
 select 
-    mobile
+    user_id
 from (
     select
-        mobile,
+        user_id,
         row_number() over (order by 1) rank
     from (
         select distinct
-            mobile
+            user_id
         from (
             select
-                mobile
+                user_id
             from
-                mart_movie.dim_myshow_movieuser
+                mart_movie.aggr_discount_card_seat_dwd
             where
-                active_date>='\$\$begindate'
-                and active_date<'\$\$enddate'
-                and city_id in (
-                    select 
-                        mt_city_id
+                order_source=1
+                and cinema_id in (
+                    select distinct
+                        cinema_id
                     from (
                         $cit
                         and province_name in ('\$name')
@@ -41,22 +41,25 @@ from (
                         $cit
                         and city_name in ('\$name')
                         ) c1
-                    )
+                        join (
+                        $cin
+                        ) cin
+                        on cin.city_id=c1.mt_city_id
+                        )
                 and (
                     movie_id in (\$movie_id)
                     or -99 in (\$movie_id)
                     )
             union all
             select
-                mobile
+                user_id
             from
-                mart_movie.dim_myshow_movieusera
+                mart_movie.detail_order_seat_info
             where
-                active_date>='\$\$begindate'
-                and active_date<'\$\$enddate'
-                and city_id in (
+                order_source=1
+                and cinema_id in (
                     select distinct
-                        mt_city_id
+                        cinema_id
                     from (
                         $cit
                         and province_name in ('\$name')
@@ -64,18 +67,17 @@ from (
                         $cit
                         and city_name in ('\$name')
                         ) c1
-                    )
+                        join (
+                        $cin
+                        ) cin
+                        on cin.city_id=c1.mt_city_id
+                        )
                 and (
                     movie_id in (\$movie_id)
                     or -99 in (\$movie_id)
                     )
             ) mu
         ) mou
-        left join upload_table.myshow_mark mm
-        on mm.usermobileno=mou.mobile
-        and \$id=1
-    where
-        mm.usermobileno is null
     ) as c
 where
     rank<=\$limit

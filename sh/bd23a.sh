@@ -8,7 +8,7 @@ echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$
 so=`fun detail_myshow_saleorder.sql` 
 per=`fun dim_myshow_performance.sql`
 
-file="bd14"
+file="bd23"
 lim=";"
 attach="${path}doc/${file}.sql"
 
