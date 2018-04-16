@@ -16,9 +16,12 @@ select
     income,
     expense,
     totalticketprice,
+    ticket_price,
+    sell_price,
     project_id,
     bill_id,
     salesplan_id,
+    city_id,
     pay_time
 from
     mart_movie.detail_myshow_salepayorder

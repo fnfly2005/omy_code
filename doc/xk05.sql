@@ -1,21 +1,4 @@
-#!/bin/bash
-path="/Users/fannian/Documents/my_code/"
-t1='$time1'
-fun() {
-echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
-}
 
-dms=`fun detail_myshow_salesplan.sql`
-sho=`fun dim_myshow_show.sql`
-cit=`fun dim_myshow_city.sql`
-per=`fun dim_myshow_performance.sql`
-dpr=`fun dim_myshow_project.sql`
-
-file="xk05"
-lim=";"
-attach="${path}doc/${file}.sql"
-
-echo "
 select
     area_1_level_name,
     province_name,
@@ -46,13 +29,13 @@ from (
         from
             mart_movie.detail_myshow_salepayorder
         where
-            partition_date>='\$\$today{-7d}'
-            and partition_date<'\$\$today{-0d}'
+            partition_date>='$$today{-7d}'
+            and partition_date<'$$today{-0d}'
         group by
             1
         ) spo
         left join (
-            $per
+            select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, city_id, city_name, shop_name from mart_movie.dim_myshow_performance where performance_id is not null
             ) per
         on per.performance_id=spo.performance_id
     ) so
@@ -82,11 +65,11 @@ from (
                 from
                     mart_movie.detail_myshow_salesplan
                 where
-                    partition_date>='\$\$today{-7d}'
-                    and partition_date<'\$\$today{-0d}'
+                    partition_date>='$$today{-7d}'
+                    and partition_date<'$$today{-0d}'
                 ) dms
                 left join (
-                    $sho
+                    select show_id, performance_id, substr(show_starttime,1,10) as show_starttime, show_endtime from mart_movie.dim_myshow_show where show_id is not null
                     ) sho
                 on sho.show_id=dms.show_id
                 left join (
@@ -109,6 +92,4 @@ from (
     and so.rank<=50
 where
     so.rank<=50
-$lim">${attach}
-
-echo "succuess,detail see ${attach}"
+;
