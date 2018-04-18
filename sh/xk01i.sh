@@ -44,6 +44,13 @@ from (
     union all
     select
         mobile,
+        case when length(pay_no)>4 then 'wp' 
+        else NUll end as dmi,
+        NUll as dma
+    from upload_table.detail_wp_saleorder
+    union all
+    select
+        mobile,
         NUll as dmi,
         NUll as dma
     from upload_table.detail_wg_salereminders
@@ -75,6 +82,12 @@ from (
     from mart_movie.detail_myshow_saleorder
     group by
         1
+    union all
+    select
+        mobile,
+        NUll as dmi,
+        NUll as dma
+    from upload_table.dim_wp_user
     ) as so
 group by
     1

@@ -9,6 +9,7 @@ select
     TotalPrice,
     mon_TotalPrice,
     GrossProfit,
+    mon_GrossProfit,
     ap_num,
     sp_num,
     round(sp_num*1.0/ap_num,4) sp_rate,
@@ -29,7 +30,8 @@ from (
         select 
             customer_type_id,
             area_1_level_name,
-            round(sum(TotalPrice),0) mon_TotalPrice
+            round(sum(TotalPrice),0) mon_TotalPrice,
+            round(sum(GrossProfit),0) mon_GrossProfit
         from 
             mart_movie.topic_myshow_dailysalesreport
         where 

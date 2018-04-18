@@ -8,3 +8,5 @@ FROM
     item_type it1
     left JOIN item_type it2 
     ON it1.pid=it2.id
+where
+    it1.name not like '%测试%'

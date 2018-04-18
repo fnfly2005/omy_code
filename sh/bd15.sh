@@ -19,6 +19,7 @@ select
     UserName,
     IDNumber,
     maoyan_order_id,
+    show_name,
     order_create_time,
     value2
 from (
@@ -36,7 +37,7 @@ from (
     ) md
     on md.key=so.order_refund_status
 group by
-    1,2,3,4,5,6
+    1,2,3,4,5,6,7
 $lim">${attach}
 
 echo "succuess,detail see ${attach}"
