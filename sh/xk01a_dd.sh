@@ -1,4 +1,18 @@
+#!/bin/bash
+path="/Users/fannian/Documents/my_code/"
+t1='$time1'
+fun() {
+echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
+}
 
+spo=`fun detail_myshow_salepayorder.sql` 
+ss=`fun detail_myshow_salesplan.sql`
+
+file="xk01"
+lim=";"
+attach="${path}doc/${file}.sql"
+
+echo "
 select
     ss1.dt,
     ss1.ap_num,
@@ -16,7 +30,7 @@ from (
         count(distinct ss.salesplan_id) as as_num
     from
         (
-        select partition_date as dt, performance_id, customer_type_id, customer_id, shop_id, show_id, salesplan_sellout_flag, project_id, salesplan_id, ticketclass_id, city_id from mart_movie.detail_myshow_salesplan where salesplan_id is not null and partition_date>='$$begindate' and partition_date<'$$enddate'
+        $ss
         and salesplan_sellout_flag=0
         ) ss
     group by
@@ -32,7 +46,7 @@ from (
         sum(spo.grossprofit) as grossprofit
     from
         (
-        select partition_date as dt, order_id, sellchannel, customer_id, performance_id, meituan_userid, show_id, totalprice, grossprofit, setnumber, salesplan_count, expressfee, discountamount, income, expense, totalticketprice, ticket_price, sell_price, project_id, bill_id, salesplan_id, city_id, pay_time from mart_movie.detail_myshow_salepayorder where partition_date>='$$begindate' and partition_date<'$$enddate'
+        $spo
         ) spo
     group by
         spo.dt
@@ -44,7 +58,7 @@ from (
         count(distinct union_id) as uv
     from
         mart_flow.detail_flow_pv_wide_report
-    where partition_date='$$begindate'
+    where partition_date='\$\$begindate'
         and partition_log_channel='movie'
         and partition_app in (
         select key
@@ -61,4 +75,7 @@ from (
         partition_date
     ) as fpw
     on ss1.dt=fpw.dt
-;
+$lim">${attach}
+
+echo "succuess,detail see ${attach}"
+
