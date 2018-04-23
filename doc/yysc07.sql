@@ -13,19 +13,33 @@ from (
         count(distinct order_id) as order_num
     from (
         select
-            dt,
+            partition_date as dt,
             app_name,
             case when regexp_like(url_parameters,'[Ff]romTag=') then split_part(regexp_extract(url_parameters,'[Ff]romTag=[^&]+'),'=',2)
-            when regexp_like(url,'fromTag%3D') then split_part(regexp_extract(url,'fromTag%3D[^%]+'),'%3D',2)
-            when regexp_like(url,'from=') then split_part(regexp_extract(url,'from=[^&]+'),'=',2)
+            when regexp_like(substr(url,40,40),'fromTag%3D') then split_part(regexp_extract(url,'fromTag%3D[^%]+'),'%3D',2)
+            when regexp_like(substr(url,40,40),'from=') then split_part(regexp_extract(url,'from=[^&]+'),'=',2)
             else 'other'
             end as fromtag,
             union_id
         from
-            (
-            select partition_date as dt, app_name, url_parameters, substr(url,40,40) as url, page_name, union_id from mart_flow.detail_flow_pv_wide_report where partition_date>='$$begindate' and partition_date<'$$enddate' and partition_log_channel='firework' and partition_app in ( 'movie', 'dianping_nova', 'other_app', 'dp_m', 'group' ) and page_bg='猫眼文化'
+            mart_flow.detail_flow_pv_wide_report
+        where partition_date>='$$begindate'
+            and partition_date<'$$enddate'
+            and (
+                (partition_log_channel='firework'
+                and $source=1)
+                or (partition_log_channel='cube'
+                and $source=2)
+                )
+            and partition_app in (
+            'movie',
+            'dianping_nova',
+            'other_app',
+            'dp_m',
+            'group'
+            )
+            and page_bg='猫眼文化'
             and regexp_like(page_name,'$id')
-            ) as fpw
         ) fp1
         left join (
             select 
