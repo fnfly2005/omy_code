@@ -30,6 +30,7 @@ page_tag1,5,其他,演出,演出
 page_tag1,6,自主,平台,平台
 fromTag,home,app首页运营位,平台运营位,首页运营位
 fromTag,moviehome,电影首页,电影演出tab,电影首页
+fromTag,out_underline,微信演出赛事首页,微信演出赛事底部tab,电影首页
 fromTag,allcate,全部分类,平台全部分类,全部分类
 fromTag,search,搜索,平台大搜,搜索
 fromTag,homenavi,首页导航区,平台首页icon,首页导航区
