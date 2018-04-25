@@ -50,6 +50,7 @@ fromTag,showdeallist,演出团购列表页,演出团购列表页,演出团购列
 fromTag,mtpoisearch,美团搜索POI挂团单,美团搜索POI挂团单,美团搜索POI挂团单
 fromTag,qr,二维码,二维码,二维码
 fromTag,out_qzy,美团亲子游合作,美团亲子游合作,美团亲子游合作
+sellchannel,-99,全部,全部,all
 sellchannel,1,点评,点评,dp
 sellchannel,2,美团,美团,mt
 sellchannel,3,微信点评,微信吃喝玩乐,dp

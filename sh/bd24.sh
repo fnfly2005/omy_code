@@ -1,12 +1,32 @@
+#!/bin/bash
+path="/Users/fannian/Documents/my_code/"
+t1='$time1'
+fun() {
+echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
+}
 
+spo=`fun detail_myshow_salepayorder.sql`
+dmp=`fun dim_myshow_performance.sql`
+dc=`fun dim_myshow_customer.sql`
+dpr=`fun dim_myshow_project.sql`
+md=`fun myshow_dictionary.sql`
+
+file="bd24"
+lim=";"
+attach="${path}doc/${file}.sql"
+
+echo "
 select
-    case when 1 in ($dim) then dt
+    case when 0 in (\$dim) then 
+        substr(dt,1,7) 
+    else 'all' end as mt,
+    case when 1 in (\$dim) then dt
     else 'all' end as dt,
-    case when 2 in ($dim) then md.value2 
+    case when 2 in (\$dim) then md.value2 
     else 'all' end as pt,
-    case when 3 in ($dim) then customer_type_name
+    case when 3 in (\$dim) then customer_type_name
     else 'all' end as customer_type_name,
-    case when 3 in ($dim) then customer_lvl1_name
+    case when 3 in (\$dim) then customer_lvl1_name
     else 'all' end as customer_lvl1_name,
     area_1_level_name,
     area_2_level_name,
@@ -16,10 +36,10 @@ select
     spo.performance_id,
     performance_name,
     shop_name,
-    case when 3 in ($dim) then 'all'
+    case when 3 not in (\$dim) then 'all'
         when dpr.bd_name is null then '无'
     else dpr.bd_name end as bd_name,
-    sum(order_id) as order_num,
+    sum(order_num) as order_num,
     sum(ticket_num) as ticket_num,
     sum(TotalPrice) as TotalPrice,
     sum(grossprofit) as grossprofit
@@ -37,28 +57,30 @@ from (
     from 
         mart_movie.detail_myshow_salepayorder
     where 
-        partition_date>='$$begindate'
-        and partition_date<'$$enddate'
+        partition_date>='\$\$begindate'
+        and partition_date<'\$\$enddate'
     group by
         1,2,3,4,5
     ) spo
     left join (
-    select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, city_id, city_name, shop_name from mart_movie.dim_myshow_performance where performance_id is not null
+    $dmp
     ) dmp
     using(performance_id)
     left join (
-    select customer_id, customer_type_id, customer_type_name, customer_lvl1_name, customer_name, customer_shortname, customer_code from mart_movie.dim_myshow_customer where customer_id is not null
+    $dc
     ) dc
-    on dms.customer_id=dc.customer_id
+    on spo.customer_id=dc.customer_id
     left join (
-    select project_id, insteaddelivery, bd_name from mart_movie.dim_myshow_project where project_id is not null
+    $dpr
     ) dpr
-    on dpr.project_id=dms.project_id
+    on dpr.project_id=spo.project_id
     left join (
-    select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
+    $md
     and key_name='sellchannel'
     ) md
     on md.key=spo.sellchannel
 group by
-    1,2,3,4,5,6,7,8,9,10,11,12,13
-;
+    1,2,3,4,5,6,7,8,9,10,11,12,13,14
+$lim">${attach}
+
+echo "succuess,detail see ${attach}"

@@ -1,17 +1,37 @@
 #!/bin/bash
-clock="00"
-t1=${1:-`date -v -1d +"%Y-%m-%d ${clock}:00:00"`}
-t2=${2:-`date -j -f %s $(expr $(date -j -f%Y-%m-%d ${t1% *} +%s) + 86400) +"%Y-%m-%d ${clock}:00:00"`}
-t3=`date -j -f %s $(expr $(date -j -f%Y-%m-%d ${t1% *} +%s) - 86400) +"%Y-%m-%d ${clock}:00:00"`
+#--------------------猫眼演出readme-------------------
+#test1.0 优化输出方式
 path="/Users/fannian/Documents/my_code/"
 fun() {
-echo `cat ${path}sql/${1}.sql | sed "s/-time1/${2:-${t1% *}}/g;
-s/-time2/${3:-${t2% *}}/g;s/-time3/${4:-${t3% *}}/g" | grep -iv "/\*"`
+    if [ $2x == ex ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
+    elif [ $2x == ux ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
+    elif [ $2x == tx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
+    elif [ $2x == utx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
+    else
+        echo `cat ${path}sql/${1} | grep -iv "/\*"`
+    fi
 }
-fut() {
-echo `grep -iv "\-time" ${path}sql/${1}.sql | grep -iv "/\*"`
-}
-so=`fut S_Order` 
-for i in `seq 5 -1 1`
-    echo i
-do
+so=`fun detail_myshow_saleorder.sql ut`
+
+file="test"
+lim=";"
+attach="${path}doc/${file}.sql"
+mt1="upload_table."
+mt2="mart_movie."
+
+echo "
+${so}
+$lim">${attach}
+
+echo "succuess!"
+echo ${attach}
+if [ ${1}r == pr ]
+#加上任意字符，如r 避免空值报错
+then
+cat ${attach}
+#命令行参数为p时，打印输出文件
+fi

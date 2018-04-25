@@ -1,5 +1,8 @@
 
 select
+    case when 0 in ($dim) then 
+        substr(dt,1,7) 
+    else 'all' end as mt,
     case when 1 in ($dim) then dt
     else 'all' end as dt,
     case when 2 in ($dim) then md.value2 
@@ -16,10 +19,10 @@ select
     spo.performance_id,
     performance_name,
     shop_name,
-    case when 3 in ($dim) then 'all'
+    case when 3 not in ($dim) then 'all'
         when dpr.bd_name is null then '无'
     else dpr.bd_name end as bd_name,
-    sum(order_id) as order_num,
+    sum(order_num) as order_num,
     sum(ticket_num) as ticket_num,
     sum(TotalPrice) as TotalPrice,
     sum(grossprofit) as grossprofit
@@ -49,16 +52,16 @@ from (
     left join (
     select customer_id, customer_type_id, customer_type_name, customer_lvl1_name, customer_name, customer_shortname, customer_code from mart_movie.dim_myshow_customer where customer_id is not null
     ) dc
-    on dms.customer_id=dc.customer_id
+    on spo.customer_id=dc.customer_id
     left join (
     select project_id, insteaddelivery, bd_name from mart_movie.dim_myshow_project where project_id is not null
     ) dpr
-    on dpr.project_id=dms.project_id
+    on dpr.project_id=spo.project_id
     left join (
     select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
     and key_name='sellchannel'
     ) md
     on md.key=spo.sellchannel
 group by
-    1,2,3,4,5,6,7,8,9,10,11,12,13
+    1,2,3,4,5,6,7,8,9,10,11,12,13,14
 ;

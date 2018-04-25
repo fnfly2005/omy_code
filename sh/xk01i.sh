@@ -88,6 +88,12 @@ from (
         NUll as dmi,
         NUll as dma
     from upload_table.dim_wp_user
+    union all
+    select
+        mobile,
+        NUll as dmi,
+        NUll as dma
+    from mart_movie.dim_gp_user
     ) as so
 group by
     1

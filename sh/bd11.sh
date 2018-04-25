@@ -28,23 +28,19 @@ echo "select
     shop_name,
     case when dpr.bd_name is null then '无'
     else dpr.bd_name end as bd_name
-from
-    (
+from (
     $dms
     and salesplan_sellout_flag=0
     ) dms
-    left join
-    (
+    left join (
     $dmp
     ) dmp
     using(performance_id)
-    left join
-    (
+    left join (
     $dc
     ) dc
     on dms.customer_id=dc.customer_id
-    left join 
-    (
+    left join (
     $dpr
     ) dpr
     on dpr.project_id=dms.project_id

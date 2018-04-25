@@ -22,6 +22,7 @@ where
     mobile is not null
     and length(mobile)=11
     and substr(mobile,1,2)>='13'
+    and substr(create_time,1,10)>
 group by
     1
 $lim">${attach}
