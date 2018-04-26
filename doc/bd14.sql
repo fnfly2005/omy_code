@@ -1,6 +1,10 @@
 
 select 
-    mobile
+    mobile,
+    $send_performance_id as send_performance_id,
+    '$$begindate' as send_date,
+    cast(floor(rand()*$batch_code) as bigint)+1 as batch_code,
+    '$sendtag' as sendtag
 from (
     select 
         mobile,
@@ -41,8 +45,7 @@ from (
                                 or '测试'='$performance_name'
                                 )
                         ) c1
-                    where
-                        performance_id not in ($no_performance_id)
+                    where performance_id not in ($no_performance_id)
                     )
             union all
             select 
@@ -77,15 +80,21 @@ from (
                                 or '测试'='$performance_name'
                                 )
                         ) as di
-                    where
-                        item_id not in ($no_performance_id)
+                    where item_id not in ($no_performance_id)
                     ) 
             ) so
-            left join upload_table.myshow_mark mm
-            on mm.usermobileno=so.mobile
-            and $id=1
+            left join (
+            select mobile
+            from upload_table.send_fn_user
+            where send_date>=date_add('day',-$id,current_date)
+            union all 
+            select mobile
+            from upload_table.send_wdh_user
+            where send_date>=date_add('day',-$id,current_date)
+                ) mm
+            on mm.mobile=mou.mobile
         where
-            mm.usermobileno is null
+            mm.mobile is null
         ) as cs
     ) as c
 where

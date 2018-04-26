@@ -1,12 +1,5 @@
 #!/bin/bash
 path="/Users/fannian/Documents/my_code/"
-t1='$time1'
-fun() {
-echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
-}
-
-so=`fun detail_myshow_saleorder.sql` 
-per=`fun dim_myshow_performance.sql`
 
 file="bd14"
 lim=";"
@@ -14,7 +7,11 @@ attach="${path}doc/${file}.sql"
 
 echo "
 select 
-    mobile
+    mobile,
+    \$send_performance_id as send_performance_id,
+    '\$\$begindate' as send_date,
+    cast(floor(rand()*\$batch_code) as bigint)+1 as batch_code,
+    '\$sendtag' as sendtag
 from (
     select 
         mobile,
@@ -55,8 +52,7 @@ from (
                                 or '测试'='\$performance_name'
                                 )
                         ) c1
-                    where
-                        performance_id not in (\$no_performance_id)
+                    where performance_id not in (\$no_performance_id)
                     )
             union all
             select 
@@ -91,19 +87,32 @@ from (
                                 or '测试'='\$performance_name'
                                 )
                         ) as di
-                    where
-                        item_id not in (\$no_performance_id)
+                    where item_id not in (\$no_performance_id)
                     ) 
             ) so
-            left join upload_table.myshow_mark mm
-            on mm.usermobileno=so.mobile
-            and \$id=1
+            left join (
+            select mobile
+            from upload_table.send_fn_user
+            where send_date>=date_add('day',-\$id,current_date)
+            union all 
+            select mobile
+            from upload_table.send_wdh_user
+            where send_date>=date_add('day',-\$id,current_date)
+                ) mm
+            on mm.mobile=mou.mobile
         where
-            mm.usermobileno is null
+            mm.mobile is null
         ) as cs
     ) as c
 where
     rank<=\$limit
 $lim">${attach}
 
-echo "succuess,detail see ${attach}"
+echo "succuess!"
+echo ${attach}
+if [ ${1}r == pr ]
+#加上任意字符，如r 避免空值报错
+then
+cat ${attach}
+#命令行参数为p时，打印输出文件
+fi
