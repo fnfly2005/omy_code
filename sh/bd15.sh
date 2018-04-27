@@ -1,4 +1,5 @@
 #!/bin/bash
+#实时数据详见bs20a.sh
 path="/Users/fannian/Documents/my_code/"
 t1='$time1'
 fun() {
@@ -14,21 +15,22 @@ lim=";"
 attach="${path}doc/${file}.sql"
 
 echo "
-select
-    usermobileno,
-    UserName,
-    IDNumber,
+select distinct
     maoyan_order_id,
-    show_name,
+    IDNumber,
+    UserName,
+    mobile,
+    so.performance_id,
     order_create_time,
-    value2
+    value2,
+    show_name
 from (
     $so
-    and performance_id=\$performance_id
+    and performance_id in (\$performance_id)
     ) so
     left join (
     $soi
-    and performanceid=\$performance_id
+    and performanceid in (\$performance_id)
     ) soi
     using(order_id)
     left join (
@@ -36,8 +38,13 @@ from (
     and key_name='order_refund_status'
     ) md
     on md.key=so.order_refund_status
-group by
-    1,2,3,4,5,6,7
 $lim">${attach}
 
-echo "succuess,detail see ${attach}"
+echo "succuess!"
+echo ${attach}
+if [ ${1}r == pr ]
+#加上任意字符，如r 避免空值报错
+then
+cat ${attach}
+#命令行参数为p时，打印输出文件
+fi

@@ -1,4 +1,5 @@
 #!/bin/bash
+#历史数据详见bd15.sh
 path="/Users/fannian/Documents/my_code/"
 fun() {
 echo `cat ${path}sql/${1} | sed "s/-time1/${2}/g;
@@ -13,20 +14,26 @@ lim=";"
 
 echo "
 select distinct
-    UserMobileNo,
-    UserName,
-    IDNumber,
     MYOrderID,
+    IDNumber,
+    UserName,
+    UserMobileNo,
+    PerformanceID,
     CreateTime,
     RefundStatus
 from (
     $soi
-    and PerformanceID=${2}
+    and PerformanceID in (${2})
     ) soi
     join ( 
     $so
     and RefundStatus<>5
     ) so
     using(OrderID)
+limit 1000
 $lim
 ">${attach}
+
+echo "succuess!"
+echo ${attach}
+cat ${attach}

@@ -21,7 +21,7 @@ echo "
 select
     ii.item_id,
     ii.item_no,
-    ii.title_cn,
+    ii.item_name,
     ii.city_id,
     ii.type_id,
     it.type_lv1_name,

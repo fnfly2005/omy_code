@@ -35,4 +35,4 @@ from
     S_Order
 where
     PaidTime is not null
-    and OrderID>=-time1
+    and OrderID>-time1

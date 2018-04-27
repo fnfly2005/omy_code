@@ -11,6 +11,7 @@ select
     performance_id,
     meituan_userid,
     dianping_userid,
+    show_name,
     pay_time,
     consumed_time,
     show_endtime,

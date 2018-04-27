@@ -11,3 +11,6 @@ select
     total_money
 from
     upload_table.detail_wg_saleorder
+where
+    dt>='$$begindate'
+    and dt<'$$enddate'

@@ -19,5 +19,7 @@ select
     from_unixtime(register_time/1000,'%Y-%m-%d') dt
 from
     passport_user
+where
+    from_unixtime(register_time/1000,'%Y-%m-%d')>'2018-04-08'
 $lim">${attach}
 echo "succuess,detail see ${attach}"

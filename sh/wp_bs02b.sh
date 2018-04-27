@@ -11,6 +11,7 @@ it=`fut item_type.sql`
 ven=`fut venue.sql`
 cit=`fut city.sql`
 pro=`fut province.sql`
+ii=`fut item_info.sql`
 
 file="wp_bs02"
 lim=";"
@@ -19,26 +20,19 @@ attach="${path}doc/${file}.sql"
 echo "
 select
     ii.item_id,
-    replace(ii.title_cn,',',' ') as item_name,
+    ii.item_name,
     ii.city_id,
     ii.type_id,
     it.type_lv1_name,
     it.type_lv2_name,
     ii.venue_id,
-    replace(ven.venue_name,',',' ') as venue_name,
+    ven.venue_name,
     ven.venue_type,
     cit.city_name,
     cit.province_id,
     pro.province_name
 from (
-    select
-        id as item_id,
-        title_cn,
-        type_id,
-        venue_id,
-        city_id
-    from
-        item_info
+    $ii
     ) ii
     left join (
     $it
@@ -59,4 +53,12 @@ from (
     ) pro
     on pro.province_id=cit.province_id
 $lim">${attach}
-echo "succuess,detail see ${attach}"
+
+echo "succuess!"
+echo ${attach}
+if [ ${1}r == pr ]
+#加上任意字符，如r 避免空值报错
+then
+cat ${attach}
+#命令行参数为p时，打印输出文件
+fi

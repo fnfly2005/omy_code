@@ -3,7 +3,7 @@
 #test1.0 优化输出方式
 path="/Users/fannian/Documents/my_code/"
 fun() {
-    if [ $2x == ex ];then
+    if [ $2x == dx ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
     elif [ $2x == ux ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
@@ -15,7 +15,7 @@ fun() {
         echo `cat ${path}sql/${1} | grep -iv "/\*"`
     fi
 }
-so=`fun detail_myshow_saleorder.sql ut`
+tes=`fun dim_wg_users.sql u`
 
 file="test"
 lim=";"
@@ -24,7 +24,9 @@ mt1="upload_table."
 mt2="mart_movie."
 
 echo "
-${so}
+select
+    max(dt) dt
+$tes
 $lim">${attach}
 
 echo "succuess!"

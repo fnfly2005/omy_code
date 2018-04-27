@@ -1,13 +1,5 @@
 #!/bin/bash
 path="/Users/fannian/Documents/my_code/"
-clock="00"
-t1=${1:-`date -v -1d +"%Y-%m-%d ${clock}:00:00"`}
-t2=${2:-`date -j -f %s $(expr $(date -j -f%Y-%m-%d ${t1% *} +%s) + 86400) +"%Y-%m-%d ${clock}:00:00"`}
-t3=`date -j -f %s $(expr $(date -j -f%Y-%m-%d ${t1% *} +%s) - 86400) +"%Y-%m-%d ${clock}:00:00"`
-fut() {
-echo `grep -iv "\-time" ${path}sql/${1} | grep -iv "/\*"`
-}
-
 file="wp_bs02"
 lim=";"
 attach="${path}doc/${file}.sql"
@@ -26,4 +18,12 @@ where
 group by
     1
 $lim">${attach}
-echo "succuess,detail see ${attach}"
+
+echo "succuess!"
+echo ${attach}
+if [ ${1}r == pr ]
+#加上任意字符，如r 避免空值报错
+then
+cat ${attach}
+#命令行参数为p时，打印输出文件
+fi
