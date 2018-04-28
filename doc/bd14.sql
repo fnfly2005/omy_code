@@ -61,7 +61,7 @@ from (
                         select
                             item_id
                         from
-                            upload_table.dim_wg_items
+                            upload_table.dim_wg_item
                         where (
                                 type_lv1_name in ('$category_name')
                                 or '全部' in ('$category_name')

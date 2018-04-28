@@ -15,7 +15,7 @@ fun() {
         echo `cat ${path}sql/${1} | grep -iv "/\*"`
     fi
 }
-tes=`fun dim_wg_users.sql u`
+tes=`fun dim_wg_type.sql u`
 
 file="test"
 lim=";"
@@ -24,8 +24,8 @@ mt1="upload_table."
 mt2="mart_movie."
 
 echo "
-select
-    max(dt) dt
+select 
+    *
 $tes
 $lim">${attach}
 

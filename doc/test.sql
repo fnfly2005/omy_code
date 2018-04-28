@@ -1,5 +1,5 @@
 
-select
-    max(dt) dt
-from upload_table.dim_wg_users
+select 
+    *
+from upload_table.dim_wg_type
 ;
