@@ -8,7 +8,8 @@ select
     custom,
     union_id,
     user_id
-from mart_flow.detail_flow_pv_wide_report
+from 
+    mart_flow.detail_flow_pv_wide_report
 where partition_date>='$$begindate'
     and partition_date<'$$enddate'
     and partition_log_channel='movie'
@@ -23,4 +24,5 @@ where partition_date>='$$begindate'
     select value
     from upload_table.myshow_pv
     where key='page_identifier'
+    and page_tag1>=0
     )

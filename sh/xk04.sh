@@ -1,8 +1,17 @@
 #!/bin/bash
 path="/Users/fannian/Documents/my_code/"
-t1='$time1'
 fun() {
-echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
+    if [ $2x == dx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
+    elif [ $2x == ux ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
+    elif [ $2x == tx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
+    elif [ $2x == utx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
+    else
+        echo `cat ${path}sql/${1} | grep -iv "/\*"`
+    fi
 }
 
 tdo=`fun topic_myshow_dailyonlinereport.sql` 
@@ -49,7 +58,7 @@ from (
         from 
             mart_movie.topic_myshow_dailysalesreport
         where 
-            partition_date>='\$\$monthfirst'
+            partition_date>'\$\$yesterday_monthfirst'
             and customer_type_id<>1
         group by
             1,2
@@ -58,5 +67,11 @@ from (
     and tdo.area_1_level_name=t1.area_1_level_name
 $lim">${attach}
 
-echo "succuess,detail see ${attach}"
-
+echo "succuess!"
+echo ${attach}
+if [ ${1}r == pr ]
+#加上任意字符，如r 避免空值报错
+then
+cat ${attach}
+#命令行参数为p时，打印输出文件
+fi

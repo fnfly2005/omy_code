@@ -35,7 +35,7 @@ from (
         from 
             mart_movie.topic_myshow_dailysalesreport
         where 
-            partition_date>='$$monthfirst'
+            partition_date>'$$yesterday_monthfirst'
             and customer_type_id<>1
         group by
             1,2
