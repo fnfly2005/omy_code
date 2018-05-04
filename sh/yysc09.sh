@@ -15,8 +15,8 @@ attach="${path}doc/${file}.sql"
 echo "
 select
     dt,
-    pt,
-    case when value2 is not null then value2
+    md2.value1 as pt,
+    case when md1.value2 is not null then md1.value2
     when fromTag=0 then '其他'
     when fromTag is null then '其他'
     else fromTag end fromTag,
@@ -27,8 +27,7 @@ select
 from (
     select
         fp1.dt,
-        case when page_identifier='c_Q7wY4' then 'H5'
-        else '小程序' end pt,
+        fp1.app_name,
         fromTag,
         fp1.performance_id,
         performance_name,
@@ -100,11 +99,22 @@ from (
     left join (
     $md
     and key_name='fromTag'
-    ) md
-    on fpw.fromTag=md.key
+    ) md1
+    on fpw.fromTag=md1.key
+    left join (
+    $md
+    and key_name='app_name'
+    ) md2
+    on fpw.app_name=md2.key
 group by
     1,2,3,4,5
 $lim">${attach}
 
-echo "succuess,detail see ${attach}"
-
+echo "succuess!"
+echo ${attach}
+if [ ${1}r == pr ]
+#加上任意字符，如r 避免空值报错
+then
+cat ${attach}
+#命令行参数为p时，打印输出文件
+fi

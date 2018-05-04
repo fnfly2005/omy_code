@@ -15,7 +15,7 @@ fun() {
         echo `cat ${path}sql/${1} | grep -iv "/\*"`
     fi
 }
-tes=`fun dim_wg_type.sql u`
+tes=`fun .sql u`
 
 file="test"
 lim=";"

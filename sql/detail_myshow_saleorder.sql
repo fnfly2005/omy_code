@@ -19,7 +19,9 @@ select
     order_create_time,
     order_refund_status,
     setnumber,
-    salesplan_count
+    salesplan_count,
+    province_name,
+    city_name
 from
     mart_movie.detail_myshow_saleorder
 where

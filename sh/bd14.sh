@@ -1,5 +1,19 @@
 #!/bin/bash
 path="/Users/fannian/Documents/my_code/"
+fun() {
+    if [ $2x == dx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
+    elif [ $2x == ux ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
+    elif [ $2x == tx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
+    elif [ $2x == utx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
+    else
+        echo `cat ${path}sql/${1} | grep -iv "/\*"`
+    fi
+}
+spe=`fun myshow_send_performance.sql`
 
 file="bd14"
 lim=";"
@@ -51,6 +65,10 @@ from (
                                 performance_name like '%\$performance_name%'
                                 or '测试'='\$performance_name'
                                 )
+                            and (
+                                shop_name like '%\$shop_name%'
+                                or '测试'='\$shop_name'
+                                )
                         ) c1
                     where performance_id not in (\$no_performance_id)
                     )
@@ -86,6 +104,10 @@ from (
                                 title_cn like '%\$performance_name%'
                                 or '测试'='\$performance_name'
                                 )
+                            and (
+                                venue_name like '%\$shop_name%'
+                                or '测试'='\$shop_name'
+                                )
                         ) as di
                     where item_id not in (\$no_performance_id)
                     ) 
@@ -93,11 +115,19 @@ from (
             left join (
             select mobile
             from upload_table.send_fn_user
-            where send_date>=date_add('day',-\$id,current_date)
+            where 
+                send_date>=date_add('day',-\$id,current_date)
+                and sendtag not in (
+                    $spe
+                    )
             union all 
             select mobile
             from upload_table.send_wdh_user
-            where send_date>=date_add('day',-\$id,current_date)
+            where 
+                send_date>=date_add('day',-\$id,current_date)
+                and sendtag not in (
+                    $spe
+                    )
                 ) mm
             on mm.mobile=mou.mobile
         where

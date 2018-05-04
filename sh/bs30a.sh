@@ -33,7 +33,7 @@ select
     show_name,
     case when dif_min is null then '未取票'
         when dif_min='all' then 'all'
-        when -cast(dif_min as bigint)>=(\$hou*60) then '超时取票'
+        when -cast(round(dif_min,0) as bigint)>=(\$hou*60) then '超时取票'
     else '正常取票' end as dif_tag,
     dif_hour,
     dif_min,
@@ -56,7 +56,7 @@ from (
             fetch_type,
             show_name,
             case when 2=\$det
-                then date_diff('hour',pay_time,fetched_time)
+                then date_diff('hour',pay_time,show_time)
             else 'all' end as dif_hour,
             case when 3=\$det
                 then date_diff('minute',fetched_time,show_time)

@@ -14,11 +14,13 @@ fun() {
     fi
 }
 
-spo=`fun detail_myshow_salepayorder.sql u`
+spo=`fun detail_myshow_salepayorder.sql`
 per=`fun dim_myshow_performance.sql`
 cus=`fun dim_myshow_customer.sql`
 md=`fun myshow_dictionary.sql`
 sho=`fun dim_myshow_show.sql`
+sfo=`fun detail_myshow_salefirstorder.sql`
+sor=`fun dp_myshow__s_orderrefund.sql`
 
 file="bd09"
 lim=";"
@@ -40,27 +42,48 @@ select
     per.city_name,
     per.category_name,
     per.shop_name,
+    per.performance_id,
     per.performance_name,
     case when 4 in (\$dim) then show_name
     else 'all' end as show_name,
+    case when 5 in (\$dim) then refund_flag
+    else 'all' end as refund_flag,
+    case when 6 in (\$dim) then newuser_flag
+    else 'all' end as newuser_flag,
     sum(order_num) as order_num,
     sum(ticket_num) as ticket_num,
     sum(TotalPrice) as TotalPrice,
     sum(grossprofit) as grossprofit
 from (
     select
-        partition_date as dt,
+        dt,
         sellchannel,
         performance_id,
         customer_id,
         show_id,
-        count(distinct order_id) as order_num,
-        sum(salesplan_count*setnumber) as ticket_num,
-        sum(TotalPrice) as TotalPrice,
-        sum(grossprofit) as grossprofit
-    $spo
+        case when sor.order_id is null then 'no'
+            when sor.issuc=0 then 'apply'
+        else 'yes' end as refund_flag,
+        case when sfo.meituan_userid is not null then 'yes'
+        else 'no' end as newuser_flag,
+        count(distinct spo.order_id) as order_num,
+        sum(spo.salesplan_count*spo.setnumber) as ticket_num,
+        sum(spo.TotalPrice) as TotalPrice,
+        sum(spo.grossprofit) as grossprofit
+    from (
+        $spo
+        ) spo
+        left join (
+        $sfo
+        ) sfo
+        on sfo.meituan_userid=spo.meituan_userid
+        and sfo.first_pay_order_date=spo.dt
+        left join (
+        $sor
+        ) sor
+        on sor.order_id=spo.order_id
     group by
-        1,2,3,4,5
+        1,2,3,4,5,6,7
         ) as spo
     join (
         $per
@@ -76,6 +99,8 @@ from (
         $cus
         and (customer_name like '%\$customer_name%'
         or '全部'='\$customer_name')
+        and (customer_code in (\$customer_code)
+        or -99 in (\$customer_code))
         ) cus
         on spo.customer_id=cus.customer_id
     left join (
@@ -88,7 +113,7 @@ from (
         ) md
         on md.key=spo.sellchannel
 group by
-    1,2,3,4,5,6,7,8,9,10,11,12
+    1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
 $lim">${attach}
 
 echo "succuess!"

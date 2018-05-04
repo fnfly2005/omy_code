@@ -1,19 +1,22 @@
 
 select
     dt,
-    pt,
-    case when value2 is not null then value2
+    md2.value1 as pt,
+    case when md1.value2 is not null then md1.value2
     when fromTag=0 then '其他'
     when fromTag is null then '其他'
     else fromTag end fromTag,
+    performance_id,
+    performance_name,
     sum(uv) uv,
     sum(order_uv) order_uv
 from (
     select
         fp1.dt,
-        case when page_identifier='c_Q7wY4' then 'H5'
-        else '小程序' end pt,
+        fp1.app_name,
         fromTag,
+        fp1.performance_id,
+        performance_name,
         approx_distinct(fp1.union_id) as uv,
         count(distinct fp2.order_id) as order_uv
     from (
@@ -48,7 +51,7 @@ from (
         ) as fp1
         join (
             select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, city_id, city_name, shop_name from mart_movie.dim_myshow_performance where performance_id is not null
-            and category_name in ('$name')
+            and performance_id in ($id)
             ) per
         on fp1.performance_id=per.performance_id
         left join (
@@ -77,13 +80,18 @@ from (
         and fp1.dt=fp2.dt
         and fp1.page_identifier='c_Q7wY4'
     group by
-        1,2,3
+        1,2,3,4,5
     ) as fpw
     left join (
     select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
     and key_name='fromTag'
-    ) md
-    on fpw.fromTag=md.key
+    ) md1
+    on fpw.fromTag=md1.key
+    left join (
+    select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
+    and key_name='app_name'
+    ) md2
+    on fpw.app_name=md2.key
 group by
-    1,2,3
+    1,2,3,4,5
 ;

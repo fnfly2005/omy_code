@@ -44,6 +44,10 @@ from (
                                 performance_name like '%$performance_name%'
                                 or '测试'='$performance_name'
                                 )
+                            and (
+                                shop_name like '%$shop_name%'
+                                or '测试'='$shop_name'
+                                )
                         ) c1
                     where performance_id not in ($no_performance_id)
                     )
@@ -79,6 +83,10 @@ from (
                                 title_cn like '%$performance_name%'
                                 or '测试'='$performance_name'
                                 )
+                            and (
+                                venue_name like '%$shop_name%'
+                                or '测试'='$shop_name'
+                                )
                         ) as di
                     where item_id not in ($no_performance_id)
                     ) 
@@ -86,11 +94,19 @@ from (
             left join (
             select mobile
             from upload_table.send_fn_user
-            where send_date>=date_add('day',-$id,current_date)
+            where 
+                send_date>=date_add('day',-$id,current_date)
+                and sendtag not in (
+                    select sendtag from upload_table.myshow_send_performance_fn where send_flag='0'
+                    )
             union all 
             select mobile
             from upload_table.send_wdh_user
-            where send_date>=date_add('day',-$id,current_date)
+            where 
+                send_date>=date_add('day',-$id,current_date)
+                and sendtag not in (
+                    select sendtag from upload_table.myshow_send_performance_fn where send_flag='0'
+                    )
                 ) mm
             on mm.mobile=mou.mobile
         where
