@@ -23,7 +23,7 @@ echo "
 select 
     mobile,
     \$send_performance_id as send_performance_id,
-    '\$\$begindate' as send_date,
+    '\$\$enddate' as send_date,
     cast(floor(rand()*\$batch_code) as bigint)+1 as batch_code,
     '\$sendtag' as sendtag
 from (
@@ -115,16 +115,22 @@ from (
             left join (
             select mobile
             from upload_table.send_fn_user
-            where 
-                send_date>=date_add('day',-\$id,current_date)
+            where (
+                (send_date>=date_add('day',-\$id,date_parse('\$\$enddate','%Y-%m-%d'))
+                and \$id<>0)
+                or sendtag in ('\$send_tag')
+                    )
                 and sendtag not in (
                     $spe
                     )
             union all 
             select mobile
             from upload_table.send_wdh_user
-            where 
-                send_date>=date_add('day',-\$id,current_date)
+            where (
+                (send_date>=date_add('day',-\$id,date_parse('\$\$enddate','%Y-%m-%d'))
+                and \$id<>0)
+                or sendtag in ('\$send_tag')
+                    )
                 and sendtag not in (
                     $spe
                     )
