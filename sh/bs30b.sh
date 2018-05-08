@@ -17,25 +17,61 @@ fun() {
     fi
 }
 
-so=`fun detail_myshow_saleorder.sql u` 
+so=`fun detail_myshow_saleorder.sql u`
+dub=`fun detail_user_base_info.sql`
+sfo=`fun detail_myshow_salefirstorder.sql u`
+cit=`fun dim_myshow_city.sql`
+
 file="bs30"
 lim=";"
 attach="${path}doc/${file}.sql"
 
 echo "
-select
-    case when 1 in (\$dim) then substr(pay_time,1,10) 
-    else 'all' end as dt,
-    case when 2 in (\$dim) then province_name
-    else 'all' end as province_name,
-    case when 3 in (\$dim) then city_name
-    else 'all' end as city_name,
+select 
+    \$dim,
     count(distinct order_id) order_num
-$so
-    and fetch_type=2
-    and performance_id in (\$performance_id)
+from (
+    select
+        case when sfo.dianping_userid is not null then 'yes'
+        else 'no' end new_flag,
+        case when so.fetch_type=2 then so.province_name
+        else cit.province_name end province_name,
+        case when so.fetch_type=2 then so.city_name
+        else cit.city_name end city_name,
+        datediff(dt,birthday)/365 age,
+        order_id
+    from (
+        select
+            substr(pay_time,1,10) dt,
+            province_name,
+            city_name,
+            fetch_type,
+            order_id,
+            meituan_userid
+        $so
+            and performance_id in (\$performance_id)
+            ) so
+        left join (
+        $dub
+        ) dub
+        on dub.userid=so.meituan_userid
+        left join (
+        select
+            dianping_userid,
+            min(first_pay_order_date) first_pay_order_date
+        $sfo
+        group by
+            dianping_userid
+        ) sfo
+        on sfo.dianping_userid=so.meituan_userid
+        and sfo.first_pay_order_date=so.dt
+        left join (
+        $cit
+        ) cit
+        on cit.mt_city_id=dub.city_id
+    ) sim
 group by
-    1,2,3
+    \$dim
 $lim">${attach}
 
 echo "succuess!"
