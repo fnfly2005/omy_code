@@ -10,7 +10,7 @@ from (
         else cit.province_name end province_name,
         case when so.fetch_type=2 then so.city_name
         else cit.city_name end city_name,
-        datediff(birthday,dt)/365 age,
+        datediff(dt,birthday)/365 age,
         order_id
     from (
         select
@@ -38,7 +38,7 @@ from (
         on sfo.dianping_userid=so.meituan_userid
         and sfo.first_pay_order_date=so.dt
         left join (
-        select city_id, mt_city_id, city_name, province_name, area_1_level_name, area_2_level_name from mart_movie.dim_myshow_city where city_id is not null
+        select city_id, mt_city_id, case when mt_city_id=0 then '其他城市' else city_name end as city_name, case when mt_city_id=0 then '其他城市' else province_name end as province_name, area_1_level_name, area_2_level_name from mart_movie.dim_myshow_city where city_id is not null
         ) cit
         on cit.mt_city_id=dub.city_id
     ) sim
