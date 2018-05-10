@@ -27,6 +27,7 @@ wt=`fun dim_wg_type.sql`
 wc=`fun dim_wg_citymap.sql`
 cit=`fun dim_myshow_city.sql`
 cat=`fun dim_myshow_category.sql`
+sfo=`fun detail_myshow_salefirstorder.sql u`
 
 file="bs28"
 lim=";"
@@ -59,18 +60,44 @@ select
     sum(order_num) as order_num,
     sum(totalprice) as totalprice,
     sum(ticket_num) as ticket_num,
-    sum(grossprofit) as grossprofit
+    sum(grossprofit) as grossprofit,
+    sum(new_totalprice) as new_totalprice
 from (
     select
-        partition_date as dt,
+        dt,
         sellchannel,
         customer_id,
         performance_id,
-        count(distinct order_id) as order_num,
+        sum(order_num) as order_num,
         sum(totalprice) as totalprice,
-        sum(salesplan_count*setnumber) as ticket_num,
-        sum(grossprofit) as grossprofit
-    $spo
+        sum(ticket_num) as ticket_num,
+        sum(grossprofit) as grossprofit,
+        sum(case when sfo.dianping_userid is not null then totalprice end) as new_totalprice
+    from (
+        select
+            partition_date as dt,
+            sellchannel,
+            customer_id,
+            performance_id,
+            meituan_userid,
+            count(distinct order_id) as order_num,
+            sum(totalprice) as totalprice,
+            sum(salesplan_count*setnumber) as ticket_num,
+            sum(grossprofit) as grossprofit
+        $spo
+        group by
+            1,2,3,4,5
+        ) sp1
+        left join (
+        select
+            dianping_userid,
+            min(first_pay_order_date) first_pay_order_date
+        $sfo
+        group by
+            1
+        ) sfo
+        on sp1.meituan_userid=sfo.dianping_userid
+        and sp1.dt=sfo.first_pay_order_date
     group by
         1,2,3,4
         ) spo

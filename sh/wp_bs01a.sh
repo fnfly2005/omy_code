@@ -30,4 +30,3 @@ then
 cat ${attach}
 #命令行参数为p时，打印输出文件
 fi
-

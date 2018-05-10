@@ -1,53 +1,83 @@
 
 select
-    mt,
-    sell_type,
-    sell_lv1_type,
-    sum(totalprice) as totalprice,
-    count(distinct order_id) as order_num,
-    sum(ticket_num) ticket_num
+    substr(fp1.dt,1,7) as mt,
+    fp1.pt,
+    avg(fp1.uv) uv,
+    avg(sp1.order_num) order_num,
+    avg(sp1.totalprice) totalprice
 from (
     select
-        substr(pay_time,1,7) as mt,
-        value2 as sell_type,
-        case when partner_name is null 
-            then value1
-        else partner_name end as sell_lv1_type,
-        case when ogi.order_id is null then 0
-        else 1 end as gift_flag,
-        so.order_id,
-        setnumber*salesplan_count as ticket_num,
-        totalprice
+        fpw.dt,
+        case when md.value2 is null then '其他'
+        else md.value2 end as pt,
+        sum(fpw.uv) as uv
     from (
-        select order_id, maoyan_order_id, usermobileno as mobile, recipientidno, sellchannel, city_id, totalprice, customer_id, performance_id, meituan_userid, dianping_userid, show_name, pay_time, consumed_time, show_endtime, show_starttime, order_create_time, order_refund_status, setnumber, salesplan_count, province_name, city_name from mart_movie.detail_myshow_saleorder
-        where
-            pay_time is not null
-            and pay_time>='$$monthfirst{-1m}'
-            and pay_time<'$$monthfirst'
-            and sellchannel in (9,10,11)
-        ) so
-        left join (
-        select OrderID as order_id, PartnerID as partner_id from origindb.dp_myshow__s_orderpartner
-        ) opa
-        on so.order_id=opa.order_id
-        and so.sellchannel=11
-        left join (
-        select PartnerID as partner_id, Name as partner_name from origindb.dp_myshow__s_partner
-        ) par
-        on opa.partner_id=par.partner_id
-        left join (
-        select OrderID as order_id from origindb.dp_myshow__s_ordergift
-        ) ogi
-        on so.order_id=ogi.order_id
-        and so.sellchannel in (9,10)
-        left join (
+        select
+            partition_date as dt,
+            app_name,
+            count(distinct union_id) as uv
+        from
+            mart_flow.detail_flow_pv_wide_report
+        where partition_date>='$$monthfirst{-1m}'
+            and partition_date<'$$monthfirst'
+            and partition_log_channel='movie'
+            and partition_app in (
+            'movie',
+            'dianping_nova',
+            'other_app',
+            'dp_m',
+            'group'
+            )
+            and page_identifier in (
+            select value
+            from upload_table.myshow_pv
+            where key='page_identifier'
+            and page_tag1>=0
+            )
+        group by
+            partition_date,
+            app_name
+        ) as fpw
+    left join (
+        select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
+        and key_name='app_name'
+        ) md
+    on fpw.app_name=md.key
+    group by
+        1,2
+    ) as fp1
+    join (
+    select
+        sp0.dt,
+        md.value2 as pt,
+        sum(sp0.order_num) as order_num,
+        sum(sp0.totalprice) as totalprice
+    from (
+        select
+            spo.dt,
+            spo.sellchannel,
+            count(distinct spo.order_id) as order_num,
+            sum(spo.totalprice) as totalprice
+        from
+            (
+            select partition_date as dt, order_id, sellchannel, customer_id, performance_id, meituan_userid, show_id, totalprice, grossprofit, setnumber, salesplan_count, expressfee, discountamount, income, expense, totalticketprice, ticket_price, sell_price, project_id, bill_id, salesplan_id, city_id, pay_time from mart_movie.detail_myshow_salepayorder where partition_date>='$$begindate' and partition_date<'$$enddate'
+            ) spo
+        group by
+            spo.dt,
+            spo.sellchannel
+        ) as sp0
+        left join
+        (
         select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
         and key_name='sellchannel'
-        ) md
-        on md.key=so.sellchannel
-    ) as s1
-where
-    gift_flag=0
+        ) as md
+        on sp0.sellchannel=md.key
+    group by
+        sp0.dt,
+        md.value2
+    ) as sp1
+    on sp1.dt=fp1.dt
+    and sp1.pt=fp1.pt
 group by
-    1,2,3
+    1,2
 ;
