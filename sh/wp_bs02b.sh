@@ -1,9 +1,5 @@
 #!/bin/bash
 path="/Users/fannian/Documents/my_code/"
-clock="00"
-t1=${1:-`date -v -1d +"%Y-%m-%d ${clock}:00:00"`}
-t2=${2:-`date -j -f %s $(expr $(date -j -f%Y-%m-%d ${t1% *} +%s) + 86400) +"%Y-%m-%d ${clock}:00:00"`}
-t3=`date -j -f %s $(expr $(date -j -f%Y-%m-%d ${t1% *} +%s) - 86400) +"%Y-%m-%d ${clock}:00:00"`
 fut() {
 echo `grep -iv "\-time" ${path}sql/${1} | grep -iv "/\*"`
 }
@@ -30,7 +26,8 @@ select
     ven.venue_type,
     cit.city_name,
     cit.province_id,
-    pro.province_name
+    pro.province_name,
+    row_number() over (order by ii.item_id) item_no
 from (
     $ii
     ) ii
