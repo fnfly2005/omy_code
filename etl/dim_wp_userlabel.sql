@@ -1,8 +1,6 @@
 creator='fannian@meituan.com'
-tasktype='DeltaMerge'
 'db': META['hmart_movie'],
-'unique_keys': 'mobile',
-'format': 'mobile,city_id,order_src,active_date,pay_num,pay_money,item_flag,category_flag,etl_time',
+'format': '',
 
 drop table if EXISTS mart_movie_test.dim_wp_userlabel_temp;
 create table mart_movie_test.dim_wp_userlabel_temp as
@@ -29,7 +27,7 @@ from
 where
     mobile rlike '^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$'
 ;
-insert OVERWRITE TABLE $delta.table
+insert OVERWRITE TABLE `$target.table`
 select
     l1.mobile,
     city_id,

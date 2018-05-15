@@ -11,20 +11,17 @@ lim=";"
 attach="${path}doc/${file}.sql"
 
 echo "
-select
-from (
-    select distinct
-        city_id
-    from (
-        $ci
-        and province_name in ('\$name')
-        union all
-        $ci
-        and city_name in ('\$name')
-        ) c1
-    ) ci
-    left join upload_table.mobile_info
-    upload_table.wg_register_mobile
+select 
+    movie_id as id,
+    name
+from 
+    movie_mis.dim_movie_movie
+where 
+    movie_type=0
+    and releatime>=date_add(current_date,INTERVAL -12 month)
+    and movie_wish_num>5000
+order by 
+    movie_wish_num desc
 $lim">${attach}
 
 echo "succuess,detail see ${attach}"
