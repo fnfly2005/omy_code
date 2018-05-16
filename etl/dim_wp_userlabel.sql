@@ -7,14 +7,14 @@ create table mart_movie_test.dim_wp_userlabel_temp as
 select distinct
     dt,
     mobile,
-    cast(item_no as string) item_no,
+    item_no,
     case when length(pay_no)>5 then 1
     else 0 end as pay_flag,
     order_id,
     order_src,
     total_money,
     ci.city_id,
-    cast(ty.category_id as string) category_id,
+    ty.category_id,
     row_number() over (partition by mobile order by dt desc) order_no
 from 
     upload_table.detail_wp_saleorder so
@@ -41,7 +41,8 @@ select
 from (
     select
         mobile,
-        max(dt) active_date,
+        case when order_no=1 then dt end as active_date,
+        case when order_no=1 then order_src end as order_src,
         count(case when pay_flag=1 then 1 end) as pay_num,
         sum(case when pay_flag=1 then total_money end) as pay_money,
         collect_set(case when order_no<=7 then item_no end) item_flag,
@@ -49,7 +50,9 @@ from (
     from
         mart_movie_test.dim_wp_userlabel_temp
     group by
-        mobile
+        mobile,
+        case when order_no=1 then dt end,
+        case when order_no=1 then order_src end
     ) as l1
     left join (
         select
@@ -70,25 +73,6 @@ from (
         ) as cn
         on cn.mobile=l1.mobile
         and cn.rank=1
-    left join (
-        select
-            mobile,
-            order_src,
-            row_number() over (partition by mobile order by ov desc) as rank
-        from (
-            select
-                mobile,
-                order_src,
-                count(1) ov
-            from
-                mart_movie_test.dim_wp_userlabel_temp
-            group by
-                mobile,
-                order_src
-             ) sn1
-        ) as sn
-        on sn.mobile=l1.mobile
-        and sn.rank=1
 
 #if $isRELOAD
 drop table `$target.table`
@@ -99,13 +83,13 @@ drop table `$target.table`
 CREATE TABLE IF NOT EXISTS `$target.table`
 (
 `mobile` bigint COMMENT '电话号码',
-`city_id` bigint COMMENT '主要活跃城市',
-`order_src` bigint COMMENT '主要活跃平台',
+`city_id` bigint COMMENT '常用偏好城市',
+`order_src` bigint COMMENT '最近活跃平台',
 `active_date` string COMMENT '最近活跃日期',
 `pay_num` bigint COMMENT '支付频次',
 `pay_money` double COMMENT '支付金额',
-`item_flag` array<string> COMMENT '项目标志(最近7个)',
-`category_flag` array<string> COMMENT '类目标志',
+`item_flag` array<bigint> COMMENT '项目标签(最近7个)',
+`category_flag` array<int> COMMENT '类目标签',
 `etl_time` string COMMENT '更新时间'
 ) COMMENT '用户染色项目-智慧剧院人群标签'
 ROW FORMAT DELIMITED 

@@ -5,16 +5,18 @@ creator='fannian@meituan.com'
 drop table if EXISTS mart_movie_test.dim_wg_userlabel_temp1;
 create table mart_movie_test.dim_wg_userlabel_temp1 as
 select
-    dt,
-    user_id,
-    mobile,
-    cast(item_no as string) item_no,
-    pay_flag,
+    case when wso.user_id is null then wus.dt
+    else wso.dt end as dt,
+    case when wso.user_id is null then wus.user_id
+    else wso.user_id end as user_id,
+    case when wso.user_id is null then wus.mobile
+    else wso.mobile end as mobile,
+    item_id,
+    case when wso.user_id is null then 1
+    else action_flag as action_flag,
     order_id,
     order_src,
     total_money,
-    ci.city_id,
-    cast(ty.category_id as string) category_id,
     row_number() over (partition by user_id order by dt desc) order_no
 from (
     select
@@ -31,71 +33,110 @@ from (
         upload_table.detail_wg_saleorder
     where
         order_mobile rlike '^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$'
-    union all
+    ) wso
+    full join (
+        select
+            dt,
+            user_id,
+            mobile
+        from
+            upload_table.dim_wg_users
+        ) as wus
+    on wso.user_id=wus.user_id
+;
+drop table if EXISTS mart_movie_test.dim_wg_userlabel_temp2;
+create table mart_movie_test.dim_wg_userlabel_temp2 as
+select
+    dt,
+    mobile,
+	item_no,
+    pay_flag,
+    order_id,
+    order_src,
+    total_money,
+    ci.city_id,
+	ty.category_id,
+    row_number() over (partition by mobile order by dt desc) order_no
+from (
     select
-        dt,
-        NULL user_id,
-        mobile,
-        item_id,
-        3 as action_flag,
-        NULL order_id,
-        NULL order_src,
-        NULL total_money
-    from
-        upload_table.detail_wg_outstockrecords
-    where
-        mobile rlike '^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$'
-    union all
-    select
-        dt,
-        user_id,
-        mobile,
-        NUlL item_id,
-        1 as action_flag,
-        NULL order_id,
-        NULL order_src,
-        NULL total_money
-    from
-        upload_table.dim_wg_users
-    union all
-    select
-        dt,
-        NULL user_id,
-        mobile,
-        item_id,
-        3 as action_flag,
-        NULL order_id,
-        NULL order_src,
-        NULL total_money
-    from
-        upload_table.detail_wg_salereminders
-    where
-        mobile rlike '^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$'
-    union all
-    select
-        dt,
-        user_id,
-        mobile,
-        NUlL item_id,
-        1 as action_flag,
-        NULL order_id,
-        NULL order_src,
-        NULL total_money
-    from
-        upload_table.dim_wg_users
-    union all
-    select
-        dt,
-        user_id,
-        mobile,
-        NUlL item_id,
-        1 as action_flag,
-        NULL order_id,
-        NULL order_src,
-        NULL total_money
-    from
-        upload_table.dim_wg_users
-    ) so
+    from (
+        select
+            dt,
+            mobile,
+            item_id,
+			action_flag,
+            order_id,
+            order_src,
+            total_money,
+            order_no
+        from
+            mart_movie_test.dim_wg_userlabel_temp1
+        union all
+        select
+            ia.dt,
+            lba.mobile,
+            ia.item_id,
+            2 as action_flag,
+            NULL order_id,
+            NULL order_src,
+            NULL total_money,
+            NULL order_no
+        from (
+            select
+                dt,
+                user_id,
+                item_id
+            from
+                upload_table.dim_wg_iteminterests
+            union all
+            select
+                dt,
+                user_id,
+                item_id
+            from
+                upload_table.dim_wg_itemattentions
+            ) as ia
+            join (
+                select distinct
+                    user_id,
+                    mobile
+                from 
+                    mart_movie_test.dim_wg_userlabel_temp1
+                where 
+                    order_no=1
+                ) lba
+            on lba.user_id=ia.user_id
+        union all
+        select
+            dt,
+            mobile,
+            item_id,
+            3 as action_flag,
+            NULL order_id,
+            NULL order_src,
+            NULL total_money,
+            NULL order_no
+        from (
+            select
+                dt,
+                mobile,
+                item_id
+            from
+                upload_table.detail_wg_outstockrecords
+            where
+                mobile rlike '^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$'
+            union all
+            select
+                dt,
+                mobile,
+                item_id
+            from
+                upload_table.detail_wg_salereminders
+            where
+                mobile rlike '^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$'
+            ) osr
+        ) s2
+    ) s3
     left join upload_table.dim_wg_item it
     on it.item_id=so.item_id
     left join upload_table.dim_wg_citymap ci
@@ -219,8 +260,8 @@ CREATE TABLE IF NOT EXISTS `$target.table`
 `active_date` string COMMENT '最近活跃日期',
 `pay_num` bigint COMMENT '支付频次',
 `pay_money` double COMMENT '支付金额',
-`item_flag` array<string> COMMENT '项目标志(最近7个)',
-`category_flag` array<string> COMMENT '类目标志',
+`item_flag` array<bigint> COMMENT '项目标志(最近7个)',
+`category_flag` array<int> COMMENT '类目标志',
 `etl_time` string COMMENT '更新时间'
 ) COMMENT '用户染色项目-智慧剧院人群标签'
 ROW FORMAT DELIMITED 
