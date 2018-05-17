@@ -5,12 +5,13 @@ fun() {
 echo `cat ${path}sql/${1} | sed "s/-time1/${2}/g;
 s/-time2/${3}/g;s/-time3/${4}/g"`
 }
-so=`fun S_Order.sql ${1}`
-soi=`fun S_OrderIdentification.sql ${1}`
+so=`fun S_Order.sql ${3}`
+soi=`fun S_OrderIdentification.sql ${3}`
 
-file="bs20"
+file="ss_bs01"
 attach="${path}doc/${file}.sql"
-lim=";"
+lim="limit 10000;"
+
 
 echo "
 select distinct
@@ -30,10 +31,14 @@ from (
     and RefundStatus<>5
     ) so
     using(OrderID)
-limit 1000
 $lim
 ">${attach}
 
 echo "succuess!"
 echo ${attach}
+if [ ${1}r == pr ]
+#加上任意字符，如r 避免空值报错
+then
 cat ${attach}
+#命令行参数为p时，打印输出文件
+fi

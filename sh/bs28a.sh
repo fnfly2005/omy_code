@@ -9,7 +9,7 @@ oni=`fun detail_maoyan_order_new_info.sql`
 cni=`fun detail_maoyan_order_sale_cost_new_info.sql`
 fpw=`fun detail_flow_pv_wide_report.sql`
 
-file="xk01"
+file="bs28"
 lim=";"
 attach="${path}doc/${file}.sql"
 
@@ -19,9 +19,6 @@ select
     totalprice,
     order_num,
     sku_num,
-    uv,
-    user_num,
-    dea_num,
     rehi_totalprice,
     rehi_order_num
 from (
@@ -30,18 +27,14 @@ from (
         cni.totalprice,
 		cni.order_num,
 		cni.sku_num,
-		cni.user_num,
-		cni.dea_num,
 		oni.rehi_totalprice,
 		oni.rehi_order_num
     from (
         select
-            substr(pay_time,1,10) dt,
+            substr(pay_time,1,7) dt,
             sum(purchase_price) as totalprice,
             count(distinct order_id) as order_num,
-            sum(quantity) as sku_num,
-            count(distinct user_id) as user_num,
-            count(distinct deal_id) as dea_num
+            sum(quantity) as sku_num
         from
             mart_movie.detail_maoyan_order_sale_cost_new_info
         where
@@ -61,7 +54,7 @@ from (
         ) cni
         left join (
             select
-                dt,
+                substr(dt,1,7) dt,
                 count(distinct order_id) as rehi_order_num,
                 sum(totalprice) as rehi_totalprice
             from (
@@ -84,26 +77,6 @@ from (
             ) oni
         on oni.dt=cni.dt
     ) as so
-    left join (
-        select
-            partition_date as dt,
-            approx_distinct(union_id) as uv
-        from mart_flow.detail_flow_pv_wide_report
-        where partition_date>='\$\$begindate'
-            and partition_date<'\$\$enddate'
-            and partition_log_channel='movie'
-            and partition_app in (
-            'movie',
-            'dianping_nova',
-            'other_app',
-            'dp_m',
-            'group'
-            )
-            and page_identifier='c_dqihv0si'
-        group by
-            1
-        ) as fpw
-    on fpw.dt=so.dt
 $lim">${attach}
 echo "succuess!"
 echo ${attach}

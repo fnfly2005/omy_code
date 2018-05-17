@@ -26,8 +26,7 @@ select
     ven.venue_type,
     cit.city_name,
     cit.province_id,
-    pro.province_name,
-    row_number() over (order by ii.item_id) item_no
+    pro.province_name
 from (
     $ii
     ) ii

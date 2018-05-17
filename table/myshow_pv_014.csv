@@ -71,6 +71,8 @@ page_identifier,com.gewara.trade.seat.MovieSelectSeatActivity,电影选座页,na
 page_identifier,ra.trade.pay.MoviePaySeatActivity,电影确认订单页,native,4,-2,0
 page_identifier,com.gewara.trade.pay.MoviePaySeatActivity,电影确认订单页,native,4,-2,0
 page_identifier,com.gewara.trade.order.seat.MovieSeatOrderDetailActivity,电影订单详情页,native,5,-2,0
+event_id,jumpToActivity,顶通点击,pages/show/index/index,1,3,10
+event_id,onInputFocus,搜索,pages/show/index/index,1,1,0
 event_id,b_AcDXh,关键词搜索,c_oEWlZ,1,1,0
 event_id,b_3Rbqj,icon模块,c_oEWlZ,1,2,20
 event_id,b_x80sywt8,中通banner,c_oEWlZ,1,3,30

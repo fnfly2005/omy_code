@@ -16,8 +16,8 @@ attach="${path}doc/${file}.sql"
 echo "
 select
     ii.item_id,
-    ii.item_no,
     ii.item_name,
+    ii.item_no,
     ii.city_id,
     ii.type_id,
     it.type_lv1_name,

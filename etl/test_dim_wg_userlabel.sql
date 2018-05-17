@@ -2,8 +2,8 @@ creator='fannian@meituan.com'
 'db': META['hmart_movie'],
 'format': '',
 
-drop table if EXISTS mart_movie_test.dim_wg_userlabel_temp1;
-create table mart_movie_test.dim_wg_userlabel_temp1 as
+drop table if EXISTS tmp.dim_wg_userlabel_temp1;
+create table tmp.dim_wg_userlabel_temp1 as
 select
 	dt,
 	user_id,
@@ -45,6 +45,7 @@ from (
             upload_table.detail_wg_saleorder
         where
             order_mobile rlike '^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$'
+            and order_mobile<>13800138000
         ) wso
         left join (
             select
@@ -55,6 +56,7 @@ from (
             where
                 order_mobile rlike '^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$'
                 and length(pay_no)>5
+                and order_mobile<>13800138000
             ) wgs
             on wgs.order_id=wso.order_id
             and wgs.order_no>1
@@ -65,16 +67,18 @@ from (
                 mobile
             from
                 upload_table.dim_wg_users
+            where
+                 mobile<>13800138000
             ) as wus
         on wso.user_id=wus.user_id
     ) as so
 ;
-drop table if EXISTS mart_movie_test.dim_wg_userlabel_temp2;
-create table mart_movie_test.dim_wg_userlabel_temp2 as
+drop table if EXISTS tmp.dim_wg_userlabel_temp2;
+create table tmp.dim_wg_userlabel_temp2 as
 select
     dt,
     mobile,
-    ii.item_no,
+    ii.item_nu,
     action_flag,
     order_id,
     order_src,
@@ -94,7 +98,7 @@ from (
         total_money,
         order_no
     from
-        mart_movie_test.dim_wg_userlabel_temp1
+        tmp.dim_wg_userlabel_temp1
     union all
     select
         ia.dt,
@@ -111,21 +115,21 @@ from (
             user_id,
             item_id
         from
-            upload_table.dim_wg_iteminterests
+            upload_table.detail_wg_iteminterests
         union all
         select
             dt,
             user_id,
             item_id
         from
-            upload_table.dim_wg_itemattentions
+            upload_table.detail_wg_itemattentions
         ) as ia
         join (
             select distinct
                 user_id,
                 mobile
             from 
-                mart_movie_test.dim_wg_userlabel_temp1
+                tmp.dim_wg_userlabel_temp1
             where 
                 order_no=1
             ) lba
@@ -144,6 +148,7 @@ from (
         upload_table.detail_wg_outstockrecords
     where
         mobile rlike '^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$'
+        and mobile<>13800138000
     union all
     select
         dt,
@@ -158,19 +163,20 @@ from (
         upload_table.detail_wg_salereminders
     where
         mobile rlike '^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$'
+        and mobile<>13800138000
     ) so
     left join (
         select
             it.item_id,
-            it.item_no,
+            it.item_nu,
             ci.city_id,
             ty.category_id
         from
-            upload_table.dim_wg_item it
+            upload_table.dim_wg_performance it
             left join upload_table.dim_wg_citymap ci
             on ci.city_name=it.city_name
             left join upload_table.dim_wg_type ty
-            on ty.type_lv1_name=it.type_lv1_name
+            on ty.type_lv1_name=it.category_name
             ) ii
     on ii.item_id=so.item_id
     and so.action_flag<>1
@@ -195,10 +201,10 @@ from (
         count(distinct case when action_flag=5 then order_id end) as pay_num,
         sum(case when action_flag=5 then total_money end) as pay_money,
         collect_set(action_flag) action_flag,
-        collect_set(case when act_no<=7 then item_no end) item_flag,
+        collect_set(case when act_no<=7 then item_nu end) item_flag,
         collect_set(category_id) category_flag
     from
-        mart_movie_test.dim_wg_userlabel_temp2
+        tmp.dim_wg_userlabel_temp2
     group by
         mobile,
         case when act_no=1 then dt end,
@@ -207,22 +213,28 @@ from (
     left join (
         select
             mobile,
-            case when cn1.city_id is null then mi.city_id
-            else cn1.city_id end city_id,
+            city_id,
             row_number() over (partition by mobile order by ov desc) as rank
         from (
             select
-                mobile,
-                city_id,
-                count(1) ov
-            from
-                mart_movie_test.dim_wg_userlabel_temp2
-            group by
-                mobile,
-                city_id
-             ) cn1
-             left join upload_table.mobile_info mi
-             on substr(cn1.mobile,1,7)=mi.mobile
+                cn1.mobile,
+                case when cn1.city_id is null then mi.city_id
+                else cn1.city_id end city_id,
+                ov
+            from (
+                select
+                    mobile,
+                    city_id,
+                    count(1) ov
+                from
+                    tmp.dim_wg_userlabel_temp2
+                group by
+                    mobile,
+                    city_id
+                ) cn1
+                left join upload_table.mobile_info mi
+                on substr(cn1.mobile,1,7)=mi.mobile
+            ) cn2
         ) as cn
         on cn.mobile=l1.mobile
         and cn.rank=1

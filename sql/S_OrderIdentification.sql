@@ -8,4 +8,4 @@ select
 from
     S_OrderIdentification
 where
-    OrderID>=-time1
+    OrderID>-time1
