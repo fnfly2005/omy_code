@@ -5,6 +5,6 @@ select
     value2,
     value3
 from
-    upload_table.myshow_dictionary
+    upload_table.myshow_dictionary_s
 where
     key_name is not null

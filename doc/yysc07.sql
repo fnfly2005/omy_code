@@ -1,14 +1,16 @@
 
 select
-    dt,
-    case when value2 is not null then value2
+    case when md.value2 is not null then value2
     else fromtag end fromtag,
+    dt,
+    md2.value2,
     uv,
     order_num
 from (
     select
-        fp1.dt,
         fp1.fromtag,
+        fp1.dt,
+        fp1.app_name,
         approx_distinct(fp1.union_id) as uv,
         count(distinct order_id) as order_num
     from (
@@ -59,11 +61,16 @@ from (
         and fp1.app_name=fmw.app_name
         and fp1.union_id=fmw.union_id
     group by
-        1,2
+        1,2,3
     ) fp2
     left join (
-            select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
+            select key, value1, value2, value3 from upload_table.myshow_dictionary_s where key_name is not null
             and key_name='fromTag'
             ) md
     on md.key=fp2.fromtag
+    left join (
+            select key, value1, value2, value3 from upload_table.myshow_dictionary_s where key_name is not null
+            and key_name='app_name'
+            ) md2
+    on md2.key=fp2.fromtag
 ;

@@ -1,37 +1,37 @@
 
 select
-    dt,
-    md2.value1 as pt,
     case when md1.value2 is not null then md1.value2
-    when fromTag=0 then '其他'
-    when fromTag is null then '其他'
-    else fromTag end fromTag,
-    performance_id,
-    performance_name,
+    when fp.fromTag=0 then '其他'
+    when fp.fromTag is null then '其他'
+    else fp.fromTag end fromTag,
+    fp.dt,
+    fp.pt,
+    per.performance_id,
+    per.performance_name,
     sum(uv) uv,
-    sum(order_uv) order_uv
+    sum(totalprice) as totalprice,
+    sum(order_num) order_num,
+    sum(ticket_num) as ticket_num,
+    sum(grossprofit) as grossprofit
 from (
     select
-        fp1.dt,
-        fp1.app_name,
         fromTag,
-        fp1.performance_id,
-        performance_name,
-        approx_distinct(fp1.union_id) as uv,
-        count(distinct fp2.order_id) as order_uv
+        fp1.dt,
+        md2.value2 as pt,
+        performance_id,
+        sum(uv) as uv
     from (
         select
-            partition_date as dt,
-            app_name,
-            page_identifier,
             case when page_identifier='c_Q7wY4' 
                 then custom['fromTag']
             else utm_source
             end as fromTag,
+            partition_date as dt,
+            app_name,
             case when page_identifier<>'pages/show/detail/index'
                     then custom['performance_id']
                 else custom['id'] end as performance_id,
-            union_id
+            count(distinct union_id) as uv
         from 
             mart_flow.detail_flow_pv_wide_report
         where partition_date>='$$begindate'
@@ -48,50 +48,102 @@ from (
             'c_Q7wY4',
             'pages/show/detail/index'
             )
+        group by
+            1,2,3,4
         ) as fp1
-        join (
-            select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, city_id, city_name, shop_name from mart_movie.dim_myshow_performance where performance_id is not null
-            and performance_id in ($id)
-            ) per
-        on fp1.performance_id=per.performance_id
         left join (
-            select
-                partition_date as dt,
-                app_name,
-                union_id,
-                order_id
-            from
-                mart_flow.detail_flow_mv_wide_report
-            where partition_date>='$$begindate'
-                and partition_date<'$$enddate'
-                and partition_log_channel='movie'
-                and partition_etl_source='2_5x'
-                and partition_app in (
-                'movie',
-                'dianping_nova',
-                'other_app',
-                'dp_m',
-                'group'
-                )
-                and event_id='b_WLx9n'
-            ) as fp2
-        on fp1.app_name=fp2.app_name
-        and fp1.union_id=fp2.union_id
-        and fp1.dt=fp2.dt
-        and fp1.page_identifier='c_Q7wY4'
+        select key, value1, value2, value3 from upload_table.myshow_dictionary_s where key_name is not null
+        and key_name='app_name'
+        ) md2
+        on fp1.app_name=md2.key
+        and performance_id in ($id)
+    where
+        performance_id in ($id)
     group by
-        1,2,3,4,5
-    ) as fpw
+        1,2,3,4
+    ) fp
     left join (
-    select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
-    and key_name='fromTag'
-    ) md1
-    on fpw.fromTag=md1.key
+        select
+            fromTag,
+            dt,
+            value2 as pt,
+            performance_id,
+            sum(totalprice) as totalprice,
+			sum(order_num) order_num,
+            sum(ticket_num) as ticket_num,
+            sum(grossprofit) as grossprofit
+        from (
+            select
+                fromTag,
+                dt,
+                sellchannel,
+                performance_id,
+                sum(totalprice) as totalprice,
+                count(distinct fp2.order_id) as order_num,
+                sum(ticket_num) as ticket_num,
+                sum(grossprofit) as grossprofit
+            from (
+                select distinct
+                    case when event_id='b_WLx9n' then custom['fromTag']
+                    else utm_source
+                    end as fromTag,
+                    order_id
+                from
+                    mart_flow.detail_flow_mv_wide_report
+                where partition_date>='$$begindate'
+                    and partition_date<'$$enddate'
+                    and partition_log_channel='movie'
+                    and partition_etl_source='2_5x'
+                    and partition_app in (
+                    'movie',
+                    'dianping_nova',
+                    'other_app',
+                    'dp_m',
+                    'group'
+                    )
+                    and event_id in ('b_WLx9n','b_w047f3uw')
+                ) as fp2
+                join (
+                    select
+                        partition_date as dt,
+                        sellchannel,
+                        performance_id,
+                        order_id,
+                        sum(totalprice) as totalprice,
+                        sum(salesplan_count*setnumber) as ticket_num,
+                        sum(grossprofit) as grossprofit
+                    from mart_movie.detail_myshow_salepayorder where partition_date>='$$begindate' and partition_date<'$$enddate'
+                        and sellchannel in (1,2,3,5,6,7,13)
+                        and performance_id in ($id)
+                    group by
+                        1,2,3,4
+                    ) spo
+                on fp2.order_id=spo.order_id
+            group by
+                1,2,3,4
+            ) as sdo
+            left join (
+                select key, value1, value2, value3 from upload_table.myshow_dictionary_s where key_name is not null
+                and key_name='sellchannel'
+                ) md3
+            on md3.key=sdo.sellchannel 
+        group by
+            1,2,3,4
+        ) as sp
+    on sp.fromTag=fp.fromTag
+    and sp.dt=fp.dt
+    and sp.pt=fp.pt
+    and sp.performance_id=fp.performance_id
     left join (
-    select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
-    and key_name='app_name'
-    ) md2
-    on fpw.app_name=md2.key
+        select key, value1, value2, value3 from upload_table.myshow_dictionary_s where key_name is not null
+            and key_name='fromTag'
+        ) md1
+    on fp.fromTag=md1.key
+    join (
+        select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, city_id, city_name, shop_name from mart_movie.dim_myshow_performance where performance_id is not null
+        and performance_id in ($id)
+        ) per
+    on fp.performance_id=per.performance_id
 group by
     1,2,3,4,5
 ;
