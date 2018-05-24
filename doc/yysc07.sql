@@ -1,6 +1,6 @@
 
 select
-    case when md.value2 is not null then value2
+    case when md.value2 is not null then md.value2
     else fromtag end fromtag,
     dt,
     md2.value2,
@@ -40,7 +40,6 @@ from (
             'dp_m',
             'group'
             )
-            and page_bg='猫眼文化'
             and regexp_like(page_name,'$id')
         ) fp1
         left join (
@@ -72,5 +71,5 @@ from (
             select key, value1, value2, value3 from upload_table.myshow_dictionary_s where key_name is not null
             and key_name='app_name'
             ) md2
-    on md2.key=fp2.fromtag
+    on md2.key=fp2.app_name
 ;

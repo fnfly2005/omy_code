@@ -4,7 +4,7 @@
 # 优化输出方式,优化函数处理
 path="/Users/fannian/Documents/my_code/"
 fun() {
-    if [ $2x == ex ];then
+    if [ $2x == dx ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
     elif [ $2x == ux ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
@@ -17,49 +17,38 @@ fun() {
     fi
 }
 
-so=`fun detail_myshow_saleorder.sql u`
+soi=`fun dp_myshow__s_orderidentification.sql` 
 per=`fun dim_myshow_performance.sql`
-md=`fun myshow_dictionary.sql`
-cus=`fun dim_myshow_customer.sql`
 
-file="bs27"
-lim=";"
+file="bs32"
+lim="limit 1000;"
 attach="${path}doc/${file}.sql"
 
 echo "
 select
-    sendtag,
-    batch_code,
-    count(distinct sed.mobile) send_num,
-    sum(case when valid_flag=1 then totalprice end) totalprice,
-    sum(case when valid_flag=1 then order_num end) order_num,
-    sum(case when valid_flag=0 then totalprice end) un_totalprice,
-    sum(case when valid_flag=0 then order_num end) un_order_num
+    performance_name,
+    city_name,
+    shop_name,
+    category_name,
+	order_num,
+	totalprice
 from (
-    select distinct 
-        mobile,
-        sendtag,
-        batch_code
-    from 
-        mart_movie.detail_myshow_msuser
-    where
-        sendtag in ('\$sendtag') 
-    ) sed
-    left join (
     select
-        usermobileno as mobile,
-        case when performance_id in (\$send_performance_id) 
-            then 1
-        else 0 end as valid_flag,
-        sum(totalprice) totalprice,
-        count(distinct order_id) order_num
-    $so
+        performance_id,
+        count(distinct order_id) as order_num,
+        sum(totalprice) as totalprice
+    from 
+        mart_movie.detail_myshow_saleorder
+    where
+        pay_time is not null
+        and meituan_userid=1275075496
     group by
-        1,2
+        1
     ) so
-    on so.mobile=sed.mobile
-group by
-    1,2
+    join (
+        $per
+        ) per
+    on per.performance_id=so.performance_id
 $lim">${attach}
 
 echo "succuess!"
@@ -70,3 +59,5 @@ then
 cat ${attach}
 #命令行参数为p时，打印输出文件
 fi
+
+

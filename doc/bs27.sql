@@ -12,23 +12,10 @@ from (
         mobile,
         sendtag,
         batch_code
-    from (
-        select
-            mobile,
-            sendtag,
-            batch_code
-        from upload_table.send_fn_user
-        where
-            sendtag in ('$sendtag') 
-        union all
-        select
-            mobile, 
-            sendtag,
-            batch_code
-        from upload_table.send_wdh_user
-        where
-            sendtag in ('$sendtag') 
-        ) sen
+    from 
+        mart_movie.detail_myshow_msuser
+    where
+        sendtag in ('$sendtag') 
     ) sed
     left join (
     select

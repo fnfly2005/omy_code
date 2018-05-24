@@ -4,7 +4,7 @@
 # 优化输出方式,优化函数处理
 path="/Users/fannian/Documents/my_code/"
 fun() {
-    if [ $2x == ex ];then
+    if [ $2x == dx ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
     elif [ $2x == ux ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
@@ -17,49 +17,44 @@ fun() {
     fi
 }
 
-so=`fun detail_myshow_saleorder.sql u`
+soi=`fun dp_myshow__s_orderidentification.sql` 
 per=`fun dim_myshow_performance.sql`
-md=`fun myshow_dictionary.sql`
-cus=`fun dim_myshow_customer.sql`
 
-file="bs27"
-lim=";"
+file="bs32"
+lim="limit 1000;"
 attach="${path}doc/${file}.sql"
 
 echo "
 select
-    sendtag,
-    batch_code,
-    count(distinct sed.mobile) send_num,
-    sum(case when valid_flag=1 then totalprice end) totalprice,
-    sum(case when valid_flag=1 then order_num end) order_num,
-    sum(case when valid_flag=0 then totalprice end) un_totalprice,
-    sum(case when valid_flag=0 then order_num end) un_order_num
+    IDNumber,
+    UserName,
+    meituan_userid,
+    performance_name,
+    city_name,
+    shop_name,
+    category_name,
+    usermobileno
 from (
-    select distinct 
-        mobile,
-        sendtag,
-        batch_code
-    from 
-        mart_movie.detail_myshow_msuser
-    where
-        sendtag in ('\$sendtag') 
-    ) sed
-    left join (
-    select
-        usermobileno as mobile,
-        case when performance_id in (\$send_performance_id) 
-            then 1
-        else 0 end as valid_flag,
-        sum(totalprice) totalprice,
-        count(distinct order_id) order_num
-    $so
-    group by
-        1,2
-    ) so
-    on so.mobile=sed.mobile
-group by
-    1,2
+    $soi
+    ) soi
+    join (
+        select
+            usermobileno,
+            order_id,
+            performance_id,
+            meituan_userid
+        from 
+            mart_movie.detail_myshow_saleorder
+        where
+            pay_time is not null
+            and city_id=2
+            and sellchannel=2
+        ) so
+    on soi.order_id=so.order_id
+    join (
+        $per
+        ) per
+    on per.performance_id=so.performance_id
 $lim">${attach}
 
 echo "succuess!"
@@ -70,3 +65,5 @@ then
 cat ${attach}
 #命令行参数为p时，打印输出文件
 fi
+
+

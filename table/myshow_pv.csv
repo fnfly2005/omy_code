@@ -78,7 +78,7 @@ event_id,b_w047f3uw,立即支付_支付,packages/show/pages/order/confirm,3,5,0
 event_id,b_AcDXh,搜索,c_oEWlZ,1,1,0
 event_id,b_3Rbqj,icon模块,c_oEWlZ,1,2,20
 event_id,b_x80sywt8,中通banner,c_oEWlZ,1,3,30
-event_id,b_lhw2exj0,中通banner,c_oEWlZ,1,3,30
+event_id,b_lhw2exj0,中通banner,,1,3,30
 event_id,b_rvo3alhz,RB位置一,c_oEWlZ,1,3,40
 event_id,b_zjmim58d,RB位置一,c_oEWlZ,1,3,40
 event_id,b_i99kw7lh,RB位置二,c_oEWlZ,1,3,50
