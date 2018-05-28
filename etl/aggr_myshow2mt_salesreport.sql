@@ -11,28 +11,15 @@ drop table `$target.table`
 
 ##Load##
 ##-- Load节点, (可以留空)
-insert OVERWRITE TABLE `$target.table` PARTITION(partition_date='$now.date')
+drop table if EXISTS mart_movie_test.aggr_myshow2mt_salesreport_temp;
+create table mart_movie_test.aggr_myshow2mt_salesreport_temp as
 select
 	so.performance_id,
 	cit.mt_city_id as city_id,
 	cit.mt_city_name as city_name,
-	mt_city_rank as city_rank,
-	category_id,
-	category_name,
-	1 as is_hot,
-	null as quality,
-    poi_id,
-	poi_name,
-	latitude,
-	longitude,
-    poi_first_cate_id,
-    poi_first_cate_name,
-    poi_second_cate_id,
-    poi_second_cate_name,
-    poi_third_cate_id,
-    poi_third_cate_name,
-	barea_id,
-	barea_name,
+	cit.mt_city_rank as city_rank,
+	per.category_id,
+	per.category_name,
 	performance_name,
 	celebrityList,
 	performance_ticketstatus,
@@ -45,7 +32,8 @@ select
 	click_num_weekday,
 	order_num_oneday,
 	order_num_three,
-	order_num_week
+	order_num_week,
+    shop_id
 from (
     select
         performance_id,
@@ -72,6 +60,25 @@ from (
     group by
         performance_id
     ) as so
+    join (
+        select
+            performance_id,
+            performance_name,
+            category_id,
+            category_name,
+            city_id,
+            shop_id,
+            firstshowtime,
+            lastshowtime,
+            minprice,
+            maxprice,
+            performance_ticketstatus
+        from
+            mart_movie.dim_myshow_performance
+        where
+            performance_online_flag=1
+        ) as per
+    on so.performance_id=per.performance_id
     left join (
         select
             case when page_identifier='c_b5okwrne' 
@@ -114,25 +121,6 @@ from (
             else 0 end
         ) as pv
     on so.performance_id=pv.performance_id
-    join (
-        select
-            performance_id,
-            performance_name,
-            category_id,
-            category_name,
-            city_id,
-            shop_id,
-            firstshowtime,
-            lastshowtime,
-            minprice,
-            maxprice,
-            performance_ticketstatus
-        from
-            mart_movie.dim_myshow_performance
-        where
-            performance_online_flag=1
-        ) as per
-    on so.performance_id=per.performance_id
     left join (
         select
             city_id,
@@ -146,15 +134,52 @@ from (
     left join 
         dw.dim_mt_city cit
     on cit.mt_city_id=dc.mt_city_id
+;
+insert OVERWRITE TABLE `$target.table` PARTITION(partition_date='$now.date')
+select
+	performance_id,
+	city_id,
+	city_name,
+	city_rank,
+	category_id,
+	category_name,
+	1 as is_hot,
+	null as quality,
+    poi_id,
+	poi_name,
+	latitude,
+	longitude,
+    poi_first_cate_id,
+    poi_first_cate_name,
+    poi_second_cate_id,
+    poi_second_cate_name,
+    poi_third_cate_id,
+    poi_third_cate_name,
+	barea_id,
+	barea_name,
+	performance_name,
+	celebrityList,
+	performance_ticketstatus,
+	firstshowtime,
+	lastshowtime,
+    minprice,
+    maxprice,
+	click_num_oneday,
+	click_num_threeday,
+	click_num_weekday,
+	order_num_oneday,
+	order_num_three,
+	order_num_week
+from 
+    mart_movie_test.aggr_myshow2mt_salesreport_temp st
     left join (
         select
             dp_shop_id,
-            max(mt_main_poi_id) as mt_main_poi_id
+            mt_main_poi_id
         from
             dw.dim_dp_shop
-        group by
-            dp_shop_id
         ) as dsh
+    on dsh.dp_shop_id=st.shop_id
     left join (
         select
 	        mt_poi_id as poi_id,

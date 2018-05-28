@@ -68,16 +68,22 @@ from (
                         ) c1
                     where performance_id not in (\$no_performance_id)
                     )
-                and city_id in (
-                    select
-                        city_id
-                    from
-                        mart_movie.dim_myshow_city
-                    where
-                        province_id in (\$province_id)
-                    union
-                    select
-                        \$city_id as city_id
+                and (
+                    (
+                        city_id in (\$city_id)
+                        and 1 in (\$cp)
+                        )
+                    or (
+                        city_id in (
+                            select
+                                city_id
+                            from
+                                mart_movie.dim_myshow_city
+                            where
+                                province_id in (\$province_id)
+                            )
+                        and 2 in (\$cp)
+                        )
                     )
             union all
             select
@@ -92,7 +98,23 @@ from (
                     mart_movie.dim_wg_userlabel
                 where
                     2 in (\$order_src)
-                    and city_id in (\$city_id)
+                    and (
+                        (
+                            city_id in (\$city_id)
+                            and 1 in (\$cp)
+                            )
+                        or (
+                            city_id in (
+                                select
+                                    city_id
+                                from
+                                    mart_movie.dim_myshow_city
+                                where
+                                    province_id in (\$province_id)
+                                )
+                            and 2 in (\$cp)
+                            )
+                        )
                 union all
                 select 
                     mobile,
@@ -102,11 +124,28 @@ from (
                     mart_movie.dim_wp_userlabel
                 where
                     3 in (\$order_src)
-                    and city_id in (\$city_id)
+                    and (
+                        (
+                            city_id in (\$city_id)
+                            and 1 in (\$cp)
+                            )
+                        or (
+                            city_id in (
+                                select
+                                    city_id
+                                from
+                                    mart_movie.dim_myshow_city
+                                where
+                                    province_id in (\$province_id)
+                                )
+                            and 2 in (\$cp)
+                            )
+                        )
                 ) ws
                 cross join unnest(category_flag) as t (category_id)
             where
                 category_id in (\$category_id)
+                or -99 in (\$category_id)
             ) so
             left join (
                 select distinct
@@ -140,7 +179,7 @@ from (
                             )
                     ) m1
                 ) mm
-            on mm.mobile=mou.mobile
+            on mm.mobile=so.mobile
         where
             mm.mobile is null
         group by
