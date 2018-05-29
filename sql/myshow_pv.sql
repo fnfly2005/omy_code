@@ -2,6 +2,8 @@
 select
     nav_flag,
     value,
+    name,
+    page,
     page_tag1,
     page_tag2
 from

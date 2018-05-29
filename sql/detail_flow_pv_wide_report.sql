@@ -14,15 +14,15 @@ where partition_date>='$$begindate'
     and partition_date<'$$enddate'
     and partition_log_channel='movie'
     and partition_app in (
-    'movie',
-    'dianping_nova',
-    'other_app',
-    'dp_m',
-    'group'
-    )
+        'movie',
+        'dianping_nova',
+        'other_app',
+        'dp_m',
+        'group'
+        )
     and page_identifier in (
-    select value
-    from upload_table.myshow_pv
-    where key='page_identifier'
-    and page_tag1>=0
-    )
+        select value
+        from upload_table.myshow_pv
+        where key='page_identifier'
+        and page_tag1>=0
+        )

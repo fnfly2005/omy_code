@@ -3,7 +3,7 @@ select
     case when md.value2 is not null then md.value2
     else fromtag end fromtag,
     dt,
-    md2.value2,
+    md2.value2 as pt,
     uv,
     order_num
 from (

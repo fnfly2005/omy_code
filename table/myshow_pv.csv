@@ -1,4 +1,5 @@
 page_identifier,c_oEWlZ,演出首页,h5,1,0,0
+page_identifier,c_cijyn3pg,演出首页,h5,1,0,0
 page_identifier,c_6yPP8,演出列表页,h5,1,0,0
 page_identifier,c_Q7wY4,演出详情页,h5,2,0,0
 page_identifier,c_8UWcP,演出票品选择页,h5,3,0,0
@@ -28,12 +29,14 @@ page_identifier,packages/show/pages/list/index,演出列表页,mini_programs,1,0
 page_identifier,packages/show/pages/ticket/ticket,演出票品选择页,mini_programs,3,0,0
 page_identifier,packages/show/pages/seats/area,演出区域选择页,mini_programs,3,0,0
 page_identifier,packages/show/pages/order/confirm,演出确认订单页,mini_programs,4,0,0
+page_identifier,c_fdy6sm9s,演出确认订单页,mini_programs,4,0,0
 page_identifier,packages/show/pages/index/index,演出首页,mini_programs,1,0,0
 page_identifier,packages/show/pages/search/index,演出搜索页,mini_programs,1,0,0
 page_identifier,packages/show/pages/detail/index,演出详情页,mini_programs,2,0,0
 page_identifier,packages/show/pages/seats/seats,演出选座页,mini_programs,3,0,0
 page_identifier,packages/show/pages/list/theatre,热门场馆列表页,mini_programs,1,0,0
 page_identifier,packages/show/pages/detail/venue,演出场馆详情页,mini_programs,1,0,0
+page_identifier,c_wzyexh5l,格瓦拉开机屏,native,0,-1,0
 page_identifier,c_f740bkf7,平台首页,native,0,-1,0
 page_identifier,c_5hep1k02,格瓦拉个人中心,native,0,-1,0
 page_identifier,c_qc0t1u1j,格瓦拉资讯详情页,native,0,-1,0
@@ -62,6 +65,13 @@ page_identifier,c_256bojfx,卖品详情页,native,5,-2,0
 page_identifier,c_wh7rogdp,我的卖品订单详情页,native,5,-2,0
 page_identifier,c_BvlYz,申请退款页,native,5,-2,0
 page_identifier,c_y02b19d,退款详情页,native,5,-2,0
+page_identifier,c_g42lbw3k,作品详情页,native,1,-2,0
+page_identifier,c_8ta0krrs,影人详情页,native,1,-2,0
+page_identifier,c_6av22msd,短评详情页,native,1,-2,0
+page_identifier,c_50junqfk,资讯详情页,native,1,-2,0
+page_identifier,c_j12hn5s3,搜索页,native,1,-2,0
+page_identifier,c_xscvruki,影评列表页,native,1,-2,0
+page_identifier,c_2nq786nl,电影确认订单页,native,5,-2,0
 page_identifier,com.gewara.trade.cinema.MainCinemaListFragment,电影首页,native,1,-2,0
 page_identifier,com.gewara.trade.cinema.c,电影首页,native,1,-2,0
 page_identifier,DP.MAYHomeViewController,电影首页,native,1,-2,0
