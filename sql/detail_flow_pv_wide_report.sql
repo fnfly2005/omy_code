@@ -20,9 +20,7 @@ where partition_date>='$$begindate'
         'dp_m',
         'group'
         )
-    and page_identifier in (
-        select value
-        from upload_table.myshow_pv
-        where key='page_identifier'
-        and page_tag1>=0
-        )
+/*    and page_identifier in (*/
+/*        select value*/
+/*        from upload_table.myshow_pv*/
+/*        where key='page_identifier')*/

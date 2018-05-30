@@ -63,12 +63,12 @@ from (
         1,2,3
     ) fp2
     left join (
-            select key, value1, value2, value3 from upload_table.myshow_dictionary_s where key_name is not null
+            select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where key_name is not null
             and key_name='fromTag'
             ) md
     on md.key=fp2.fromtag
     left join (
-            select key, value1, value2, value3 from upload_table.myshow_dictionary_s where key_name is not null
+            select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where key_name is not null
             and key_name='app_name'
             ) md2
     on md2.key=fp2.app_name

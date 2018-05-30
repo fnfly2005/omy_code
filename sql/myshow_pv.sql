@@ -1,9 +1,10 @@
 /*埋点字典表*/
 select
-    nav_flag,
+    key,
     value,
     name,
     page,
+    nav_flag,
     page_tag1,
     page_tag2
 from
