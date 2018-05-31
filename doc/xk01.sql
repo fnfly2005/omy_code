@@ -1,92 +1,49 @@
 
 select
-    so.dt,
-    totalprice,
-    order_num,
-    sku_num,
-    uv,
-    user_num,
-    dea_num,
-    rehi_totalprice,
-    rehi_order_num
+    dt,
+    sell_type,
+    sell_lv1_type,
+    sum(totalprice) as totalprice,
+    count(distinct order_id) as order_num,
+    sum(ticket_num) ticket_num
 from (
-    select 
-        cni.dt,
-        cni.totalprice,
-		cni.order_num,
-		cni.sku_num,
-		cni.user_num,
-		cni.dea_num,
-		oni.rehi_totalprice,
-		oni.rehi_order_num
+    select
+        substr(pay_time,1,10) as dt,
+        value2 as sell_type,
+        case when partner_name is null 
+            then value1
+        else partner_name end as sell_lv1_type,
+        case when ogi.order_id is null then 0
+        else 1 end as gift_flag,
+        so.order_id,
+        setnumber*salesplan_count as ticket_num,
+        totalprice
     from (
-        select
-            substr(pay_time,1,10) dt,
-            sum(purchase_price) as totalprice,
-            count(distinct order_id) as order_num,
-            sum(quantity) as sku_num,
-            count(distinct user_id) as user_num,
-            count(distinct deal_id) as dea_num
-        from
-            mart_movie.detail_maoyan_order_sale_cost_new_info
-        where
-            pay_time is not null
-            and pay_time>='$$begindate'
-            and pay_time<'$$enddate'
-            and deal_id in (
-                select
-                    deal_id
-                from
-                    mart_movie.dim_deal_new
-                where
-                    category=12
-                    )
-        group by
-            1
-        ) cni
+        select order_id, maoyan_order_id, usermobileno as mobile, recipientidno, sellchannel, city_id, totalprice, customer_id, performance_id, meituan_userid, dianping_userid, show_name, pay_time, consumed_time, show_endtime, show_starttime, order_create_time, order_refund_status, setnumber, salesplan_count, province_name, city_name from mart_movie.detail_myshow_saleorder where pay_time is not null and pay_time>='$$begindate' and pay_time<'$$enddate'
+        and sellchannel in (9,10,11)
+        ) so
         left join (
-            select
-                dt,
-                count(distinct order_id) as rehi_order_num,
-                sum(totalprice) as rehi_totalprice
-            from (
-                select
-                    substr(modified,1,10) dt,
-                    order_id,
-                    total_money/100 totalprice
-                from
-                    mart_movie.detail_maoyan_order_new_info
-                where
-                    pay_time is not null
-                    and category=12
-                    and yn=0
-                    and modified>='$$begindate'
-                    and modified<'$$enddate'
-                    and pay_time<'$$begindate'
-                ) on1
-            group by
-                1
-            ) oni
-        on oni.dt=cni.dt
-    ) as so
-    left join (
-        select
-            partition_date as dt,
-            approx_distinct(union_id) as uv
-        from mart_flow.detail_flow_pv_wide_report
-        where partition_date>='$$begindate'
-            and partition_date<'$$enddate'
-            and partition_log_channel='movie'
-            and partition_app in (
-            'movie',
-            'dianping_nova',
-            'other_app',
-            'dp_m',
-            'group'
-            )
-            and page_identifier='c_dqihv0si'
-        group by
-            1
-        ) as fpw
-    on fpw.dt=so.dt
+        select OrderID as order_id, PartnerID as partner_id from origindb.dp_myshow__s_orderpartner
+        ) opa
+        on so.order_id=opa.order_id
+        and so.sellchannel=11
+        left join (
+        select PartnerID as partner_id, Name as partner_name from origindb.dp_myshow__s_partner
+        ) par
+        on opa.partner_id=par.partner_id
+        left join (
+        select OrderID as order_id from origindb.dp_myshow__s_ordergift
+        ) ogi
+        on so.order_id=ogi.order_id
+        and so.sellchannel in (9,10)
+        left join (
+        select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where key_name is not null
+        and key_name='sellchannel'
+        ) md
+        on md.key=so.sellchannel
+    ) as s1
+where
+    gift_flag=0
+group by
+    1,2,3
 ;
