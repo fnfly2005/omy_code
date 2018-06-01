@@ -32,8 +32,8 @@ select
     count(distinct order_id) order_num
 from (
     select
-        case when sfo.dianping_userid is not null then 'yes'
-        else 'no' end new_flag,
+        case when sfo.meituan_userid is not null then '新客'
+        else '老客' end new_flag,
         case when so.fetch_type=2 then so.province_name
         else cit.province_name end province_name,
         case when so.fetch_type=2 then so.city_name
@@ -57,13 +57,13 @@ from (
         on dub.userid=so.meituan_userid
         left join (
         select
-            dianping_userid,
+            meituan_userid,
             min(first_pay_order_date) first_pay_order_date
         $sfo
         group by
-            dianping_userid
+            meituan_userid
         ) sfo
-        on sfo.dianping_userid=so.meituan_userid
+        on sfo.meituan_userid=so.meituan_userid
         and sfo.first_pay_order_date=so.dt
         left join (
         $cit

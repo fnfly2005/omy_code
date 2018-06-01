@@ -6,7 +6,7 @@ select
     else fpw.fromTag end fromTag,
     fpw.dt,
     fpw.pt,
-    source_id,
+    fpw.source_id,
     sum(uv) uv,
     sum(totalprice) as totalprice,
     sum(order_num) order_num,
@@ -71,7 +71,7 @@ from (
             else 'other'
             end as fromTag,
             partition_date as dt,
-            app_name,
+            'all' as app_name,
             $id as source_id,
             approx_distinct(union_id) as uv
         from
@@ -121,7 +121,8 @@ from (
             select
                 fromTag,
                 dt,
-                sellchannel,
+                case when $source=1 then sellchannel
+                else -99 end as sellchannel,
                 case when $source=1 then performance_id
                 else $id end as source_id,
                 sum(totalprice) as totalprice,
