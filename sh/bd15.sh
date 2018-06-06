@@ -23,7 +23,8 @@ select distinct
     so.performance_id,
     order_create_time,
     value2,
-    show_name
+    show_name,
+    show_id
 from (
     $so
     and performance_id in (\$performance_id)

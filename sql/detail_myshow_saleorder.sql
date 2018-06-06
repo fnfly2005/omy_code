@@ -12,6 +12,7 @@ select
     meituan_userid,
     dianping_userid,
     show_name,
+    show_id,
     pay_time,
     consumed_time,
     show_endtime,
