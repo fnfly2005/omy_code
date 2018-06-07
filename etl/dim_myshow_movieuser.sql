@@ -16,6 +16,7 @@ from (
         mart_movie.aggr_discount_card_seat_dwd
     where mobile_phone is not null
         and to_date(order_time)='$now.date'
+        and month='$now.yearmo'
     group by
         user_id
     ) as do1
@@ -31,6 +32,7 @@ from (
         from
             mart_movie.aggr_discount_card_seat_dwd
         where to_date(order_time)='$now.date'
+            and month='$now.yearmo'
         ) as do2
         on do1.order_id=do2.order_id
     left join (

@@ -1,35 +1,6 @@
-#!/bin/bash
-#--------------------猫眼演出readme-------------------
-#*************************api1.0*******************
-# 优化输出方式,优化函数处理
-path="/Users/fannian/Documents/my_code/"
-fun() {
-    if [ $2x == dx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
-    elif [ $2x == ux ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
-    elif [ $2x == tx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
-    elif [ $2x == utx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
-    else
-        echo `cat ${path}sql/${1} | grep -iv "/\*"`
-    fi
-}
 
-
-so=`fun detail_myshow_saleorder.sql u`
-md=`fun myshow_dictionary.sql`
-mdc=`fun myshow_dictionary.sql u`
-mp=`fun myshow_pv.sql u`
-
-file="bs34"
-lim=";"
-attach="${path}doc/${file}.sql"
-
-echo "
 select
-    case when 1 in (\$dim) then sp1.dt
+    case when 1 in ($dim) then sp1.dt
     else 'all' end as dt,
     sp1.pt,
     avg(all_uv) as all_uv,
@@ -49,17 +20,17 @@ from (
     from (
         select
             substr(pay_time,1,10) as dt,
-            case when 2 in (\$dim) then sellchannel
+            case when 2 in ($dim) then sellchannel
             else -99 end as sellchannel,
             sum(totalprice) as totalprice,
             count(distinct order_id) as order_num,
             sum(setnumber*salesplan_count) as ticket_num
-        $so
+        from mart_movie.detail_myshow_saleorder where pay_time is not null and pay_time>='$$begindate' and pay_time<'$$enddate'
         group by
             1,2
         ) as sp0
         left join (
-            $md
+            select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where key_name is not null
             and key_name='sellchannel'
             ) as md
         on sp0.sellchannel=md.key
@@ -85,14 +56,14 @@ from (
             from (
                 select
                     partition_date as dt,
-                    case when 2 in (\$dim) then app_name
+                    case when 2 in ($dim) then app_name
                     else 'all' end as app_name,
                     page_identifier,
                     union_id
                 from
                     mart_flow.detail_flow_pv_wide_report
-                where partition_date>='\$\$begindate'
-                    and partition_date<'\$\$enddate'
+                where partition_date>='$$begindate'
+                    and partition_date<'$$enddate'
                     and partition_log_channel='movie'
                     and partition_app in (
                         'movie',
@@ -110,7 +81,7 @@ from (
                     and app_name in (
                         select
                             key
-                        $mdc
+                        from upload_table.myshow_dictionary_s where key_name is not null
                         and key_name='app_name'
                         )
                 ) as fpw
@@ -118,7 +89,7 @@ from (
                     select
                         value,
                         nav_flag
-                    $mp
+                    from upload_table.myshow_pv where key='page_identifier'
                     and page_tag1>=0
                     ) mp
                 on mp.value=fpw.page_identifier
@@ -126,7 +97,7 @@ from (
                 1,2
             ) as fp0
             left join (
-                $md
+                select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where key_name is not null
                 and key_name='app_name'
                 ) md
             on fp0.app_name=md.key
@@ -137,13 +108,4 @@ from (
     and sp1.pt=fp1.pt
 group by
     1,2
-$lim">${attach}
-
-echo "succuess!"
-echo ${attach}
-if [ ${1}r == pr ]
-#加上任意字符，如r 避免空值报错
-then
-cat ${attach}
-#命令行参数为p时，打印输出文件
-fi
+;
