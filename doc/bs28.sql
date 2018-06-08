@@ -73,6 +73,9 @@ from (
                 and order_create_time>='$$begindate'
                 and order_create_time<'$$enddate'
                 and $payflag=0
+                and (sellchannel not in (9,10,11)
+                    or 1 not in ($flt)
+                    )
             group by
                 1,2,3,4
             union all
@@ -86,6 +89,9 @@ from (
                 sum(salesplan_count*setnumber) as ticket_num,
                 sum(grossprofit) as grossprofit
             from mart_movie.detail_myshow_salepayorder where partition_date>='$$begindate' and partition_date<'$$enddate'
+                and (sellchannel not in (9,10,11)
+                    or 1 not in ($flt)
+                    )
             group by
                 1,2,3,4
             ) sp1
@@ -119,7 +125,7 @@ from (
         else 'all' end as pt,
         'all' customer_type_name,
         'all' customer_lvl1_name,
-        case when 6 in ($dim) then wt.category_name
+        case when 6 in ($dim) then cat.category_name
         else 'all' end category_name,
         case when 7 in ($dim) then area_1_level_name
         else 'all' end area_1_level_name,

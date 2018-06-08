@@ -1,10 +1,21 @@
 #!/bin/bash
+#--------------------猫眼演出readme-------------------
+#*************************api1.0*******************
+# 优化输出方式,优化函数处理
 path="/Users/fannian/Documents/my_code/"
-t1='$time1'
 fun() {
-echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
+    if [ $2x == dx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
+    elif [ $2x == ux ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
+    elif [ $2x == tx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
+    elif [ $2x == utx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
+    else
+        echo `cat ${path}sql/${1} | grep -iv "/\*"`
+    fi
 }
-
 my=`fun aggr_movie_dau_client_core_page_daily.sql` 
 dp=`fun aggr_movie_dianping_app_conversion_daily.sql`
 wxycss=`fun aggr_movie_maoyan_weixin_daily.sql`
@@ -14,38 +25,41 @@ file="bs11"
 lim=";"
 attach="${path}doc/${file}.sql"
 
-echo "select
-    my.dt,
-    my.firstpage_uv my,
-    dp.firstpage_uv dp,
-    wxycss.firstpage_uv wxycss,
-    mt.firstpage_uv mt,
-    wxchwl.firstpage_uv wxchwl
-from
-    (
-    $my
-    ) my
-    left join
-    (
-    $dp
-    ) dp
-    on my.dt=dp.dt
-    left join
-    (
-    $wxycss
-    ) wxycss
-    on my.dt=wxycss.dt
-    left join
-    (
-    $mt
-    ) mt
-    on my.dt=mt.dt
-    left join
-    (
-    $wxchwl
-    ) wxchwl
-    on my.dt=wxchwl.dt
+echo "
+select
+    case when 1 in (\$dim) then dt
+    else 'all' end as dt,
+    pt,
+    avg(uv) uv
+from (
+    select
+        dt,
+        case when 2 in (\$dim) then pt
+        else 'all' end as pt,
+        sum(firstpage_uv) as uv
+    from (
+        $my
+        union all
+        $dp
+        union all
+        $wxycss
+        union all
+        $mt
+        union all
+        $wxchwl
+        ) as u 
+    group by 
+        1,2
+    ) as su
+group by
+    1,2
 $lim">${attach}
 
-echo "succuess,detail see ${attach}"
-
+echo "succuess!"
+echo ${attach}
+if [ ${1}r == pr ]
+#加上任意字符，如r 避免空值报错
+then
+cat ${attach}
+#命令行参数为p时，打印输出文件
+fi
