@@ -84,6 +84,7 @@ from (
             from
                 (
                 $spo
+                and sellchannel not in (9,10,11)
                 ) spo
                 left join (
                 $cus
