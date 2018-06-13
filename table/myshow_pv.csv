@@ -45,6 +45,9 @@ page_identifier,packages/show/pages/list/theatre,热门场馆列表页,mini_prog
 page_identifier,packages/show/pages/detail/venue,演出场馆详情页,mini_programs,1,0,0
 page_identifier,c_wzyexh5l,格瓦拉开机屏,native,0,-1,0
 page_identifier,c_f740bkf7,平台首页,native,0,-1,0
+page_identifier,c_butmynlk,平台首页,pc,1,0,0
+page_identifier,c_352o88g9,搜索页,pc,1,0,0
+page_identifier,c_bfo0abmf,演出详情页,pc,2,0,0
 page_identifier,c_5hep1k02,格瓦拉个人中心,native,0,-1,0
 page_identifier,c_qc0t1u1j,格瓦拉资讯详情页,native,0,-1,0
 page_identifier,c_1pae4zyv,演出票品选择页,native,3,0,0
@@ -188,3 +191,15 @@ event_id,b_otdo5ww9,格瓦拉演出列表页_搜索_click,c_ub9cbobf,1,1,0
 event_id,b_9is24kks,格瓦拉演出列表页_演出tab_click,c_ub9cbobf,1,4,0
 event_id,b_iv8oda3j,格瓦拉演出列表页_banner_click,c_ub9cbobf,1,4,0
 event_id,b_9v01bb0g,格瓦拉演出列表页_商品列表,c_ub9cbobf,1,4,0
+event_id,b_dua6s5tw,类目条-click,c_butmynlk,1,2,0
+event_id,b_6oovijpy,banner位_view,c_butmynlk,1,3,10
+event_id,b_bca0qg9d,banner位_click,c_butmynlk,1,3,10
+event_id,b_4n6fk9ne,类目页项目_click,c_butmynlk,1,3,10
+event_id,b_8itfvcsd,首页类目区展示_view,c_butmynlk,1,3,20
+event_id,b_xpqus97y,首页“更多”类目_click,c_butmynlk,1,3,21
+event_id,b_9p1qckxy,首页项目曝光位_click,c_butmynlk,1,3,22
+event_id,b_qdfkp6ju,最新上架项目_click,c_butmynlk,1,3,30
+event_id,b_21u4tg3g,搜索无结果提示框-view,c_352o88g9,1,1,0
+event_id,b_4korxagv,搜索页项目_click,c_352o88g10,1,1,10
+event_id,b_1gup42he,购票须知tab_view,c_bfo0abmf,2,5,10
+event_id,b_p546f7wy,演出详情页_view,c_bfo1abmf,2,5,0
