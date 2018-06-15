@@ -98,7 +98,7 @@ event_id,b_w047f3uw,立即支付_支付,packages/show/pages/order/confirm,3,5,0
 event_id,b_AcDXh,搜索,c_oEWlZ,1,1,0
 event_id,b_3Rbqj,icon模块,c_oEWlZ,1,2,20
 event_id,b_x80sywt8,中通banner,c_oEWlZ,1,3,30
-event_id,b_lhw2exj0,中通banner,,1,3,30
+event_id,b_lhw2exj0,中通banner,c_oEWlZ,1,3,30
 event_id,b_rvo3alhz,RB位置一,c_oEWlZ,1,3,40
 event_id,b_zjmim58d,RB位置一,c_oEWlZ,1,3,40
 event_id,b_i99kw7lh,RB位置二,c_oEWlZ,1,3,50
@@ -108,10 +108,10 @@ event_id,b_y1ccf4yx,热门场馆模块,c_oEWlZ,1,2,60
 event_id,b_dkbpbenc,热门场馆下挂商品,c_oEWlZ,1,2,61
 event_id,b_9pgyatw2,热门场馆－更多,c_oEWlZ,1,2,62
 event_id,b_owqtgmmu,本地团购,c_oEWlZ,1,2,70
-event_id,b_NoQFz,为你推荐,c_oEWlZ,1,3,100
+event_id,b_NoQFz,为你推荐,c_oEWlZ,1,4,100
+event_id,b_wss3zxmk,为你推荐,c_oEWlZ,1,4,100
 event_id,b_x6Zn8,头部banner,c_oEWlZ,1,3,10
 event_id,b_bckledsf,头部banner,c_oEWlZ,1,3,10
-event_id,b_wss3zxmk,为你推荐,c_oEWlZ,1,4,100
 event_id,b_vSdMX,场馆POI跳转链接,c_Q7wY4,2,5,0
 event_id,b_Vwmzc,座位图icon,c_Q7wY4,2,5,0
 event_id,b_oBtxe,演出详情链接,c_Q7wY4,2,5,0
@@ -176,11 +176,11 @@ event_id,b_jgk1sybg,格瓦拉首页儿童亲子模块商品_click,c_f740bkf7,1,3
 event_id,b_liql5f5a,格瓦拉首页儿童亲子模块更多_click_2,c_f740bkf7,1,3,61
 event_id,b_n82v7bj9,格瓦拉首页音乐会模块商品_click,c_f740bkf7,1,3,70
 event_id,b_co6tlsxo,格瓦拉首页音乐会模块更多_click_2,c_f740bkf7,1,3,71
-event_id,b_97h3xz1n,格瓦拉底通banner_click,c_f740bkf7,1,3,80
-event_id,b_se7ssmxv,格瓦拉底通banner_view,c_f740bkf7,1,3,80
+event_id,b_97h3xz1n,格瓦拉底通banner,c_f740bkf7,1,3,80
+event_id,b_se7ssmxv,格瓦拉底通banner,c_f740bkf7,1,3,80
 event_id,b_to85lkzt,格瓦拉搜索new_click,c_f740bkf7,1,1,0
-event_id,b_wc15ij1d,格瓦拉顶通banner_click,c_f740bkf7,1,3,10
-event_id,b_hrusij78,格瓦拉顶通banner_view,c_f740bkf7,1,3,10
+event_id,b_wc15ij1d,格瓦拉顶通banner,c_f740bkf7,1,3,10
+event_id,b_hrusij78,格瓦拉顶通banner,c_f740bkf7,1,3,10
 event_id,b_f622c76n,添加购票人信息_click,c_pp92sa1m,3,5,0
 event_id,b_b7n4p3ga,修改购票人信息_click,c_pp92sa1m,3,5,0
 event_id,b_1tftauta,格瓦拉送票方式_click,c_pp92sa1m,3,5,0

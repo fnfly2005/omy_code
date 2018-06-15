@@ -21,6 +21,7 @@ select
     order_refund_status,
     setnumber,
     salesplan_count,
+    ticket_price,
     province_name,
     city_name
 from

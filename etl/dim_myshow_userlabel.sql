@@ -154,6 +154,8 @@ from (
     ) so
     left join mart_movie.dim_myshow_performance per
     on per.performance_id=so.performance_id
+where
+    user_id<>0
 ;
     
 insert OVERWRITE TABLE `$target.table`

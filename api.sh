@@ -17,7 +17,7 @@ fun() {
     fi
 }
 
-=`fun ` 
+=`fun `
 file=""
 lim=";"
 attach="${path}doc/${file}.sql"

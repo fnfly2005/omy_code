@@ -6,6 +6,8 @@ select
     performance_id,
     performance_name,
     show_id,
+    show_name,
+    ticketclass_id,
     ticket_price,
     salesplan_ontime,
     salesplan_createtime,
@@ -13,6 +15,8 @@ select
     customer_name,
     customer_type_name,
     customer_lvl1_name,
-    city_name
+    shop_name,
+    city_name,
+    area_1_level_name
 from
     mart_movie.dim_myshow_salesplan
