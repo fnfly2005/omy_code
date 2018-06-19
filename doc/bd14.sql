@@ -8,21 +8,17 @@ select
 from (
     select 
         mobile,
-        row_number() over (order by action_flag) rank
+        row_number() over (order by 1) rank
     from (
-        select 
-            so.mobile,
-            min(action_flag) action_flag
+        select distinct
+            so.mobile
         from (
             select
-                usermobileno as mobile,
-                1 as action_flag
+                usermobileno as mobile
             from
                 mart_movie.detail_myshow_saleorder
             where
-                sellchannel in ($sellchannel_id)
-                and 1 in ($order_src)
-                and performance_id in (
+                performance_id in (
                     select distinct
                         performance_id
                     from (
@@ -30,101 +26,51 @@ from (
                             performance_id
                         from
                             mart_movie.dim_myshow_performance
-                        where 
-                            category_id in ('$category_id')
+                        where (
+                                performance_id in ($item_id)
+                                or -99 in ($item_id)
+                                )
                             and (
                                 performance_id in ($performance_id)
-                                or -99=$performance_id
+                                or -99 in ($performance_id)
                                 )
                             and (
-                                performance_name like '%$performance_name%'
-                                or '测试'='$performance_name'
-                                )
-                            and (
-                                shop_name like '%$shop_name%'
-                                or '测试'='$shop_name'
+                                shop_id in ($shop_id)
+                                or -99 in ($shop_id)
                                 )
                         ) c1
                     where performance_id not in ($no_performance_id)
                     )
-                and (
-                    (
-                        city_id in ($city_id)
-                        and 1 in ($cp)
-                        )
-                    or (
-                        city_id in (
-                            select
-                                city_id
-                            from
-                                mart_movie.dim_myshow_city
-                            where
-                                province_id in ($province_id)
-                            )
-                        and 2 in ($cp)
-                        )
-                    )
             union all
-            select
-                mobile,
-                action_flag
-            from (
-                select 
-                    mobile,
-                    category_flag,
-                    2 as action_flag
-                from
-                    mart_movie.dim_wg_userlabel
-                where
-                    2 in ($order_src)
-                    and (
-                        (
-                            city_id in ($city_id)
-                            and 1 in ($cp)
-                            )
-                        or (
-                            city_id in (
-                                select
-                                    city_id
-                                from
-                                    mart_movie.dim_myshow_city
-                                where
-                                    province_id in ($province_id)
-                                )
-                            and 2 in ($cp)
-                            )
-                        )
-                union all
-                select 
-                    mobile,
-                    category_flag,
-                    3 as action_flag
-                from
-                    mart_movie.dim_wp_userlabel
-                where
-                    3 in ($order_src)
-                    and (
-                        (
-                            city_id in ($city_id)
-                            and 1 in ($cp)
-                            )
-                        or (
-                            city_id in (
-                                select
-                                    city_id
-                                from
-                                    mart_movie.dim_myshow_city
-                                where
-                                    province_id in ($province_id)
-                                )
-                            and 2 in ($cp)
-                            )
-                        )
-                ) ws
-                cross join unnest(category_flag) as t (category_id)
+            select 
+                order_mobile as mobile
+            from
+                upload_table.detail_wg_saleorder
             where
-                category_id in ($category_id)
-                or -99 in ($category_id)
+                $order_src=1
+                and item_id in (
+                    select distinct
+                        item_id
+                    from (
+                        select
+                            item_id
+                        from
+                            upload_table.dim_wg_item
+                        where (
+                                item_no in ($item_id)
+                                or -99 in ($item_id)
+                                )
+                            and (
+                                title_cn like '%$performance_name%'
+                                or '测试'='$performance_name'
+                                )
+                            and (
+                                venue_name like '%$shop_name%'
+                                or '测试'='$shop_name'
+                                )
+                        ) as di
+                    where item_id not in ($no_performance_id)
+                    ) 
             ) so
             left join (
                 select distinct
@@ -161,8 +107,6 @@ from (
             on mm.mobile=mou.mobile
         where
             mm.mobile is null
-        group by
-            1
         ) as cs
     ) as c
 where

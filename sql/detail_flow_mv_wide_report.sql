@@ -1,9 +1,11 @@
 /*新美大流量MV宽表*/
 select
-    partition_etl_source,
     partition_date as dt,
     custom,
-    union_id
+    union_id,
+    app_name,
+    user_id,
+    utm_source
 from
     mart_flow.detail_flow_mv_wide_report
 where

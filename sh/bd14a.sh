@@ -39,8 +39,7 @@ from (
             from
                 mart_movie.detail_myshow_saleorder
             where
-                sellchannel in (\$sellchannel_id)
-                and performance_id in (
+                performance_id in (
                     select distinct
                         performance_id
                     from (
@@ -49,25 +48,16 @@ from (
                         from
                             mart_movie.dim_myshow_performance
                         where (
-                            category_name in ('\$category_name')
-                            or '全部' in ('\$category_name')
-                            )
-                            and (
-                                province_name in ('\$area_name')
-                                or city_name in ('\$area_name')
-                                or '全部' in ('\$area_name')
+                                performance_id in (\$item_id)
+                                or -99 in (\$item_id)
                                 )
                             and (
                                 performance_id in (\$performance_id)
-                                or -99=\$performance_id
+                                or -99 in (\$performance_id)
                                 )
                             and (
-                                performance_name like '%\$performance_name%'
-                                or '测试'='\$performance_name'
-                                )
-                            and (
-                                shop_name like '%\$shop_name%'
-                                or '测试'='\$shop_name'
+                                shop_id in (\$shop_id)
+                                or -99 in (\$shop_id)
                                 )
                         ) c1
                     where performance_id not in (\$no_performance_id)
@@ -88,17 +78,8 @@ from (
                         from
                             upload_table.dim_wg_item
                         where (
-                                type_lv1_name in ('\$category_name')
-                                or '全部' in ('\$category_name')
-                                ) 
-                            and (
-                                city_name in ('\$area_name')
-                                or province_name in ('\$area_name')
-                                or '全部' in ('\$area_name')
-                                )
-                            and (
-                                item_no in (\$performance_id)
-                                or -99=\$performance_id
+                                item_no in (\$item_id)
+                                or -99 in (\$item_id)
                                 )
                             and (
                                 title_cn like '%\$performance_name%'

@@ -1,8 +1,8 @@
 creator = 'fannian@maoyan.com'
 'db': META['hmart_movie']
-'format': 'id,city_id,city_name,province_id,province_name,area_1_level_id,area_1_level_name,area_2_level_id,area_2_level_name,mt_city_id,dp_flag,city_level,etl_time',
+'format': 'id,performance_id,activity_id,performance_name,performance_shortname,category_id,category_name,city_id,city_name,province_id,province_name,area_1_level_id,area_1_level_name,area_2_level_id,area_2_level_name,shop_id,shop_name,performance_ticketstatus,performance_editstatus,performance_online_flag,performance_createtime,firstshowtime,lastshowtime,minprice,maxprice,premiumstatus,performance_seattype,iscomplete,etl_time',
 'db': META['mart_movie_mis'],
-'table': 'dim_myshow_city',
+'table': 'dim_myshow_performance',
 
 ##Extract##
 ##-- Extract节点, 这里填写一个能在source.db上执行的sql
