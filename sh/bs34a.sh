@@ -17,8 +17,7 @@ fun() {
     fi
 }
 
-
-so=`fun detail_myshow_saleorder.sql u`
+spo=`fun detail_myshow_salepayorder.sql u`
 md=`fun myshow_dictionary.sql`
 mdc=`fun myshow_dictionary.sql u`
 mp=`fun myshow_pv.sql u`
@@ -38,14 +37,16 @@ select
     avg(fp1.order_uv) as order_uv,
     avg(sp1.order_num) as order_num,
     avg(totalprice) as totalprice,
-    avg(ticket_num) as ticket_num
+    avg(ticket_num) as ticket_num,
+    avg(grossprofit) as grossprofit
 from (
     select
         sp0.dt,
         md.value2 as pt,
         sum(totalprice) as totalprice,
         sum(sp0.order_num) as order_num,
-        sum(ticket_num) as ticket_num
+        sum(ticket_num) as ticket_num,
+        sum(grossprofit) as grossprofit
     from (
         select
             substr(pay_time,1,10) as dt,
@@ -53,8 +54,10 @@ from (
             else -99 end as sellchannel,
             sum(totalprice) as totalprice,
             count(distinct order_id) as order_num,
-            sum(setnumber*salesplan_count) as ticket_num
-        $so
+            sum(setnumber*salesplan_count) as ticket_num,
+            sum(grossprofit) as grossprofit
+        $spo
+            and sellchannel not in (9,10,11)
         group by
             1,2
         ) as sp0

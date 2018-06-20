@@ -9,14 +9,16 @@ select
     avg(fp1.order_uv) as order_uv,
     avg(sp1.order_num) as order_num,
     avg(totalprice) as totalprice,
-    avg(ticket_num) as ticket_num
+    avg(ticket_num) as ticket_num,
+    avg(grossprofit) as grossprofit
 from (
     select
         sp0.dt,
         md.value2 as pt,
         sum(totalprice) as totalprice,
         sum(sp0.order_num) as order_num,
-        sum(ticket_num) as ticket_num
+        sum(ticket_num) as ticket_num,
+        sum(grossprofit) as grossprofit
     from (
         select
             substr(pay_time,1,10) as dt,
@@ -24,8 +26,10 @@ from (
             else -99 end as sellchannel,
             sum(totalprice) as totalprice,
             count(distinct order_id) as order_num,
-            sum(setnumber*salesplan_count) as ticket_num
-        from mart_movie.detail_myshow_saleorder where pay_time is not null and pay_time>='$$begindate' and pay_time<'$$enddate'
+            sum(setnumber*salesplan_count) as ticket_num,
+            sum(grossprofit) as grossprofit
+        from mart_movie.detail_myshow_salepayorder where partition_date>='$$begindate' and partition_date<'$$enddate'
+            and sellchannel not in (9,10,11)
         group by
             1,2
         ) as sp0

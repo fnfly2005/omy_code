@@ -18,6 +18,7 @@ fun() {
 }
 
 ssp=`fun detail_myshow_salesplan.sql u`
+so=`fun detail_myshow_saleorder.sql u` 
 spo=`fun detail_myshow_salepayorder.sql u` 
 per=`fun dim_myshow_performance.sql`
 cus=`fun dim_myshow_customer.sql`
@@ -109,9 +110,6 @@ from (
                 and order_create_time>='\$\$begindate'
                 and order_create_time<'\$\$enddate'
                 and \$payflag=0
-                and (sellchannel not in (9,10,11)
-                    or 1 not in (\$flt)
-                    )
             group by
                 1,2,3,4
             union all
@@ -125,9 +123,20 @@ from (
                 sum(salesplan_count*setnumber) as ticket_num,
                 sum(grossprofit) as grossprofit
             $spo
-                and (sellchannel not in (9,10,11)
-                    or 1 not in (\$flt)
-                    )
+            group by
+                1,2,3,4
+            union all
+            select
+                substr(pay_time,1,10) as dt,
+                sellchannel,
+                customer_id,
+                performance_id,
+                count(distinct order_id) as order_num,
+                sum(totalprice) as totalprice,
+                sum(salesplan_count*setnumber) as ticket_num,
+                0 as grossprofit
+            $so
+                and sellchannel in (9,10)
             group by
                 1,2,3,4
             ) sp1
