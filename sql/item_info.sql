@@ -5,6 +5,14 @@ select
     replace(title_cn,',',' ') as item_name,
     type_id,
     venue_id,
-    city_id
+    city_id,
+    substr(show_time,1,10) as dt
 from
     item_info
+where
+    title_cn not like '%废%'
+    and title_cn not like '%测试%'
+    AND title_cn NOT LIKE '%调试%'
+    AND title_cn NOT LIKE '%勿动%'
+    AND title_cn NOT LIKE '%test%'
+    AND title_cn NOT LIKE '%ceshi%'
