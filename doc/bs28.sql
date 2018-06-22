@@ -73,6 +73,7 @@ from (
                 and order_create_time>='$$begindate'
                 and order_create_time<'$$enddate'
                 and $payflag=0
+                and sellchannel in ($sellchannel)
             group by
                 1,2,3,4
             union all
@@ -86,6 +87,7 @@ from (
                 sum(salesplan_count*setnumber) as ticket_num,
                 sum(grossprofit) as grossprofit
             from mart_movie.detail_myshow_salepayorder where partition_date>='$$begindate' and partition_date<'$$enddate'
+                and sellchannel in ($sellchannel)
             group by
                 1,2,3,4
             union all
@@ -100,6 +102,7 @@ from (
                 0 as grossprofit
             from mart_movie.detail_myshow_saleorder where pay_time is not null and pay_time>='$$begindate' and pay_time<'$$enddate'
                 and sellchannel in (9,10)
+                and sellchannel in ($sellchannel)
             group by
                 1,2,3,4
             ) sp1

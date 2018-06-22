@@ -16,6 +16,7 @@ attach="${path}doc/${file}.sql"
 
 echo "
 select distinct
+    so.order_id,
     maoyan_order_id,
     IDNumber,
     UserName,
@@ -24,7 +25,10 @@ select distinct
     order_create_time,
     value2,
     show_name,
-    show_id
+    show_id,
+    ticketclass_description,
+    detailedaddress,
+    TicketNumber
 from (
     $so
     and performance_id in (\$performance_id)

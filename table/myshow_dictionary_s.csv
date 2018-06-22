@@ -74,7 +74,7 @@ sellchannel,9,,,范特西,批量出票,fx,
 sellchannel,10,,,商户,批量出票,fx,
 sellchannel,11,,,分销,分销,fx,
 sellchannel,12,,,微信点评_小程序,微信吃喝玩乐,dp,
-sellchannel,13,,,手机QQ钱包,手机QQ演出,qq,
+sellchannel,13,,,手机QQ钱包,演出M站,mt,猫眼M站
 performance_ticketstatus,1,,,未上线,未上线,未上线,
 performance_ticketstatus,2,,,预售,预售,预售,
 performance_ticketstatus,3,,,在售中,在售中,在售中,

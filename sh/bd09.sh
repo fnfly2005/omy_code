@@ -72,6 +72,7 @@ from (
         sum(spo.grossprofit) as grossprofit
     from (
         $spo
+        and sellchannel in (\$sellchannel)
         ) spo
         left join (
         $sfo

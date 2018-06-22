@@ -23,7 +23,9 @@ select
     salesplan_count,
     ticket_price,
     province_name,
-    city_name
+    city_name,
+    ticketclass_description,
+    detailedaddress
 from
     mart_movie.detail_myshow_saleorder
 where

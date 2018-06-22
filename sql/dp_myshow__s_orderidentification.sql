@@ -3,7 +3,8 @@ select
     PerformanceID as performance_id,
     OrderID as order_id,
     UserName,
-    IDNumber
+    IDNumber,
+    TicketNumber
 from
     origindb.dp_myshow__s_orderidentification
 where

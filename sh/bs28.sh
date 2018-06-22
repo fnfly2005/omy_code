@@ -110,6 +110,7 @@ from (
                 and order_create_time>='\$\$begindate'
                 and order_create_time<'\$\$enddate'
                 and \$payflag=0
+                and sellchannel in (\$sellchannel)
             group by
                 1,2,3,4
             union all
@@ -123,6 +124,7 @@ from (
                 sum(salesplan_count*setnumber) as ticket_num,
                 sum(grossprofit) as grossprofit
             $spo
+                and sellchannel in (\$sellchannel)
             group by
                 1,2,3,4
             union all
@@ -137,6 +139,7 @@ from (
                 0 as grossprofit
             $so
                 and sellchannel in (9,10)
+                and sellchannel in (\$sellchannel)
             group by
                 1,2,3,4
             ) sp1

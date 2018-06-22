@@ -44,9 +44,10 @@ from (
         sum(spo.grossprofit) as grossprofit
     from (
         select partition_date as dt, order_id, sellchannel, customer_id, performance_id, meituan_userid, show_id, totalprice, grossprofit, setnumber, salesplan_count, expressfee, discountamount, income, expense, totalticketprice, ticket_price, sell_price, project_id, bill_id, salesplan_id, city_id, pay_time from mart_movie.detail_myshow_salepayorder where partition_date>='$$begindate' and partition_date<'$$enddate'
+        and sellchannel in ($sellchannel)
         ) spo
         left join (
-        select meituan_userid, min(first_pay_order_date) first_pay_order_date from mart_movie.detail_myshow_salefirstorder where dianping_userid is not null and category_id=-99 group by 1
+        select meituan_userid, first_pay_order_date, pay_dt_num from mart_movie.detail_myshow_salefirstorder where dianping_userid is not null and category_id=-99
         ) sfo
         on sfo.meituan_userid=spo.meituan_userid
         and sfo.first_pay_order_date=spo.dt
@@ -80,7 +81,7 @@ from (
         ) sho
         on sho.show_id=spo.show_id
     left join (
-        select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
+        select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where key_name is not null
         and key_name='sellchannel'
         ) md
         on md.key=spo.sellchannel
