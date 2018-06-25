@@ -17,10 +17,11 @@ fun() {
     fi
 }
 
-spo=`fun detail_myshow_salepayorder.sql t`
+spo=`fun detail_myshow_salepayorder.sql ut`
 md=`fun myshow_dictionary.sql`
 mp=`fun myshow_pv.sql`
 mck=`fun topic_movie_deal_kpi_daily.sql`
+fmw=`fun detail_flow_mv_wide_report.sql ut`
 
 file="xk02"
 lim=";"
@@ -52,14 +53,15 @@ from (
             count(distinct case when nav_flag=2 then union_id end) as detail_uv,
             count(distinct case when nav_flag=4 then union_id end) as order_uv
         from (
-            select
+            select distinct
                 partition_date as dt,
                 app_name,
                 page_identifier,
                 union_id
             from
                 mart_flow.detail_flow_pv_wide_report
-            where partition_date='\$\$today{-1d}'
+            where partition_date>='\$\$today{-1d}'
+                and partition_date<'\$\$today{-0d}'
                 and partition_log_channel='movie'
                 and partition_app='other_app'
                 and app_name in ('gewara','gewara_pc')
@@ -72,15 +74,24 @@ from (
                         and page in ('native','pc')
                         and page_tag1>-2
                     )
-            group by
-                partition_date,
-                app_name,
+            union all
+            select distinct
+                partition_date as dt,
+                'gewara_pc' as app_name,
                 page_identifier,
                 union_id
+            from
+                mart_flow.detail_flow_pv_wide_report
+            where partition_date>='\$\$today{-1d}'
+                and partition_date<'\$\$today{-0d}'
+                and partition_log_channel='movie'
+                and partition_app='other_app'
+                and page_identifier='pages/showsubs/order/confirm'
+                and utm_source='gewara_pc'
             ) as fpw
             left join (
                 $mp
-                and page in ('native','pc')
+                and page in ('native','pc','mini_programs')
                 and page_tag1>-2
                 ) mp
             on mp.value=fpw.page_identifier
@@ -99,16 +110,37 @@ from (
     ) as fp1
     left join (
         select
-            spo.dt,
-            '格瓦拉' as pt,
-            count(distinct spo.order_id) as order_num
-        from (
-            $spo
+            partition_date as dt,
+            '格瓦拉APP' as pt,
+            count(distinct order_id) as order_num
+        $spo
             and sellchannel=8
-            ) spo
         group by
-            spo.dt,
-            'app'
+            1,2
+        union all
+        select
+            fmw.dt,
+            '格瓦拉PC' as pt,
+            count(distinct fmw.order_id) as order_num
+        from (
+            select distinct
+                partition_date as dt,
+                order_id
+            $fmw
+                and utm_source='gewara_pc'
+                and event_id='b_w047f3uw'
+            ) as fmw
+            left join (
+                select
+                    partition_date as dt,
+                    order_id
+                $spo
+                    and sellchannel=7
+                ) as fso
+            on fmw.order_id=fso.order_id
+            and fmw.dt=fso.dt
+        group by
+            1,2
     ) as sp1
     on sp1.dt=fp1.dt
     and sp1.pt=fp1.pt

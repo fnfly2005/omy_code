@@ -11,7 +11,7 @@ app_name,dp_m_wxcard,,,其他,微信吃喝玩乐,dp,
 app_name,maoyan_i,,,其他,猫眼,mt,
 app_name,gewara,,,格瓦拉APP,格瓦拉,gwl,
 app_name,gewara_pc,,,格瓦拉PC,格瓦拉,gwl,
-app_name,yanchu_qqwallet_i,,,手机QQ钱包,手机QQ演出,qq,
+app_name,yanchu_qqwallet_i,,,手机QQ钱包,演出M站,mt,猫眼M站
 app_name,show.maoyan.com,,,其他,其他,other,
 app_name,all,,,全部,全部,all,
 partition_app,movie,,,猫眼,猫眼,猫眼,

@@ -1,12 +1,25 @@
 #!/bin/bash
+#--------------------猫眼演出readme-------------------
+#*************************api1.0*******************
+# 优化输出方式,优化函数处理
 path="/Users/fannian/Documents/my_code/"
-t1='$time1'
 fun() {
-echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
+    if [ $2x == dx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
+    elif [ $2x == ux ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
+    elif [ $2x == tx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindatekey/today_compact{-1d}/g;s/enddatekey/today_compact{-0d}/g;s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
+    elif [ $2x == utx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindatekey/today_compact{-1d}/g;s/enddatekey/today_compact{-0d}/g;s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
+    else
+        echo `cat ${path}sql/${1} | grep -iv "/\*"`
+    fi
 }
 
-spo=`fun detail_myshow_salepayorder.sql` 
-mdk=`fun topic_movie_deal_kpi_daily.sql`
+spo=`fun detail_myshow_salepayorder.sql ut`
+fmw=`fun detail_flow_mv_wide_report.sql ut`
+mdk=`fun topic_movie_deal_kpi_daily.sql ut`
 mp=`fun myshow_pv.sql`
 md=`fun myshow_dictionary.sql`
 
@@ -34,12 +47,41 @@ from (
             spo.dt,
             '演出' as bu,
             count(distinct spo.order_id) as order_num,
-            sum(spo.salesplan_count*spo.setnumber) as ticket_num,
+            sum(ticket_num) as ticket_num,
             sum(spo.totalprice) as totalprice
-        from
-            (
+        from (
+            select
+                partition_date as dt,
+                order_id,
+                salesplan_count*setnumber as ticket_num,
+                totalprice
             $spo
-            and sellchannel=8
+                and sellchannel=8
+            union all
+            select
+                fmw.dt,
+                fmw.order_id,
+                ticket_num,
+                totalprice
+            from (
+                select distinct
+                    partition_date as dt,
+                    order_id
+                $fmw
+                    and utm_source='gewara_pc'
+                    and event_id='b_w047f3uw'
+                ) as fmw
+                left join (
+                    select
+                        partition_date as dt,
+                        order_id,
+                        salesplan_count*setnumber as ticket_num,
+                        totalprice
+                    $spo
+                        and sellchannel=7
+                    ) as fso
+                on fmw.order_id=fso.order_id
+                and fmw.dt=fso.dt
             ) spo
         group by
             spo.dt,
@@ -48,12 +90,13 @@ from (
         select
             '\$\$today{-1d}' as dt,
             '电影' as bu,
-            mdk.order_num,
-            mdk.ticket_num,
-            mdk.gmv as totalprice
-        from (
-            $mdk
-            ) as mdk
+            sum(ordernum) as order_num,
+            sum(seatnum) as ticket_num,
+            sum(gmv) as totalprice
+        $mdk
+        group by
+            '\$\$today{-1d}',
+            '电影'
         ) as sp1
     group by
         dt,
@@ -83,7 +126,7 @@ from (
                 where partition_date='\$\$today{-1d}'
                     and partition_log_channel='movie'
                     and partition_app='other_app'
-                    and app_name='gewara'
+                    and app_name in ('gewara','gewara_pc')
                 group by
                     partition_date,
                     page_identifier,
@@ -91,7 +134,7 @@ from (
                 ) as fpw
                 left join (
                     $mp
-                    and page='native'
+                    and page in ('native','pc')
                     and page_tag1<>-1
                     ) as mp
                 on fpw.page_identifier=mp.value
@@ -118,5 +161,11 @@ from (
     and sp3.bu=fp2.bu
 $lim">${attach}
 
-echo "succuess,detail see ${attach}"
-
+echo "succuess!"
+echo ${attach}
+if [ ${1}r == pr ]
+#加上任意字符，如r 避免空值报错
+then
+cat ${attach}
+#命令行参数为p时，打印输出文件
+fi
