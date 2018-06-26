@@ -76,7 +76,7 @@ from (
             usermobileno rlike '^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$'
             and usermobileno not in (13800138000,13000000000)
             and order_id is not null
-            and sellchannel not in (9,10)
+            and sellchannel not in (9,10,11)
         ) wso
         left join (
             select
