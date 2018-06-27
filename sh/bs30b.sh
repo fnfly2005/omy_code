@@ -50,6 +50,7 @@ from (
             meituan_userid
         $so
             and performance_id in (\$performance_id)
+            and sellchannel not in (9,10,11)
             ) so
         left join (
         $dub
