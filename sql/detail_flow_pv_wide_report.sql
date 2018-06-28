@@ -6,6 +6,10 @@ select
     page_identifier,
     os,
     custom,
+    utm_source,
+    url_parameters,
+    url_path,
+    url,
     union_id,
     user_id
 from 
