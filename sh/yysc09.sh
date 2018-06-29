@@ -77,8 +77,7 @@ from (
                     partition_date as dt,
                     case when 2 in (\$dim) then app_name
                     else 'all' end as app_name,
-                    case when -99 in (\$pid) then -99
-                    when page_identifier<>'pages/show/detail/index'
+                    case when page_identifier='c_Q7wY4'
                         then custom['performance_id']
                     else custom['id'] end as performance_id,
                     approx_distinct(union_id) as uv
@@ -96,17 +95,17 @@ from (
                         )
                     and page_identifier in (
                         'c_Q7wY4',
-                        'pages/show/detail/index'
+                        'pages/show/detail/index',
+                        'packages/show/pages/detail/index'
                         )
                     and \$source=1
-                    and app_name<>'gewara'
                 group by
                     1,2,3,4
                 ) mv
             where (
                 performance_id in (\$pid)
                 or -99 in (\$pid)
-                )
+                ) and performance_id is not null
             union all
             select
                 case when regexp_like(url_parameters,'fromTag=') 

@@ -1,0 +1,12 @@
+/*猫眼演出页面埋点配置维度表*/
+select
+    page_identifier,
+    page_name_my,
+    cid_type,
+    page_cat,
+    biz_par,
+    biz_bg
+from
+    mart_movie.dim_myshow_pv
+where
+    status=1

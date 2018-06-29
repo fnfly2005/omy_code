@@ -1,0 +1,14 @@
+/*猫眼演出模块埋点配置维度表*/
+select
+    event_id,
+    event_name_lv1,
+    event_name_lv2,
+    page_identifier,
+    user_int,
+    biz_par,
+    biz_typ,
+    page_loc
+from
+    mart_movie.dim_myshow_mv
+where
+    status=1

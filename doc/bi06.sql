@@ -1,51 +1,36 @@
 
 select
-    spm.cid,
-    spm.app_name,
-    app_identifier,
-    page_name,
-    app_name as app_id2,
-    page_identifier,
+    mp.*,
+    md.value2,
+    page_id,
     uv
 from (
-    select distinct
-        cid,
-        app_name,
-        app_identifier,
-        page_name
-    from (
-        select cid, app_name, app_identifier, page_name from mart_flow.sdk_page_config_info where channel_identifier='movie' and partition_date='$$today{-1d}' and cid is not null and ( page_name like '%演出%' or app_name like '%格瓦拉%' )
-        ) spc
-        left join (
-        select nav_flag, value, name, page, page_tag1, page_tag2 from upload_table.myshow_pv where key='page_identifier'
-        ) mp
-        on mp.value=spc.cid
-    where
-        mp.value is null
-    ) spm
+    select page_identifier, page_name_my, cid_type, page_cat, biz_par, biz_bg from mart_movie.dim_myshow_pv where status=1
+    ) mp
     left join (
-    select
-        app_name,
-        page_identifier,
-        count(distinct union_id) as uv
-    from
-        mart_flow.detail_flow_pv_wide_report
-    where
-        partition_date='$$today{-1d}'
-        and partition_log_channel='movie'
-        and partition_app in (
-            'movie',
-            'dianping_nova',
-            'other_app',
-            'dp_m',
-            'group'
-            )
-        and (
-            app_name='gewara'
-            or page_identifier like '%演出%'
-            )
-    group by
-        1,2
-    ) fpw
-    on fpw.page_identifier=spm.cid
+        select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where key_name is not null
+        and key_name='page_cat'
+        ) md
+    on md.key=mp.page_cat
+    left join (
+        select 
+            page_identifier,
+            page_id,
+            approx_distinct(union_id) uv
+        from 
+            mart_flow.detail_flow_pv_wide_report
+        where
+            partition_date>='$$today{-1d}'
+            and partition_date<'$$today{-0d}'
+            and partition_log_channel='movie'
+            and partition_app in (
+                'movie',
+                'dianping_nova',
+                'other_app',
+                'dp_m',
+                'group')
+        group by
+            1,2
+        ) as fpw
+    on mp.page_identifier=fpw.page_identifier
 ;

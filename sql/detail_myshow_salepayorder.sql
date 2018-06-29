@@ -11,6 +11,7 @@ select
     grossprofit,
     setnumber,
     salesplan_count,
+    setnumber*salesplan_count as ticket_num,
     expressfee,
     discountamount,
     income,
