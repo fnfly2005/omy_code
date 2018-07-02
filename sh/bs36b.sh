@@ -25,24 +25,29 @@ attach="${path}doc/${file}.sql"
 
 echo "
 select
-    \$dim,
-    count(distinct uid) as user_num
+    ht,
+    count(distinct uid) 
 from (
     select
         \$user as uid,
-        count(distinct order_id) fon,
-        count(distinct substr(pay_time,1,10)) fdt
+        min(\$date) ht
     from (
-        $so
-        and sellchannel not in (9,10,11)
-        and meituan_userid<>0
-        and usermobileno not in (13800138000,13000000000)
-        and usermobileno is not null
+        $so    
+            and sellchannel not in (9,10,11)
+            and (
+                (meituan_userid<>0
+                and '\$user'='meituan_userid')
+                or (usermobileno not in (13800138000,13000000000)
+                    and usermobileno is not null
+                    and '\$user'='mobile')
+                )
         ) so
     group by
         1
-    ) as so1
+    ) s1
 group by
+    1
+order by
     1
 $lim">${attach}
 
@@ -54,5 +59,3 @@ then
 cat ${attach}
 #命令行参数为p时，打印输出文件
 fi
-
-

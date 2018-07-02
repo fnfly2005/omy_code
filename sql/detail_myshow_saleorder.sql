@@ -1,5 +1,7 @@
 /*订单明细表*/
 select
+    substr(pay_time,1,7) as mt,
+    substr(pay_time,1,10) as dt,
     order_id,
     maoyan_order_id,
     usermobileno as mobile,
