@@ -18,6 +18,7 @@ fun() {
 }
 
 so=`fun detail_myshow_saleorder.sql`
+sos=`fun detail_myshow_saleorder.sql`
 per=`fun dim_myshow_performance.sql`
 md=`fun myshow_dictionary.sql`
 cus=`fun dim_myshow_customer.sql`
@@ -30,14 +31,14 @@ echo "
 select
     \$dim,
     \$dw,
-    count(distinct so.uid) as user_num
+    count(distinct so1.\$user) as usernum,
+    count(distinct case when fdw>1 then so1.\$user end) as cross_usernum
 from (
     select
-        \$user as uid,
-        \$dw,
+        \$user,
         count(distinct order_id) fon,
-        count(distinct substr(pay_time,1,10)) fdt,
-        sum(totalprice) as totalprice
+        count(distinct \$dw) fdw,
+        count(distinct dt) fdt
     from (
         $so
             and sellchannel not in (9,10,11)
@@ -63,8 +64,33 @@ from (
             ) cus
         on cus.customer_id=so.customer_id
     group by
-        1,2
-    ) so
+        1
+    ) so1
+    left join (
+        $sos
+            and sellchannel not in (9,10,11)
+            and (
+                (meituan_userid<>0
+                and '\$user'='meituan_userid')
+                or (usermobileno not in (13800138000,13000000000)
+                    and usermobileno is not null
+                    and '\$user'='mobile')
+                )
+        ) sos
+    on so1.\$user=sos.\$user
+    left join (
+        $per
+        ) per
+    on per.performance_id=sos.performance_id
+    left join (
+        $md
+        and key_name='sellchannel'
+        ) md
+    on md.key=sos.sellchannel
+    left join (
+        $cus
+        ) cus
+    on cus.customer_id=sos.customer_id
 group by
     1,2
 $lim">${attach}
