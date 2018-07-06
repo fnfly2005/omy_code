@@ -7,7 +7,7 @@ select
     '$sendtag' as sendtag
 from (
     select
-        mobile,
+        mou.mobile,
         row_number() over (order by 1) rank
     from (
         select distinct
@@ -122,6 +122,14 @@ from (
                     send_date>=current_date
                     and $id<>0
                         )
+                union all
+                select
+                    usermobileno as mobile
+                from 
+                    mart_movie.detail_myshow_saleorder
+                where
+                    pay_time is not null
+                    and performance_id in ($fit_pid)
                 ) m1
             ) mm
         on mm.mobile=mou.mobile

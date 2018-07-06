@@ -8,69 +8,134 @@ select
 from (
     select 
         mobile,
-        row_number() over (order by 1) rank
+        row_number() over (order by action_id desc) rank
     from (
-        select distinct
-            so.mobile
+        select
+            so.mobile,
+            action_id
         from (
-            select
-                usermobileno as mobile
-            from
-                mart_movie.detail_myshow_saleorder
-            where
-                performance_id in (
-                    select distinct
-                        performance_id
-                    from (
-                        select
-                            performance_id
-                        from
-                            mart_movie.dim_myshow_performance
-                        where (
-                                performance_id in ($item_id)
-                                or -99 in ($item_id)
-                                )
-                            and (
-                                performance_id in ($performance_id)
-                                or -99 in ($performance_id)
-                                )
-                            and (
-                                shop_id in ($shop_id)
-                                or -99 in ($shop_id)
-                                )
-                        ) c1
-                    where performance_id not in ($no_performance_id)
-                    )
-            union all
             select 
-                order_mobile as mobile
-            from
-                upload_table.detail_wg_saleorder
+                mobile,
+                max(action_id) action_id
+            from (
+                select
+                    mobile,
+                    action_flag
+                from (
+                    select 
+                        mobile,
+                        category_flag,
+                        action_flag
+                    from
+                        mart_movie.dim_myshow_userlabel
+                    where
+                        1 in ($order_src)
+                        and sellchannel in ($sellchannel_id)
+                        and (
+                            (
+                                city_id in ($city_id)
+                                and 1 in ($cp)
+                                )
+                            or (
+                                city_id in (
+                                    select
+                                        city_id
+                                    from
+                                        mart_movie.dim_myshow_city
+                                    where
+                                        province_id in ($province_id)
+                                    )
+                                and 2 in ($cp)
+                                )
+                            )
+                        and (
+                            pay_num>$pay_num
+                            or $pay_num=-99
+                            )
+                        and (
+                            pay_money>$pay_money
+                            or $pay_money=-99
+                            )
+                    union all
+                    select 
+                        mobile,
+                        category_flag,
+                        action_flag
+                    from
+                        mart_movie.dim_wg_userlabel
+                    where
+                        2 in ($order_src)
+                        and (
+                            (
+                                city_id in ($city_id)
+                                and 1 in ($cp)
+                                )
+                            or (
+                                city_id in (
+                                    select
+                                        city_id
+                                    from
+                                        mart_movie.dim_myshow_city
+                                    where
+                                        province_id in ($province_id)
+                                    )
+                                and 2 in ($cp)
+                                )
+                            )
+                        and (
+                            pay_num>$pay_num
+                            or $pay_num=-99
+                            )
+                        and (
+                            pay_money>$pay_money
+                            or $pay_money=-99
+                            )
+                    union all
+                    select 
+                        mobile,
+                        category_flag,
+                        action_flag
+                    from
+                        mart_movie.dim_wp_userlabel
+                    where
+                        3 in ($order_src)
+                        and (
+                            (
+                                city_id in ($city_id)
+                                and 1 in ($cp)
+                                )
+                            or (
+                                city_id in (
+                                    select
+                                        city_id
+                                    from
+                                        mart_movie.dim_myshow_city
+                                    where
+                                        province_id in ($province_id)
+                                    )
+                                and 2 in ($cp)
+                                )
+                            )
+                        and (
+                            pay_num>$pay_num
+                            or $pay_num=-99
+                            )
+                        and (
+                            pay_money>$pay_money
+                            or $pay_money=-99
+                            )
+                    ) ws
+                    cross join unnest(category_flag) as t (category_id)
+                where
+                    category_id in ($category_id)
+                    or -99 in ($category_id)
+                ) sw
+                cross join unnest(action_flag) as t (action_id)
             where
-                $order_src=1
-                and item_id in (
-                    select distinct
-                        item_id
-                    from (
-                        select
-                            item_id
-                        from
-                            upload_table.dim_wg_item
-                        where (
-                                item_no in ($item_id)
-                                or -99 in ($item_id)
-                                )
-                            and (
-                                title_cn like '%$performance_name%'
-                                or '测试'='$performance_name'
-                                )
-                            and (
-                                venue_name like '%$shop_name%'
-                                or '测试'='$shop_name'
-                                )
-                        ) as di
-                    where item_id not in ($no_performance_id)
-                    ) 
+                action_id in ($action_id)
+                or -99 in ($action_id)
+            group by
+                1
             ) so
             left join (
                 select distinct
@@ -102,9 +167,17 @@ from (
                         send_date>=current_date
                         and $id<>0
                             )
+                    union all
+                    select
+                        usermobileno as mobile
+                    from 
+                        mart_movie.detail_myshow_saleorder
+                    where
+                        pay_time is not null
+                        and performance_id in ($fit_pid)
                     ) m1
                 ) mm
-            on mm.mobile=mou.mobile
+            on mm.mobile=so.mobile
         where
             mm.mobile is null
         ) as cs
