@@ -157,15 +157,23 @@ from (
                     select mobile
                     from upload_table.send_fn_user
                     where (
-                        send_date>=current_date
-                        and $id<>0
+                        (send_date>=date_add('day',-$id,date_parse('$$enddate','%Y-%m-%d'))
+                        and $id<>0)
+                        or sendtag in ('$send_tag')
+                            )
+                        and sendtag not in (
+                            select sendtag from upload_table.myshow_send_performance_fn where send_flag='0'
                             )
                     union all 
                     select mobile
                     from upload_table.send_wdh_user
                     where (
-                        send_date>=current_date
-                        and $id<>0
+                        (send_date>=date_add('day',-$id,date_parse('$$enddate','%Y-%m-%d'))
+                        and $id<>0)
+                        or sendtag in ('$send_tag')
+                            )
+                        and sendtag not in (
+                            select sendtag from upload_table.myshow_send_performance_fn where send_flag='0'
                             )
                     union all
                     select

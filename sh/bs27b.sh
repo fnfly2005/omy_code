@@ -21,6 +21,9 @@ so=`fun detail_myshow_saleorder.sql u`
 per=`fun dim_myshow_performance.sql`
 md=`fun myshow_dictionary.sql`
 cus=`fun dim_myshow_customer.sql`
+sos=`fun detail_myshow_s_ordersalesplansnapshot_realtime.sql`
+sor=`fun detail_myshow_s_order_realtime.sql`
+
 
 file="bs27"
 lim=";"
@@ -30,36 +33,105 @@ echo "
 select
     sendtag,
     batch_code,
+    dt,
+    pt,
     count(distinct sed.mobile) send_num,
-    sum(case when valid_flag=1 then totalprice end) totalprice,
-    sum(case when valid_flag=1 then order_num end) order_num,
-    sum(case when valid_flag=0 then totalprice end) un_totalprice,
-    sum(case when valid_flag=0 then order_num end) un_order_num
+    sum(totalprice) totalprice,
+    sum(order_num) order_num
 from (
-    select distinct 
+    select distinct
         mobile,
         sendtag,
         batch_code
-    from 
-        mart_movie.detail_myshow_msuser
-    where
-        sendtag in ('\$sendtag') 
+    from (
+        select
+            mobile,
+            sendtag,
+            batch_code
+        from 
+            mart_movie.detail_myshow_msuser
+        where
+            sendtag in ('\$sendtag') 
+        union all
+        select
+            mobile,
+            sendtag,
+            batch_code
+        from 
+            upload_table.send_fn_user
+        where
+            sendtag in ('\$sendtag') 
+        union all
+        select
+            mobile,
+            sendtag,
+            batch_code
+        from 
+            upload_table.send_wdh_user
+        where
+            sendtag in ('\$sendtag') 
+        ) se1
     ) sed
     left join (
-    select
-        usermobileno as mobile,
-        case when performance_id in (\$send_performance_id) 
-            then 1
-        else 0 end as valid_flag,
-        sum(totalprice) totalprice,
-        count(distinct order_id) order_num
-    $so
-    group by
-        1,2
+        select
+            mobile,
+            dt,
+            value2 as pt,
+            sum(totalprice) totalprice,
+            sum(order_num) order_num
+        from (
+            select
+                usermobileno as mobile,
+                case when 1 in (\$dim) then substr(pay_time,1,10) 
+                else 'all' end as dt,
+                case when 2 in (\$dim) then sellchannel
+                else -99 end as sellchannel,
+                sum(totalprice) totalprice,
+                count(distinct order_id) order_num
+            $so
+                and sellchannel not in (9,10,11)
+                and \$isreal=0
+                and (
+                    performance_id in (\$send_performance_id) 
+                    or -99 in (\$send_performance_id)
+                    )
+            group by
+                1,2,3
+            union all
+            select
+                mobile,
+                '\$\$today' as dt,
+                case when 2 in (\$dim) then sellchannel
+                else -99 end as sellchannel,
+                sum(totalprice) totalprice,
+                count(distinct sor.order_id) order_num
+            from (
+                $sor
+                    and sellchannel not in (9,10,11)
+                    and \$isreal=1
+                    and (
+                        performance_id in (\$send_performance_id) 
+                        or -99 in (\$send_performance_id)
+                        )
+                ) sor
+                left join (
+                $sos
+                ) sos
+                on sor.order_id=sos.order_id
+            group by
+                1,2,3
+            ) spo
+            left join (
+                $md
+                and key_name='sellchannel'
+                ) md
+            on md.key=spo.sellchannel
+        group by
+            1,2,3
     ) so
     on so.mobile=sed.mobile
 group by
-    1,2
+    1,2,3,4
 $lim">${attach}
 
 echo "succuess!"

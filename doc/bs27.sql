@@ -2,34 +2,103 @@
 select
     sendtag,
     batch_code,
+    dt,
+    pt,
     count(distinct sed.mobile) send_num,
-    sum(case when valid_flag=1 then totalprice end) totalprice,
-    sum(case when valid_flag=1 then order_num end) order_num,
-    sum(case when valid_flag=0 then totalprice end) un_totalprice,
-    sum(case when valid_flag=0 then order_num end) un_order_num
+    sum(totalprice) totalprice,
+    sum(order_num) order_num
 from (
-    select distinct 
+    select distinct
         mobile,
         sendtag,
         batch_code
-    from 
-        mart_movie.detail_myshow_msuser
-    where
-        sendtag in ('$sendtag') 
+    from (
+        select
+            mobile,
+            sendtag,
+            batch_code
+        from 
+            mart_movie.detail_myshow_msuser
+        where
+            sendtag in ('$sendtag') 
+        union all
+        select
+            mobile,
+            sendtag,
+            batch_code
+        from 
+            upload_table.send_fn_user
+        where
+            sendtag in ('$sendtag') 
+        union all
+        select
+            mobile,
+            sendtag,
+            batch_code
+        from 
+            upload_table.send_wdh_user
+        where
+            sendtag in ('$sendtag') 
+        ) se1
     ) sed
     left join (
-    select
-        usermobileno as mobile,
-        case when performance_id in ($send_performance_id) 
-            then 1
-        else 0 end as valid_flag,
-        sum(totalprice) totalprice,
-        count(distinct order_id) order_num
-    from mart_movie.detail_myshow_saleorder where pay_time is not null and pay_time>='$$begindate' and pay_time<'$$enddate'
-    group by
-        1,2
+        select
+            mobile,
+            dt,
+            value2 as pt,
+            sum(totalprice) totalprice,
+            sum(order_num) order_num
+        from (
+            select
+                usermobileno as mobile,
+                case when 1 in ($dim) then substr(pay_time,1,10) 
+                else 'all' end as dt,
+                case when 2 in ($dim) then sellchannel
+                else -99 end as sellchannel,
+                sum(totalprice) totalprice,
+                count(distinct order_id) order_num
+            from mart_movie.detail_myshow_saleorder where pay_time is not null and pay_time>='$$begindate' and pay_time<'$$enddate'
+                and sellchannel not in (9,10,11)
+                and $isreal=0
+                and (
+                    performance_id in ($send_performance_id) 
+                    or -99 in ($send_performance_id)
+                    )
+            group by
+                1,2,3
+            union all
+            select
+                mobile,
+                '$$today' as dt,
+                case when 2 in ($dim) then sellchannel
+                else -99 end as sellchannel,
+                sum(totalprice) totalprice,
+                count(distinct sor.order_id) order_num
+            from (
+                select order_id, usermobileno as mobile, totalprice from upload_table.detail_myshow_s_order_realtime where pay_time is not null
+                    and sellchannel not in (9,10,11)
+                    and $isreal=1
+                    and (
+                        performance_id in ($send_performance_id) 
+                        or -99 in ($send_performance_id)
+                        )
+                ) sor
+                left join (
+                select order_id, performance_id from upload_table.detail_myshow_s_ordersalesplansnapshot_realtime
+                ) sos
+                on sor.order_id=sos.order_id
+            group by
+                1,2,3
+            ) spo
+            left join (
+                select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where key_name is not null
+                and key_name='sellchannel'
+                ) md
+            on md.key=spo.sellchannel
+        group by
+            1,2,3
     ) so
     on so.mobile=sed.mobile
 group by
-    1,2
+    1,2,3,4
 ;
