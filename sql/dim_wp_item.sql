@@ -8,4 +8,4 @@ select
     province_name,
     venue_name
 from
-    upload_table.dim_wp_item
+    upload_table.dim_wp_items

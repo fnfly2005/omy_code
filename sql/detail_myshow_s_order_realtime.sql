@@ -1,6 +1,7 @@
 /*实时订单表*/
 select
     order_id,
+    sellchannel,
     usermobileno as mobile,
     totalprice
 from 
