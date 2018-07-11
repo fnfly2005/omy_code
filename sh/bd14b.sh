@@ -39,18 +39,21 @@ from (
             from (
                 select 
                     mobile,
-                    performance_flag
+                    performance_flag,
+                    usertype
                 from (
                     select
                         mobile,
                         action_flag,
-                        performance_flag
+                        performance_flag,
+                        usertype
                     from (
                         select 
                             mobile,
                             category_flag,
                             action_flag,
-                            performance_flag
+                            performance_flag,
+                            1 as usertype
                         from
                             mart_movie.dim_myshow_userlabel
                         where
@@ -87,7 +90,8 @@ from (
                             mobile,
                             category_flag,
                             action_flag,
-                            item_flag as performance_flag
+                            item_flag as performance_flag,
+                            2 as usertype
                         from
                             mart_movie.dim_wg_userlabel
                         where
@@ -123,7 +127,8 @@ from (
                             mobile,
                             category_flag,
                             action_flag,
-                            item_flag as performance_flag
+                            item_flag as performance_flag,
+                            3 as usertype
                         from
                             mart_movie.dim_wp_userlabel
                         where
@@ -166,32 +171,12 @@ from (
                     or -99 in (\$action_id)
                 ) sa
                 cross join unnest(performance_flag) as t (performance_id)
-            where
+            where (
                 performance_id in (
                     select
                         performance_id
-                    from (
-                        select
-                            performance_id,
-                            performance_name,
-                            shop_name
-                        from 
-                            mart_movie.dim_myshow_performance
-                        union all
-                        select
-                            item_nu performance_id,
-                            performance_name,
-                            shop_name
-                        from
-                            upload_table.dim_wg_performance
-                        union all
-                        select
-                            item_no performance_id,
-                            item_name as performance_name,
-                            venue_name as shop_name
-                        from
-                            upload_table.dim_wp_items
-                        ) per
+                    from 
+                        mart_movie.dim_myshow_performance
                     where (
                             performance_name like '%\$performance_name%'
                             or '测试'='\$performance_name'
@@ -200,7 +185,43 @@ from (
                             shop_name like '%\$shop_name%'
                             or '测试'='\$shop_name'
                             )
+                    ) 
+                and usertype=1
+                )
+                or (
+                    performance_id in (
+                        select
+                            item_nu
+                        from
+                            upload_table.dim_wg_performance
+                        where (
+                                performance_name like '%\$performance_name%'
+                                or '测试'='\$performance_name'
+                                )
+                            and (
+                                shop_name like '%\$shop_name%'
+                                or '测试'='\$shop_name'
+                                )
+                        ) 
+                    and usertype=2
+                    )
+                or (
+                    performance_id in (
+                        select
+                            item_no
+                        from
+                            upload_table.dim_wp_items
+                        where (
+                                item_name like '%\$performance_name%'
+                                or '测试'='\$performance_name'
+                                )
+                            and (
+                                venue_name like '%\$shop_name%'
+                                or '测试'='\$shop_name'
+                                )
                         )
+                    and usertype=3
+                    )
                 or ('\$performance_name'='测试'
                     and '测试'='\$shop_name')
             ) so
