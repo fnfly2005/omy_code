@@ -6,7 +6,7 @@ select
     movie_id,
     active_date
 from
-    mart_movie.dim_myshow_movieuser
+    mart_movie.dim_myshow_movieusera
 where
     active_date>='$$begindate'
     and active_date<'$$enddate'
