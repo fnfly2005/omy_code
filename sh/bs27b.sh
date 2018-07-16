@@ -23,6 +23,7 @@ md=`fun myshow_dictionary.sql`
 cus=`fun dim_myshow_customer.sql`
 sos=`fun detail_myshow_s_ordersalesplansnapshot_realtime.sql`
 sor=`fun detail_myshow_s_order_realtime.sql`
+sme=`fun dp_myshow__s_messagepush.sql u`
 
 
 file="bs27"
@@ -83,6 +84,16 @@ from (
             where
                 sendtag in ('\$sendtag') 
             ) se1
+        where
+            \$send_cat=1
+        union all
+        select
+            phonenumber as mobile,
+            'all' sendtag,
+            -99 batch_code
+        $sme
+            and \$send_cat=2
+            and performanceid in (\$send_performance_id)
         ) sed
         left join (
             select

@@ -52,6 +52,16 @@ from (
             where
                 sendtag in ('$sendtag') 
             ) se1
+        where
+            $send_cat=1
+        union all
+        select
+            phonenumber as mobile,
+            'all' sendtag,
+            -99 batch_code
+        from origindb.dp_myshow__s_messagepush where phonenumber is not null and CreateTime>'2018-03-01' and regexp_like(phonenumber,'^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$') and phonenumber not in (13800138000,13000000000)
+            and $send_cat=2
+            and performanceid in ($send_performance_id)
         ) sed
         left join (
             select

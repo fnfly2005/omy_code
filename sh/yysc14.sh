@@ -30,8 +30,6 @@ attach="${path}doc/${file}.sql"
 
 echo "
 select 
-    case when 5 in (\$dim) then dt
-    else 'all' end as dt,
     case when 1 in (\$dim) then pt
     else 'all' end as pt,
     case when 2 in (\$dim) then province_name
@@ -43,7 +41,6 @@ select
     count(distinct mobile) user_num
 from (
     select
-        dt,
         md.value2 as pt,
         case when cit.city_id is not null then cit.city_id
         else mi.city_id end as city_id,
@@ -94,7 +91,6 @@ from (
         on dub.userid=so.meituan_userid
         and so.meituan_userid<>-99
         and rank=1
-        and \$mi=0
         left join (
             $md
             and key_name='sellchannel'
@@ -109,16 +105,13 @@ from (
             ) cit
         on cit.mt_city_id=dub.city_id
     where
-        so.rank=1
-        or 5 not in (\$dim)
+        rank=1
     ) sim
     left join (
         $cit
         ) ciy
     on ciy.city_id=sim.city_id
 group by
-    case when 5 in (\$dim) then dt
-    else 'all' end,
     case when 1 in (\$dim) then pt
     else 'all' end,
     case when 2 in (\$dim) then province_name

@@ -89,7 +89,7 @@ from (
                     )
             union all
             select
-                'all' page_identifier,
+                page_identifier,
                 event_id,
                 event_category,
                 event_type,
