@@ -101,9 +101,8 @@ from (
                 upload_table.fn_uploadmobile_data
             where
                 2 in (\$dim)
-                and length(mobile)=11
                 and mobile is not null
-                and regexp_like(mobile,'1[3-9][0-9]+')
+                and regexp_like(mobile,'^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$')
             union all
             select
                 cast(mobile as bigint) mobile
@@ -111,9 +110,8 @@ from (
                 upload_table.wdh_uploadmobile_data
             where
                 3 in (\$dim)
-                and length(mobile)=11
                 and mobile is not null
-                and regexp_like(mobile,'1[3-9][0-9]+')
+                and regexp_like(mobile,'^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$')
             ) mu
         ) mou
         left join (
@@ -154,6 +152,35 @@ from (
                 where
                     pay_time is not null
                     and performance_id in (\$fit_pid)
+                union all
+                select
+                    usermobileno as mobile
+                from 
+                    mart_movie.detail_myshow_saleorder
+                where
+                    pay_time is not null
+                    and performance_id in (\$fit_pid)
+                union all
+                select
+                    phonenumber as mobile
+                from
+                    origindb.dp_myshow__s_messagepush
+                where
+                    performanceid in (\$fit_pid)
+                union all
+                select
+                    mobile
+                from
+                    upload_table.black_list_fn
+                where
+                    \$fit_flag=1
+                union all
+                select
+                    mobile
+                from
+                    upload_table.wdh_upload
+                where
+                    \$fit_flag=2
                 ) m1
             ) mm
         on mm.mobile=mou.mobile

@@ -130,6 +130,35 @@ from (
                 where
                     pay_time is not null
                     and performance_id in ($fit_pid)
+                union all
+                select
+                    usermobileno as mobile
+                from 
+                    mart_movie.detail_myshow_saleorder
+                where
+                    pay_time is not null
+                    and performance_id in ($fit_pid)
+                union all
+                select
+                    phonenumber as mobile
+                from
+                    origindb.dp_myshow__s_messagepush
+                where
+                    performanceid in ($fit_pid)
+                union all
+                select
+                    mobile
+                from
+                    upload_table.black_list_fn
+                where
+                    $fit_flag=1
+                union all
+                select
+                    mobile
+                from
+                    upload_table.wdh_upload
+                where
+                    $fit_flag=2
                 ) m1
             ) mm
         on mm.mobile=mou.mobile

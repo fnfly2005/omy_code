@@ -250,6 +250,20 @@ from (
                     where
                         pay_time is not null
                         and performance_id in ($fit_pid)
+                    union all
+                    select
+                        phonenumber as mobile
+                    from
+                        origindb.dp_myshow__s_messagepush
+                    where
+                        performanceid in ($fit_pid)
+                    union all
+                    select
+                        mobile
+                    from
+                        upload_table.black_list_fn
+                    where
+                        $fit_flag=1
                     ) m1
                 ) mm
             on mm.mobile=so.mobile

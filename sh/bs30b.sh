@@ -110,7 +110,7 @@ from (
         on cit.mt_city_id=dub.city_id
     where
         so.rank=1
-        or 5 not in (\$dim)
+        or 5 in (\$dim)
     ) sim
     left join (
         $cit
