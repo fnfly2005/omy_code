@@ -5,17 +5,14 @@ select
     union_id,
     app_name,
     user_id,
-    utm_source,
-    event_id,
-    event_category,
-    event_type,
-    event_attribute
+    utm_source
 from
-    mart_movie.detail_flow_mv_wide_report
+    mart_flow.detail_flow_mv_wide_report
 where
     partition_date>='$$begindate'
     and partition_date<'$$enddate'
     and partition_log_channel='movie'
+    and partition_etl_source='2_5x'
     and partition_app in (
         'movie',
         'dianping_nova',
