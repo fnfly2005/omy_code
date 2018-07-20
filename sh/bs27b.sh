@@ -21,8 +21,7 @@ so=`fun detail_myshow_saleorder.sql u`
 per=`fun dim_myshow_performance.sql`
 md=`fun myshow_dictionary.sql`
 cus=`fun dim_myshow_customer.sql`
-sos=`fun detail_myshow_s_ordersalesplansnapshot_realtime.sql`
-sor=`fun detail_myshow_s_order_realtime.sql`
+sos=`fun detail_myshow_salerealorder.sql`
 sme=`fun dp_myshow__s_messagepush.sql u`
 
 
@@ -169,20 +168,16 @@ from (
                     case when 2 in (\$dim) and 0 not in (\$dim) then sellchannel
                     else -99 end as sellchannel,
                     sum(totalprice) totalprice,
-                    count(distinct sor.order_id) order_num
+                    count(distinct order_id) order_num
                 from (
-                    $sor
-                        and sellchannel not in (9,10,11)
-                        and \$isreal=1
-                    ) sor
-                    left join (
                     $sos
-                    where (
+                        and (
                             performance_id in (\$send_performance_id) 
                             or -99 in (\$send_performance_id)
                             )
+                        and sellchannel not in (9,10,11)
+                        and \$isreal=1
                     ) sos
-                    on sor.order_id=sos.order_id
                 group by
                     1,2,3
                 ) spo

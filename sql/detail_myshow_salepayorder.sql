@@ -23,7 +23,8 @@ select
     bill_id,
     salesplan_id,
     city_id,
-    pay_time
+    pay_time,
+    substr(pay_time,12,2) as ht
 from
     mart_movie.detail_myshow_salepayorder
 where

@@ -1,5 +1,7 @@
 /*销售计划维表*/
 select
+    salesplan_id,
+    salesplan_name,
     shop_id,
     category_name,
     show_starttime,
@@ -17,6 +19,10 @@ select
     customer_lvl1_name,
     shop_name,
     city_name,
-    area_1_level_name
+    area_1_level_name,
+    area_2_level_name,
+    province_name
 from
     mart_movie.dim_myshow_salesplan
+where
+    salesplan_id is not null

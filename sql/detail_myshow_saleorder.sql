@@ -2,6 +2,7 @@
 select
     substr(pay_time,1,7) as mt,
     substr(pay_time,1,10) as dt,
+    substr(pay_time,12,2) as ht,
     order_id,
     maoyan_order_id,
     usermobileno as mobile,
@@ -28,7 +29,8 @@ select
     province_name,
     city_name,
     ticketclass_description,
-    detailedaddress
+    detailedaddress,
+    salesplan_id
 from
     mart_movie.detail_myshow_saleorder
 where
