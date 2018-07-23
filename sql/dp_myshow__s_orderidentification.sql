@@ -1,5 +1,6 @@
 /*订单关联实名制用户购票信息*/
 select
+    id,
     PerformanceID as performance_id,
     OrderID as order_id,
     UserName,

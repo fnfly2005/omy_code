@@ -15,7 +15,7 @@ fun() {
         echo `cat ${path}sql/${1} | grep -iv "/\*"`
     fi
 }
-beg_key=2864576
+beg_key=2875394
 
 so=`fun S_Order.sql t $beg_key`
 sos=`fun S_OrderSalesPlanSnapshot.sql t $beg_key`

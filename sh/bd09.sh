@@ -91,6 +91,39 @@ from (
                 )
     group by
         1,2,3,4,5,6,7
+    union all
+    select
+        case when 1 in (\$dim) then substr(pay_time,1,10)
+        else 'all' end as dt,
+        case when 7 in (\$dim) then substr(pay_time,12,2)
+        else 'all' end as ht,
+        case when 8 in (\$dim) then (cast(substr(pay_time,15,1) as bigint)+1)*10
+        else 'all' end as mit,
+        sellchannel,
+        salesplan_id,
+        meituan_userid,
+        'all' refund_flag,
+        count(distinct order_id) as order_num,
+        sum(salesplan_count*setnumber) as ticket_num,
+        sum(TotalPrice) as TotalPrice
+    from
+        upload_table.detail_myshow_salerealorder
+    where
+        sellchannel in (\$sellchannel)
+        and pay_time is not null
+        and pay_time>='\$\$begindate'
+        and pay_time<'\$\$enddate'
+        and (performance_id in (\$id)
+            or -99 in (\$id))
+        and \$real=1
+        and ((8 not in (\$dim)
+        and 7 not in (\$dim)
+            )
+        or (substr(pay_time,12,2)>=\$hts
+            and substr(pay_time,12,2)<\$hte
+                ))
+    group by
+        1,2,3,4,5,6,7
         ) as spo
     join (
         $ssp

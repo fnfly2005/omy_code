@@ -18,12 +18,12 @@ fun() {
 }
 
 mi=`fun mobile_info.sql`
+soi=`fun dp_myshow__s_orderidentification.sql u`
 md=`fun myshow_dictionary.sql`
 so=`fun detail_myshow_saleorder.sql u`
-dub=`fun detail_user_base_info.sql`
 cit=`fun dim_myshow_city.sql`
 sme=`fun dp_myshow__s_messagepush.sql u`
-dmu=`fun dim_myshow_userlabel.sql`
+dmu=`fun dim_myshow_userlabel.sql u`
 
 file="bs30"
 lim=";"
@@ -33,50 +33,110 @@ echo "
 select 
     case when 5 in (\$dim) then dt
     else 'all' end as dt,
-    case when 1 in (\$dim) then pt
+    case when 1 in (\$dim) then value2
     else 'all' end as pt,
-    case when 2 in (\$dim) then province_name
-    else 'all' end as province_name,
-    case when 3 in (\$dim) then city_name
-    else 'all' end as city_name,
+    mi_province_name,
+    mi_city_name,
+    province_name,
+    city_name,
     age,
-    count(distinct mobile) user_num
+    case when 6 in (\$dim) then pay_num
+    else 'all' end as pay_num,
+    count(distinct sim.uid) user_num,
+    sum(totalprice) totalprice
 from (
     select
         dt,
-        dub.city_id as mt_city_id,
-        mi.city_id,
-        case when 4 in (\$dim) then datediff(dt,birthday)/365 
-        else 'all' end as age,
-        so.mobile
+        case when 20 in (\$dim) then ciy.province_name
+        else 'all' end as mi_province_name,
+        case when 30 in (\$dim) then ciy.city_name 
+        else 'all' end as mi_city_name,
+        case when 2 in (\$dim) then so.province_name
+        else 'all' end as province_name,
+        case when 3 in (\$dim) then so.city_name 
+        else 'all' end as city_name,
+        age,
+        totalprice,
+        uid
     from (
         select
             dt,
-            meituan_userid,
             mobile,
-            row_number() over (partition by mobile order by dt desc) rank
+            province_name,
+            city_name,
+            age,
+            totalprice,
+            uid,
+            row_number() over (partition by uid order by dt desc) rank
         from (
             select
                 substr(CreateTime,1,10) as dt,
-                case when usertype=2 then userid
-                else -99 end as meituan_userid,
-                phonenumber as mobile
+                'all' as age,
+                userid as meituan_userid,
+                phonenumber as mobile,
+                'all' province_name,
+                'all' city_name,
+                case when \$uid=1 then phonenumber
+                else userid end as uid,
+                0 as totalprice
             from
                 origindb.dp_myshow__s_messagepush 
             where
                 phonenumber is not null
                 and performanceid in (\$performance_id)
                 and 2 in (\$action_flag)
-                and phonenumber rlike '^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$'
             union all
             select
-                substr(pay_time,1,10) dt,
+                dt,
+                case when 4 in (\$dim) then cast(substr(dt,1,4) as bigint)-yer
+                else 'all' end as age,
                 meituan_userid,
-                usermobileno as mobile
-            $so
-                and performance_id in (\$performance_id)
-                and sellchannel not in (9,10,11)
-                and 1 in (\$action_flag)
+                mobile,
+                province_name,
+                city_name,
+                case when \$uid=1 then mobile
+                else meituan_userid end as uid,
+                sum(totalprice) as totalprice
+            from (
+                select
+                    substr(pay_time,1,10) dt,
+                    order_id,
+                    meituan_userid,
+                    province_name,
+                    city_name,
+                    usermobileno as mobile,
+                    totalprice
+                $so
+                    and performance_id in (\$performance_id)
+                    and sellchannel not in (9,10,11)
+                    and 1 in (\$action_flag)
+                ) as s1
+                left join (
+                    select
+                        order_id,
+                        cast(yer as bigint) as yer
+                    from (
+                        select
+                            orderid as order_id,
+                            min(id) id
+                        $soi
+                            and 4 in (\$dim)
+                            and PerformanceID in (\$performance_id)
+                        group by
+                            orderid
+                        ) as so1
+                        left join (
+                            select
+                                id,
+                                substr(IDNumber,7,4) as yer
+                            $soi
+                                and PerformanceID in (\$performance_id)
+                            ) as so2
+                        on so1.id=so2.id
+                    ) as soi
+                on s1.order_id=soi.order_id
+            group by
+                1,2,3,4,5,6,7
             ) sro
         ) so
         left join (
@@ -84,42 +144,32 @@ from (
             ) mi
         on mi.mobile=substr(so.mobile,1,7)
         left join (
-            $dmu
-            ) as dmu
-        on dmu.user_id=so.meituan_userid
-        left join (
-            $dub
-                and city_id is not null
-                and \$mi=0
-            ) dub
-        on dub.userid=so.meituan_userid
-        and so.meituan_userid<>-99
-        and sellchannel in (1,2,5)
-        and rank=1
+            $cit
+            ) ciy
+        on ciy.city_id=mi.city_id
     where
         so.rank=1
         or 5 in (\$dim)
     ) sim
     left join (
-        $cit
-        ) ciy
-    on ciy.city_id=sim.city_id
+        select
+            case when \$uid=1 then mobile
+                else user_id end as uid,
+            min(sellchannel) sellchannel,
+            min(pay_num) pay_num
+        from
+            mart_movie.dim_myshow_userlabel
+        group by
+            1
+       ) dmu
+    on dmu.uid=sim.uid
     left join (
         $md
         and key_name='sellchannel'
         ) md
-    on md.key=so.sellchannel
+    on md.key=dmu.sellchannel
 group by
-    case when 5 in (\$dim) then dt
-    else 'all' end,
-    case when 1 in (\$dim) then pt
-    else 'all' end,
-    case when 2 in (\$dim) then province_name
-    else 'all' end,
-    case when 3 in (\$dim) then city_name
-    else 'all' end,
-    case when 4 in (\$dim) then age
-    else 'all' end
+    1,2,3,4,5,6,7,8
 $lim">${attach}
 
 echo "succuess!"
