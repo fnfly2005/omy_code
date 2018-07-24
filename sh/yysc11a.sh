@@ -137,6 +137,7 @@ from (
                     send_date>=current_date
                     and \$id<>0
                         )
+                    or sendtag in ('\$send_tag')
                 union all 
                 select mobile
                 from upload_table.send_wdh_user
@@ -144,6 +145,7 @@ from (
                     send_date>=current_date
                     and \$id<>0
                         )
+                    or sendtag in ('\$send_tag')
                 union all
                 select
                     usermobileno as mobile

@@ -17,7 +17,7 @@ fun() {
     fi
 }
 
-so=`fun detail_myshow_saleorder.sql` 
+so=`fun detail_myshow_saleorder.sql t`
 opa=`fun dp_myshow__s_orderpartner.sql`
 par=`fun dp_myshow__s_partner.sql`
 md=`fun myshow_dictionary.sql`
@@ -31,21 +31,22 @@ echo "
 select
     dt,
     sell_type,
-    sell_lv1_type,
+    coalesce(sell_lv1_type,'全部') as sell_lv1_type,
+    coalesce(gift_flag,'全部') as gift_flag,
     sum(totalprice) as totalprice,
     count(distinct order_id) as order_num,
     sum(ticket_num) ticket_num
 from (
     select
-        substr(pay_time,1,10) as dt,
+        dt,
         value2 as sell_type,
         case when partner_name is null 
             then value1
         else partner_name end as sell_lv1_type,
-        case when ogi.order_id is null then 0
-        else 1 end as gift_flag,
+        case when ogi.order_id is null then '非赠票'
+        else '赠票' end as gift_flag,
         so.order_id,
-        setnumber*salesplan_count as ticket_num,
+        ticket_num,
         totalprice
     from (
         $so
@@ -71,10 +72,15 @@ from (
         ) md
         on md.key=so.sellchannel
     ) as s1
-where
-    gift_flag=0
 group by
-    1,2,3
+    dt,
+    sell_type,
+    sell_lv1_type,
+    gift_flag
+grouping sets(
+    (dt,sell_type,sell_lv1_type,gift_flag),
+    (dt,sell_type)
+    )
 $lim">${attach}
 
 echo "succuess!"

@@ -77,9 +77,8 @@ from (
                 upload_table.fn_uploadmobile_data
             where
                 2 in ($dim)
-                and length(mobile)=11
                 and mobile is not null
-                and regexp_like(mobile,'1[3-9][0-9]+')
+                and regexp_like(mobile,'^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$')
             union all
             select
                 cast(mobile as bigint) mobile
@@ -87,9 +86,8 @@ from (
                 upload_table.wdh_uploadmobile_data
             where
                 3 in ($dim)
-                and length(mobile)=11
                 and mobile is not null
-                and regexp_like(mobile,'1[3-9][0-9]+')
+                and regexp_like(mobile,'^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$')
             ) mu
         ) mou
         left join (
@@ -115,6 +113,7 @@ from (
                     send_date>=current_date
                     and $id<>0
                         )
+                    or sendtag in ('$send_tag')
                 union all 
                 select mobile
                 from upload_table.send_wdh_user
@@ -122,6 +121,7 @@ from (
                     send_date>=current_date
                     and $id<>0
                         )
+                    or sendtag in ('$send_tag')
                 union all
                 select
                     usermobileno as mobile

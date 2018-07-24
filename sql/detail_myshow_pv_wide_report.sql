@@ -6,7 +6,8 @@ select
     page_name_my,
     page_city_name,
     union_id,
-    performance_id
+    performance_id,
+    category_id
 from 
     mart_movie.detail_myshow_pv_wide_report
 where partition_date>='$$begindate'

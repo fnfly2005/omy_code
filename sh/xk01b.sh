@@ -17,8 +17,9 @@ fun() {
     fi
 }
 
-spo=`fun detail_myshow_salepayorder.sql` 
-ss=`fun detail_myshow_salesplan.sql`
+mpw=`fun detail_myshow_pv_wide_report.sql ut`
+spo=`fun detail_myshow_salepayorder.sql ut`
+ss=`fun detail_myshow_salesplan.sql t`
 md=`fun myshow_dictionary.sql`
 
 file="xk01"
@@ -40,29 +41,26 @@ from (
         sum(sp0.totalprice) as totalprice
     from (
         select
-            spo.dt,
-            spo.sellchannel,
-            count(distinct spo.order_id) as order_num,
-            sum(spo.totalprice) as totalprice
-        from
-            (
-            $spo
-            ) spo
+            partition_date as dt,
+            sellchannel,
+            count(distinct order_id) as order_num,
+            sum(totalprice) as totalprice
+        $spo
+            and sellchannel not in (9,10,11)
         group by
-            spo.dt,
-            spo.sellchannel
+            partition_date,
+            sellchannel
         ) as sp0
-        left join
-        (
-        $md
-        and key_name='sellchannel'
-        ) as md
+        left join (
+            $md
+            and key_name='sellchannel'
+            ) as md
         on sp0.sellchannel=md.key
     group by
         sp0.dt,
         md.value2
     ) as sp1
-    join (
+    left join (
         select
             fpw.dt,
             case when md.value2 is null then '其他'
@@ -73,23 +71,7 @@ from (
                 partition_date as dt,
                 app_name,
                 count(distinct union_id) as uv
-            from
-                mart_flow.detail_flow_pv_wide_report
-            where partition_date='\$\$today{-1d}'
-                and partition_log_channel='movie'
-                and partition_app in (
-                'movie',
-                'dianping_nova',
-                'other_app',
-                'dp_m',
-                'group'
-                )
-                and page_identifier in (
-                select value
-                from upload_table.myshow_pv
-                where key='page_identifier'
-                and page_tag1>=0
-                )
+            $mpw
             group by
                 partition_date,
                 app_name

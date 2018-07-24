@@ -2,7 +2,7 @@
 #--------------------猫眼演出readme-------------------
 #*************************api1.0*******************
 # 优化输出方式,优化函数处理
-path="/Users/fannian/Documents/my_code/"
+path=""
 fun() {
     if [ $2x == dx ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
@@ -17,68 +17,50 @@ fun() {
     fi
 }
 
-mp=`fun dim_myshow_pv.sql`
-mm=`fun dim_myshow_mv.sql`
+so=`fun detail_myshow_saleorder.sql t`
 md=`fun myshow_dictionary.sql`
-fmw=`fun detail_flow_mv_wide_report.sql ut`
 
-file="xk06"
+file="xk01"
 lim=";"
 attach="${path}doc/${file}.sql"
 
 echo "
 select
+    substr(pay_time,1,10) dt,
+    'y' as type,
+    '团购' as lv1_type,
+    sum(purchase_price) as totalprice
+from
+    mart_movie.detail_maoyan_order_sale_cost_new_info
+where
+    pay_time is not null
+    and pay_time>='\$\$today{-1d}'
+    and pay_time<'\$\$today{-0d}'
+    and deal_id in (
+        select
+            mydealid
+        from
+            origindb.dp_myshow__s_deal
+            )
+group by
+    1,2,3
+union all
+select
     dt,
-    mm.event_id,
-    mm.page_identifier,
-    page_name_my,
-    event_name_lv1,
-    event_name_lv2,
-    user_int,
-    mm.biz_par,
-    biz_typ,
-    page_loc,
-    md1.value2 as biz_bg_v,
-    cid_type,
-    event_type,
-    md2.value2 as user_int_v,
-    biz_bg,
-    page_cat,
-    uv
+    key1 as type,
+    value4 as lv1_type,
+    sum(totalprice) as totalprice
 from (
-    $mm
-    ) mm
-    left join (
-        $mp
-        ) mp
-    on mp.page_identifier=mm.page_identifier
+    $so
+    ) so
     left join (
         $md
-        and key_name='biz_bg'
-        ) md1
-    on md1.key=mp.biz_bg
-    left join (
-        $md
-        and key_name='user_int'
-        ) md2
-    on md2.key=mm.user_int
-    left join (
-        select 
-            partition_date as dt,
-            event_id,
-            page_identifier,
-            event_type,
-            approx_distinct(union_id) uv
-        $fmw
-        group by
-            1,2,3,4
-        ) as fpw
-    on mm.event_id=fpw.event_id
-    and mm.page_identifier=fpw.page_identifier
-order by
-   12,15,16,17 desc
+        and key_name='sellchannel'
+        ) md
+    on so.sellchannel=md.key
+group by
+    1,2,3
 $lim">${attach}
-
 echo "succuess!"
 echo ${attach}
 if [ ${1}r == pr ]
@@ -87,5 +69,3 @@ then
 cat ${attach}
 #命令行参数为p时，打印输出文件
 fi
-
-

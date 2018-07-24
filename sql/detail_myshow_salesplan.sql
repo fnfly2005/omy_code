@@ -10,7 +10,8 @@ select
     project_id,
     salesplan_id,
     ticketclass_id,
-    city_id
+    city_id,
+    category_id
 from
     mart_movie.detail_myshow_salesplan
 where

@@ -18,7 +18,8 @@ fun() {
 }
 
 
-spo=`fun detail_myshow_salepayorder.sql` 
+spo=`fun detail_myshow_salepayorder.sql ut`
+mpw=`fun detail_myshow_pv_wide_report.sql ut`
 md=`fun myshow_dictionary.sql`
 mp=`fun myshow_pv.sql`
 
@@ -37,51 +38,24 @@ select
 from (
     select
         dt,
-        coalesce(md.value2,'全部') as pt,
+        md.value2 as pt,
         sum(fp0.first_uv) as first_uv,
         sum(fp0.detail_uv) as detail_uv,
         sum(fp0.order_uv) as order_uv
     from (
         select
-            dt,
+            partition_date as dt,
             app_name,
-            approx_distinct(case when nav_flag=1 then union_id end) as first_uv,
-            approx_distinct(case when nav_flag=2 then union_id end) as detail_uv,
-            approx_distinct(case when nav_flag=4 then union_id end) as order_uv
-        from (
-            select
-                partition_date as dt,
-                app_name,
-                page_identifier,
-                union_id
-            from
-                mart_flow.detail_flow_pv_wide_report
-            where partition_date='\$\$today{-1d}'
-                and partition_log_channel='movie'
-                and partition_app in (
-                'movie',
-                'dianping_nova',
-                'other_app',
-                'dp_m',
-                'group'
-                )
-                and page_identifier in (
-                select value
-                from upload_table.myshow_pv
-                where key='page_identifier'
-                and page_tag1>=0
-                )
-            ) as fpw
-            left join (
-                $mp
-                and page_tag1>=0
-                ) mp
-            on mp.value=fpw.page_identifier
+            count(distinct case when page_name_my='演出首页' then union_id end) as first_uv,
+            count(distinct case when page_name_my='演出详情页' then union_id end) as detail_uv,
+            count(distinct case when page_name_my='演出确认订单页' then union_id end) as order_uv
+        $mpw
+            and page_name_my in ('演出首页','演出详情页','演出确认订单页')
         group by
-            dt,
+            partition_date,
             app_name
         ) as fp0
-        left join (
+        join (
             $md
             and key_name='app_name'
             ) md
@@ -97,22 +71,19 @@ from (
         sum(sp0.order_num) as order_num
     from (
         select
-            spo.dt,
-            spo.sellchannel,
-            count(distinct spo.order_id) as order_num
-        from
-            (
-            $spo
-            ) spo
+            partition_date as dt,
+            sellchannel,
+            count(distinct order_id) as order_num
+        $spo
+            and sellchannel not in (9,10,11)
         group by
-            spo.dt,
-            spo.sellchannel
+            partition_date,
+            sellchannel
         ) as sp0
-        left join
-        (
-        $md
-        and key_name='sellchannel'
-        ) as md
+        left join (
+            $md
+            and key_name='sellchannel'
+            ) as md
         on sp0.sellchannel=md.key
     group by
         sp0.dt,

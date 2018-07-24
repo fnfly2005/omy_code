@@ -33,18 +33,20 @@ from (
         select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where key_name is not null
         and key_name='user_int'
         ) md2
-    on md1.key=mm.user_int
+    on md2.key=mm.user_int
     left join (
         select 
             partition_date as dt,
             event_id,
+            page_identifier,
             event_type,
             approx_distinct(union_id) uv
-        from mart_movie.detail_flow_mv_wide_report where partition_date>='$$today{-1d}' and partition_date<'$$today{-0d}' and partition_log_channel='movie' and partition_app in ( 'movie', 'dianping_nova', 'other_app', 'dp_m', 'group' )
+        from mart_flow.detail_flow_mv_wide_report where partition_date>='$$today{-1d}' and partition_date<'$$today{-0d}' and partition_log_channel='movie' and partition_etl_source='2_5x' and partition_app in ( 'movie', 'dianping_nova', 'other_app', 'dp_m', 'group' )
         group by
-            1,2,3
+            1,2,3,4
         ) as fpw
     on mm.event_id=fpw.event_id
+    and mm.page_identifier=fpw.page_identifier
 order by
    12,15,16,17 desc
 ;
