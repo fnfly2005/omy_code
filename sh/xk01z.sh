@@ -29,7 +29,9 @@ select
     substr(pay_time,1,10) dt,
     'y' as type,
     '团购' as lv1_type,
-    sum(purchase_price) as totalprice
+    sum(purchase_price) as totalprice,
+    count(distinct order_id) as order_num,
+    sum(quantity) as ticket_num
 from
     mart_movie.detail_maoyan_order_sale_cost_new_info
 where
@@ -49,7 +51,9 @@ select
     dt,
     key1 as type,
     value4 as lv1_type,
-    sum(totalprice) as totalprice
+    sum(totalprice) as totalprice,
+    count(distinct order_id) as order_num,
+    sum(ticket_num) as ticket_num
 from (
     $so
     ) so

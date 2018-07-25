@@ -18,8 +18,8 @@ fun() {
 }
 
 so=`fun detail_myshow_saleorder.sql t`
-opa=`fun dp_myshow__s_orderpartner.sql`
-par=`fun dp_myshow__s_partner.sql`
+md=`fun myshow_dictionary.sql`
+ogi=`fun dp_myshow__s_ordergift.sql`
 
 file="xk01"
 lim=";"
@@ -28,24 +28,27 @@ attach="${path}doc/${file}.sql"
 echo "
 select
     dt,
-    partner_name,
-    count(distinct so.order_id) as order_num,
+    value1,
+    case when ogi.order_id is null then '非赠票'
+    else '赠票' end as gift_flag,
     sum(totalprice) as totalprice,
+    count(distinct so.order_id) as order_num,
     sum(ticket_num) ticket_num
 from (
     $so
-        and sellchannel=11
-        ) so
+    and sellchannel in (9,10)
+    ) so
     left join (
-        $opa
-        ) opa
-    on so.order_id=opa.order_id
+    $ogi
+    ) ogi
+    on so.order_id=ogi.order_id
     left join (
-        $par
-        ) par
-    on opa.partner_id=par.partner_id
+    $md
+    and key_name='sellchannel'
+    ) md
+    on md.key=so.sellchannel
 group by
-    1,2
+    1,2,3
 $lim">${attach}
 
 echo "succuess!"

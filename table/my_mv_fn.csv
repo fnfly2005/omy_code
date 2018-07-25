@@ -37,14 +37,14 @@
 37,b_vSdMX,,场馆POI链接,c_Q7wY4,6,performance_id&shop_id&fromTag,custom&utm_source,0,1,2018-07-05
 38,b_EcSFj,立即购票,立即购票,c_Q7wY4,6,performance_id&shop_id&fromTag,custom,0,1,2018-07-05
 39,b_4uDeg,,演唱会附近,c_Q7wY4,6,performance_id&shop_id&fromTag,custom&utm_source,0,1,2018-07-05
-40,b_oBtxe,,演出详情链接,c_Q7wY4,6,performance_id&shop_id&fromTag,custom&utm_source,0,1,2018-07-05
+40,b_oBtxe,,更多图文详情,c_Q7wY4,6,performance_id&shop_id&fromTag,custom&utm_source,0,1,2018-07-05
 41,b_Vwmzc,,座位图,c_Q7wY4,6,performance_id&shop_id&fromTag,custom&utm_source,0,1,2018-07-05
 42,b_vc2sacku,,座位选择购票,c_Q7wY4,6,performance_id&shop_id&fromTag,custom&utm_source,0,1,2018-07-05
 43,b_8lmylw84,,确认选票,c_iclxcfq2,6,,,0,1,2018-07-05
 44,b_j89pt859,,选择座位,c_iclxcfq2,6,,,0,1,2018-07-05
 45,b_bvdccmry,,重选分区,c_iclxcfq2,6,,,0,1,2018-07-05
-46,b_2iag0in1,立即支付,立即支付_order,packages/show/pages/order/confirm,6,pId&orderId,custom&event_attribute,0,1,2018-07-05
-47,b_w047f3uw,立即支付,立即支付_pay,packages/show/pages/order/confirm,6,pId&id,custom&order_id&utm_source,0,1,2018-07-05
+46,b_2iag0in1,立即支付,立即支付_order,pages/showsubs/order/confirm,6,pId&orderId,custom&event_attribute,0,1,2018-07-05
+47,b_w047f3uw,立即支付,立即支付_pay,pages/showsubs/order/confirm,6,pId&id,custom&order_id&utm_source,0,1,2018-07-05
 48,onInputFocus,搜索,搜索框,pages/show/index/index,1,,,0,1,2018-07-05
 49,jumpToActivity,头部banner,头部banner,pages/show/index/index,3,,,10,0,2018-07-05
 50,b_d6dmcofu,PUSH,打开push,c_ak74h40f,3,drama_id&city_id,custom,0,1,2018-07-05
@@ -152,3 +152,6 @@
 152,show_icon_click,金刚区,金刚区_icon,pages/show/index/index,2,index,event_attribute,20,1,2018-07-05
 153,sortRecommendList,为你推荐,为你推荐_筛选,pages/show/index/index,4,,utm_source,102,1,2018-07-05
 154,b_to85lkzt,头部banner,头部banner,c_f740bkf7,3,city_id,custom,10,1,2018-07-05
+155,b_qv24cb7c,收藏,想看,pages/show/detail/index,6,id,custom,0,1,2018-07-25
+156,b_uusk5nvw,收藏,想看,pages/show/detail/index,6,id,custom,0,1,2018-07-25
+157,b_okjqo1ip,项目列表,项目列表,pages/user/index,6,,,0,1,2018-07-25

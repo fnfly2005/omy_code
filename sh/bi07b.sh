@@ -17,8 +17,13 @@ fun() {
     fi
 }
 
-fpw=`fun detail_flow_pv_wide_report.sql u`
-fmw=`fun detail_flow_mv_wide_report.sql u`
+fpw=`fun detail_flow_all_report_hourly.sql u`
+custom_id="locate_city_id" #自定义字段
+typ="PV" #PV 页面埋点 MV 模块埋点
+limit=50 #每个埋点查看量
+identifier="pages/show/index/index','pages/show/detail/index" #指定埋点查询
+mod=0 #0 指定埋点查询 1 批量导入查询
+hour=15
 
 file="bi07"
 lim=";"
@@ -30,11 +35,11 @@ select
 	event_id,
     custom,
     utm_source,
-    \$custom_id,
+    $custom_id,
     page_city_id,
+    geo_city_id,
 	event_category,
 	event_type,
-	event_attribute,
 	order_id
 from (
     select
@@ -42,11 +47,11 @@ from (
         event_id,
         custom,
         utm_source,
-        \$custom_id,
+        $custom_id,
         page_city_id,
+        geo_city_id,
         event_category,
         event_type,
-        event_attribute,
         order_id,
         row_number() over (partition by event_id order by 1) as rank
     from (
@@ -55,63 +60,52 @@ from (
             event_id,
             custom,
             utm_source,
-            \$custom_id,
+            $custom_id,
             page_city_id,
+            geo_city_id,
             event_category,
             event_type,
-            event_attribute,
             order_id
         from (
-            select
-                page_identifier,
-                page_identifier as event_id,
-                'all' as event_category,
-                'all' as event_type,
-                custom as event_attribute,
-                'all' as order_id,
-                page_city_id,
-                custom,
-                utm_source,
-                \$custom_id,
-                row_number() over (partition by page_identifier order by 1) as rak
-            $fpw
-                and \$type=1
-                and (
-                    page_identifier in (
-                        select
-                            identifier
-                        from 
-                            upload_table.myshow_identifier_ver
-                        where
-                            \$mod=1
-                        )
-                    or page_identifier in ('\$identifier')
-                    )
-            union all
             select
                 page_identifier,
                 event_id,
                 event_category,
                 event_type,
-                event_attribute,
                 order_id,
                 page_city_id,
+                geo_city_id,
                 custom,
                 utm_source,
-                \$custom_id,
-                row_number() over (partition by event_id order by 1) as rak
-            $fmw
-                and \$type=2
+                $custom_id,
+                row_number() over (partition by case when 'PV' in ('$typ') 
+                    then page_identifier else event_id end order by 1) as rak
+            $fpw
+                and partition_hour>=$hour
                 and (
-                    event_id in (
+                    (partition_nm in ('$typ')
+                    and (page_identifier in (
+                            select
+                                identifier
+                            from 
+                                upload_table.myshow_identifier_ver
+                            where
+                                $mod=1
+                            )
+                        or page_identifier in ('$identifier'))
+                        )
+                    or 
+                    (partition_nm in ('$typ')
+                    and (event_id in (
                         select
                             identifier
                         from 
                             upload_table.myshow_identifier_ver
                         where
-                            \$mod=1
+                            $mod=1
                         )
-                    or event_id in ('\$identifier')
+                        or event_id in ('$identifier'))
+                        )
                     )
             ) as fw
         where
@@ -119,7 +113,7 @@ from (
         ) as rk
     ) as ran
 where
-    rank<=\$limit
+    rank<=$limit
 $lim">${attach}
 
 echo "succuess!"

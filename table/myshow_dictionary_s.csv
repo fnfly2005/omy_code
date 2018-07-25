@@ -10,7 +10,7 @@ app_name,dp_m_qqcard,dianping_i,,其他,点评,dp,点评i版
 app_name,dp_m_wxcard,wx_wallet_chwl,,其他,微信吃喝玩乐,dp,微信钱包入口吃喝玩乐
 app_name,maoyan_i,movie_i,,其他,猫眼,mt,猫眼i版
 app_name,gewara,gewara_app,,格瓦拉APP,格瓦拉,gwl,格瓦拉APP
-app_name,gewara_pc,gewara_app,,格瓦拉PC,格瓦拉,wx,格瓦拉APP
+app_name,gewara_pc,wx_wallet_movie,,格瓦拉PC,微信演出赛事,wx,微信钱包入口猫眼
 app_name,yanchu_qqwallet_i,movie_i,,手机QQ钱包,演出M站,mt,猫眼i版
 app_name,show.maoyan.com,movie_i,,其他,演出M站,mt,猫眼i版
 app_name,all,,,全部,全部,all,
@@ -74,7 +74,7 @@ sellchannel,5,y,,猫眼,猫眼,mt,直连
 sellchannel,6,y,,微信钱包_h5,微信演出赛事,wx,直连
 sellchannel,7,y,,微信钱包_小程序,微信演出赛事,wx,直连
 sellchannel,8,y,,格瓦拉,格瓦拉,gwl,直连
-sellchannel,9,n,,范特西,批量出票,分销,线下分销
+sellchannel,9,n,,范特西,批量出票,批量出票,批量出票
 sellchannel,10,n,,商户,批量出票,批量出票,批量出票
 sellchannel,11,y,,api分销,api分销,分销,api分销
 sellchannel,12,y,,微信点评_小程序,微信吃喝玩乐,dp,直连
