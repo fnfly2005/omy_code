@@ -2,17 +2,23 @@
 select
     dt,
     md.value2 as pt,
-    mp.bu,
-    mp.p_name,
-    mp.m_name,
-    mp.m_no,
-    sum(uv) as uv,
-    sum(pv) as pv
+    page_name_my,
+    event_name_lv1,
+    event_name_lv2,
+    page_loc,
+    sum(case when event_type='click' then uv end) as click_uv,
+    sum(case when event_type='click' then pv end) as click_pv,
+    sum(case when event_type='view' then uv end) as view_uv,
+    sum(case when event_type='view' then pv end) as view_pv
 from (
     select
-        partition_date as dt,
-        app_name,
+        case when 1 in ($dim) then partition_date
+        else 'all' end as dt,
+        case when 2 in ($dim) then app_name
+        else 'all' end as app_name,
+        page_identifier,
         event_id,
+        event_type,
         approx_distinct(union_id) as uv,
         count(1) as pv
     from
@@ -21,40 +27,29 @@ from (
         partition_date>='$$begindate'
         and partition_date<'$$enddate'
         and partition_log_channel='movie'
-        and partition_etl_source='2_5x'
         and partition_app in (
-        'movie',
-        'dianping_nova',
-        'other_app',
-        'dp_m',
-        'group'
-        )
-        and event_type='click'
+            'movie',
+            'dianping_nova',
+            'other_app',
+            'dp_m',
+            'group'
+            )
+        and page_identifier in ('$page_identifier')
     group by
-        1,2,3
+        1,2,3,4,5
     ) as fmw
     join (
-        select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
+        select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where key_name is not null
         and key_name='app_name'
         ) as md
     on md.key=fmw.app_name
-    join (
-    select 
-        case when mp1.page_tag1=0 then '演出'
-        else '平台' end as bu,
-        mp1.name as p_name,
-        mp2.value as event_id,
-        mp2.name as m_name,
-        mp2.page_tag2 as m_no
-    from upload_table.myshow_pv as mp1
-        join upload_table.myshow_pv as mp2
-        on mp1.value=mp2.page
-        and mp1.key='page_identifier'
-        and mp2.key='event_id'
-        and mp1.nav_flag<=1
-        and mp1.page_tag1>-2
-    ) mp 
+    join mart_movie.dim_myshow_mv mp
     on mp.event_id=fmw.event_id
+    and mp.page_identifier=fmw.page_identifier
+    left join mart_movie.dim_myshow_pv msp
+    on mp.page_identifier=msp.page_identifier
+where
+    md.value2 in ('$app_name')
 group by 
     1,2,3,4,5,6
 ;

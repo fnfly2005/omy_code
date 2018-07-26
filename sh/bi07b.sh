@@ -23,7 +23,7 @@ typ="PV" #PV 页面埋点 MV 模块埋点
 limit=50 #每个埋点查看量
 identifier="pages/show/index/index','pages/show/detail/index" #指定埋点查询
 mod=0 #0 指定埋点查询 1 批量导入查询
-hour=15
+hour=17
 
 file="bi07"
 lim=";"
