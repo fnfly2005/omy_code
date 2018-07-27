@@ -11,6 +11,8 @@ select
     else 'all' end as customer_type_name,
     case when 3 in ($dim) then customer_lvl1_name
     else 'all' end as customer_lvl1_name,
+    case when 4 in ($dim) then customer_name
+    else 'all' end as customer_name,
     area_1_level_name,
     area_2_level_name,
     province_name,
@@ -19,7 +21,7 @@ select
     spo.performance_id,
     performance_name,
     shop_name,
-    case when 3 not in ($dim) then 'all'
+    case when 3 not in ($dim) and 4 not in ($dim) then 'all'
         when dpr.bd_name is null then '无'
     else dpr.bd_name end as bd_name,
     sum(order_num) as order_num,
@@ -42,11 +44,12 @@ from (
     where 
         partition_date>='$$begindate'
         and partition_date<'$$enddate'
+        and category_id in ($category_id)
     group by
         1,2,3,4,5
     ) spo
     left join (
-    select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, city_id, city_name, shop_name from mart_movie.dim_myshow_performance where performance_id is not null
+    select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, province_id, city_id, city_name, shop_id, shop_name from mart_movie.dim_myshow_performance where performance_id is not null
     ) dmp
     using(performance_id)
     left join (
@@ -58,10 +61,10 @@ from (
     ) dpr
     on dpr.project_id=spo.project_id
     left join (
-    select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
+    select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where key_name is not null
     and key_name='sellchannel'
     ) md
     on md.key=spo.sellchannel
 group by
-    1,2,3,4,5,6,7,8,9,10,11,12,13,14
+    1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
 ;

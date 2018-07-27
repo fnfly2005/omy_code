@@ -95,3 +95,4 @@
 95,com.gewara.trade.order.seat.MovieSeatOrderDetailActivity,电影订单详情页,native,1,,2,1,2018-07-05
 96,pages/user/index,我的,mini_programs,1,,0,1,2018-07-25
 97,c_3m01icu6,演出搜索页,h5,1,fromTag,1,1,2018-07-05
+98,pages/showsubs/collect/index,演出收藏列表页,mini_programs,1,,1,1,2018-07-26

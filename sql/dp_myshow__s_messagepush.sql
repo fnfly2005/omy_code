@@ -1,4 +1,4 @@
-/*预售短信提醒信息表*/
+/*开售提醒信息表*/
 select
     substr(CreateTime,1,10) as dt,
     phonenumber as mobile,

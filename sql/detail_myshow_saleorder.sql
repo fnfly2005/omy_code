@@ -30,7 +30,8 @@ select
     city_name,
     ticketclass_description,
     detailedaddress,
-    salesplan_id
+    salesplan_id,
+    salesplan_name
 from
     mart_movie.detail_myshow_saleorder
 where

@@ -40,6 +40,8 @@ select
     else 'all' end as customer_type_name,
     case when 3 in (\$dim) then customer_lvl1_name
     else 'all' end as customer_lvl1_name,
+    case when 4 in (\$dim) then customer_name
+    else 'all' end as customer_name,
     area_1_level_name,
     area_2_level_name,
     province_name,
@@ -48,7 +50,7 @@ select
     spo.performance_id,
     performance_name,
     shop_name,
-    case when 3 not in (\$dim) then 'all'
+    case when 3 not in (\$dim) and 4 not in (\$dim) then 'all'
         when dpr.bd_name is null then '无'
     else dpr.bd_name end as bd_name,
     sum(order_num) as order_num,
@@ -71,6 +73,7 @@ from (
     where 
         partition_date>='\$\$begindate'
         and partition_date<'\$\$enddate'
+        and category_id in (\$category_id)
     group by
         1,2,3,4,5
     ) spo
@@ -92,7 +95,7 @@ from (
     ) md
     on md.key=spo.sellchannel
 group by
-    1,2,3,4,5,6,7,8,9,10,11,12,13,14
+    1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
 $lim">${attach}
 
 echo "succuess!"

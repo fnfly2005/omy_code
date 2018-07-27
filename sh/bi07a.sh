@@ -79,7 +79,7 @@ from (
                 \$custom_id,
                 row_number() over (partition by page_identifier order by 1) as rak
             $fpw
-                and \$type=1
+                and 1 in (\$type)
                 and substr(stat_time,12,2)>='\$ht'
                 and (
                     page_identifier in (
@@ -107,7 +107,7 @@ from (
                 \$custom_id,
                 row_number() over (partition by event_id order by 1) as rak
             $fmw
-                and \$type=2
+                and 2 in (\$type)
                 and substr(stat_time,12,2)>='\$ht'
                 and (
                     event_id in (
