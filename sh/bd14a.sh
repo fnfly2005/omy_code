@@ -42,46 +42,42 @@ from (
                 performance_id in (
                     select distinct
                         performance_id
-                    from (
-                        select
-                            performance_id
-                        from
-                            mart_movie.dim_myshow_performance
-                        where (
-                                performance_name like '%\$performance_name%'
-                                or performance_name='测试'
+                    from
+                        mart_movie.dim_myshow_performance
+                    where (
+                            performance_name like '%\$performance_name%'
+                            or '测试'='\$performance_name'
+                            )
+                        and (
+                            performance_id in (\$performance_id)
+                            or -99 in (\$performance_id)
+                            )
+                        and (
+                            shop_id in (\$shop_id)
+                            or -99 in (\$shop_id)
+                            )
+                        and (
+                            shop_name like '%\$shop_name%'
+                            or '测试'='\$shop_name'
+                            )
+                        and ((
+                                city_id in (\$city_id)
+                                and 1 in (\$cp)
                                 )
-                            and (
-                                performance_id in (\$performance_id)
-                                or -99 in (\$performance_id)
-                                )
-                            and (
-                                shop_id in (\$shop_id)
-                                or -99 in (\$shop_id)
-                                )
-                            and (
-                                shop_name like '%\$shop_name%'
-                                or shop_name='测试'
-                                )
-                            and (
-                                (
-                                    city_id in (\$city_id)
-                                    and 1 in (\$cp)
+                            or (
+                                city_id in (
+                                    select
+                                        city_id
+                                    from
+                                        mart_movie.dim_myshow_city
+                                    where
+                                        province_id in (\$province_id)
                                     )
-                                or (
-                                    city_id in (
-                                        select
-                                            city_id
-                                        from
-                                            mart_movie.dim_myshow_city
-                                        where
-                                            province_id in (\$province_id)
-                                        )
-                                    and 2 in (\$cp)
-                                    )
+                                and 2 in (\$cp)
                                 )
-                        ) c1
-                    where performance_id not in (\$no_performance_id)
+                            or 3 in (\$cp)
+                            )
+                        and performance_id not in (\$no_performance_id)
                     )
             union all
             select 
@@ -93,43 +89,40 @@ from (
                 and item_id in (
                     select distinct
                         item_id
-                    from (
-                        select
-                            item_id
-                        from
-                            upload_table.dim_wg_performance
-                        where (
-                                item_no in (\$item_id)
-                                or -99 in (\$item_id)
+                    from
+                        upload_table.dim_wg_performance
+                    where (
+                            performance_name like '%\$performance_name%'
+                            or '测试'='\$performance_name'
+                            )
+                        and (
+                            shop_name like '%\$shop_name%'
+                            or '测试'='\$shop_name'
+                            )
+                        and (
+                            item_no in (\$performance_id)
+                            or -99 in (\$performance_id)
+                            )
+                        and (
+                            (
+                                city_id in (\$city_id)
+                                and 1 in (\$cp)
                                 )
-                            and (
-                                performance_name like '%\$performance_name%'
-                                or '测试'='\$performance_name'
-                                )
-                            and (
-                                shop_name like '%\$shop_name%'
-                                or '测试'='\$shop_name'
-                                )
-                            and (
-                                (
-                                    city_id in (\$city_id)
-                                    and 1 in (\$cp)
+                            or (
+                                city_id in (
+                                    select
+                                        city_id
+                                    from
+                                        mart_movie.dim_myshow_city
+                                    where
+                                        province_id in (\$province_id)
                                     )
-                                or (
-                                    city_id in (
-                                        select
-                                            city_id
-                                        from
-                                            mart_movie.dim_myshow_city
-                                        where
-                                            province_id in (\$province_id)
-                                        )
-                                    and 2 in (\$cp)
-                                    )
+                                and 2 in (\$cp)
                                 )
-                        ) as di
-                    where item_id not in (\$no_performance_id)
-                    ) 
+                            or 3 in (\$cp)
+                            )
+                        and item_id not in (\$no_performance_id)
+                    )
             ) so
             left join (
                 select distinct

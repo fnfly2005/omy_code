@@ -58,6 +58,9 @@ from (
                             mart_movie.dim_myshow_userlabel
                         where
                             1 in (\$order_src)
+                            and (active_date>=date_add('month',-\$mth_id,date_parse('\$\$enddate','%Y-%m-%d'))
+                                or \$mth_id=0
+                                )
                             and sellchannel in (\$sellchannel_id)
                             and (
                                 (
@@ -96,6 +99,9 @@ from (
                             mart_movie.dim_wg_userlabel
                         where
                             2 in (\$order_src)
+                            and (active_date>=date_add('month',-\$mth_id,date_parse('\$\$enddate','%Y-%m-%d'))
+                                or \$mth_id=0
+                                )
                             and (
                                 (
                                     city_id in (\$city_id)
@@ -133,6 +139,9 @@ from (
                             mart_movie.dim_wp_userlabel
                         where
                             3 in (\$order_src)
+                            and (active_date>=date_add('month',-\$mth_id,date_parse('\$\$enddate','%Y-%m-%d'))
+                                or \$mth_id=0
+                                )
                             and (
                                 (
                                     city_id in (\$city_id)
