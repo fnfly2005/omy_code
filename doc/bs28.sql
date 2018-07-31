@@ -11,6 +11,7 @@ select
     sp.area_2_level_name,
     sp.province_name,
     sp.city_name,
+    show_num,
     order_num,
     totalprice,
     ticket_num,
@@ -42,6 +43,7 @@ from (
         case when 10 in ($dim) then city_name
         else 'all' end city_name,
         count(distinct spo.performance_id) as sp_num,
+        sum(show_num) as show_num,
         sum(order_num) as order_num,
         sum(totalprice) as totalprice,
         sum(ticket_num) as ticket_num,
@@ -52,6 +54,7 @@ from (
             sellchannel,
             customer_id,
             performance_id,
+            count(distinct show_id) as show_num,
             sum(order_num) as order_num,
             sum(totalprice) as totalprice,
             sum(ticket_num) as ticket_num,
@@ -62,6 +65,7 @@ from (
                 sellchannel,
                 customer_id,
                 performance_id,
+                show_id,
                 count(distinct order_id) as order_num,
                 sum(totalprice) as totalprice,
                 sum(salesplan_count*setnumber) as ticket_num,
@@ -73,55 +77,55 @@ from (
                 and order_create_time>='$$begindate'
                 and order_create_time<'$$enddate'
                 and $payflag=0
-                and sellchannel in ($sellchannel)
             group by
-                1,2,3,4
+                1,2,3,4,5
             union all
             select
                 partition_date as dt,
                 sellchannel,
                 customer_id,
                 performance_id,
+                show_id,
                 count(distinct order_id) as order_num,
                 sum(totalprice) as totalprice,
                 sum(salesplan_count*setnumber) as ticket_num,
                 sum(grossprofit) as grossprofit
             from mart_movie.detail_myshow_salepayorder where partition_date>='$$begindate' and partition_date<'$$enddate'
-                and sellchannel in ($sellchannel)
             group by
-                1,2,3,4
+                1,2,3,4,5
             union all
             select
                 substr(pay_time,1,10) as dt,
                 sellchannel,
                 customer_id,
                 performance_id,
+                show_id,
                 count(distinct order_id) as order_num,
                 sum(totalprice) as totalprice,
                 sum(salesplan_count*setnumber) as ticket_num,
                 0 as grossprofit
             from mart_movie.detail_myshow_saleorder where pay_time is not null and pay_time>='$$begindate' and pay_time<'$$enddate'
                 and sellchannel in (9,10)
-                and sellchannel in ($sellchannel)
             group by
-                1,2,3,4
+                1,2,3,4,5
             ) sp1
         group by
             1,2,3,4
             ) spo
+        join (
+        select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where key_name is not null
+        and key_name='sellchannel'
+        and value2 in ('$pt')
+        ) md1
+        on md1.key=spo.sellchannel
         left join (
-        select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, city_id, city_name, shop_name from mart_movie.dim_myshow_performance where performance_id is not null
+        select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, province_id, city_id, city_name, shop_id, shop_name from mart_movie.dim_myshow_performance where performance_id is not null
         ) per
         on spo.performance_id=per.performance_id
         left join (
         select customer_id, customer_type_id, customer_type_name, customer_lvl1_name, customer_name, customer_shortname, customer_code from mart_movie.dim_myshow_customer where customer_id is not null
         ) cus
         on cus.customer_id=spo.customer_id
-        left join (
-        select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where key_name is not null
-        and key_name='sellchannel'
-        ) md1
-        on md1.key=spo.sellchannel
     group by
         1,2,3,4,5,6,7,8,9,10,11
     union all
@@ -147,6 +151,7 @@ from (
         case when 10 in ($dim) then cit.city_name
         else 'all' end city_name,
         count(distinct wso.item_id) as sp_num,
+        0 as show_num,
         sum(order_num) as order_num,
         sum(totalprice) as totalprice,
         0 as ticket_num,
@@ -168,9 +173,10 @@ from (
         group by
             1,2,3
             ) wso
-        left join (
+        join (
         select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where key_name is not null
         and key_name='order_src'
+        and value2 in ('$pt')
         ) md2
         on wso.order_src=md2.key
         left join (
@@ -228,7 +234,7 @@ from (
             from mart_movie.detail_myshow_salesplan where salesplan_id is not null and partition_date>='$$begindate' and partition_date<'$$enddate'
             ) spo
             left join (
-            select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, city_id, city_name, shop_name from mart_movie.dim_myshow_performance where performance_id is not null
+            select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, province_id, city_id, city_name, shop_id, shop_name from mart_movie.dim_myshow_performance where performance_id is not null
             ) per
             on spo.performance_id=per.performance_id
             left join (

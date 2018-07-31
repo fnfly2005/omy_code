@@ -48,6 +48,7 @@ select
     sp.area_2_level_name,
     sp.province_name,
     sp.city_name,
+    show_num,
     order_num,
     totalprice,
     ticket_num,
@@ -79,6 +80,7 @@ from (
         case when 10 in (\$dim) then city_name
         else 'all' end city_name,
         count(distinct spo.performance_id) as sp_num,
+        sum(show_num) as show_num,
         sum(order_num) as order_num,
         sum(totalprice) as totalprice,
         sum(ticket_num) as ticket_num,
@@ -89,6 +91,7 @@ from (
             sellchannel,
             customer_id,
             performance_id,
+            count(distinct show_id) as show_num,
             sum(order_num) as order_num,
             sum(totalprice) as totalprice,
             sum(ticket_num) as ticket_num,
@@ -99,6 +102,7 @@ from (
                 sellchannel,
                 customer_id,
                 performance_id,
+                show_id,
                 count(distinct order_id) as order_num,
                 sum(totalprice) as totalprice,
                 sum(salesplan_count*setnumber) as ticket_num,
@@ -110,42 +114,47 @@ from (
                 and order_create_time>='\$\$begindate'
                 and order_create_time<'\$\$enddate'
                 and \$payflag=0
-                and sellchannel in (\$sellchannel)
             group by
-                1,2,3,4
+                1,2,3,4,5
             union all
             select
                 partition_date as dt,
                 sellchannel,
                 customer_id,
                 performance_id,
+                show_id,
                 count(distinct order_id) as order_num,
                 sum(totalprice) as totalprice,
                 sum(salesplan_count*setnumber) as ticket_num,
                 sum(grossprofit) as grossprofit
             $spo
-                and sellchannel in (\$sellchannel)
             group by
-                1,2,3,4
+                1,2,3,4,5
             union all
             select
                 substr(pay_time,1,10) as dt,
                 sellchannel,
                 customer_id,
                 performance_id,
+                show_id,
                 count(distinct order_id) as order_num,
                 sum(totalprice) as totalprice,
                 sum(salesplan_count*setnumber) as ticket_num,
                 0 as grossprofit
             $so
                 and sellchannel in (9,10)
-                and sellchannel in (\$sellchannel)
             group by
-                1,2,3,4
+                1,2,3,4,5
             ) sp1
         group by
             1,2,3,4
             ) spo
+        join (
+        $md
+        and key_name='sellchannel'
+        and value2 in ('\$pt')
+        ) md1
+        on md1.key=spo.sellchannel
         left join (
         $per
         ) per
@@ -154,11 +163,6 @@ from (
         $cus
         ) cus
         on cus.customer_id=spo.customer_id
-        left join (
-        $md
-        and key_name='sellchannel'
-        ) md1
-        on md1.key=spo.sellchannel
     group by
         1,2,3,4,5,6,7,8,9,10,11
     union all
@@ -184,6 +188,7 @@ from (
         case when 10 in (\$dim) then cit.city_name
         else 'all' end city_name,
         count(distinct wso.item_id) as sp_num,
+        0 as show_num,
         sum(order_num) as order_num,
         sum(totalprice) as totalprice,
         0 as ticket_num,
@@ -205,9 +210,10 @@ from (
         group by
             1,2,3
             ) wso
-        left join (
+        join (
         $md
         and key_name='order_src'
+        and value2 in ('\$pt')
         ) md2
         on wso.order_src=md2.key
         left join (
