@@ -1,20 +1,25 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
+path=""
 fun() {
-    if [ $2x == dx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
-    elif [ $2x == ux ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
-    elif [ $2x == tx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
-    elif [ $2x == utx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
-    else
-        echo `cat ${path}sql/${1} | grep -iv "/\*"`
+    tmp=`cat ${path}sql/${1} | grep -iv "/\*"`
+    if [ -n $2 ];then
+        if [[ $2 =~ d ]];then
+            tmp=`echo $tmp | sed 's/where.*//'`
+        fi
+        if [[ $2 =~ u ]];then
+            tmp=`echo $tmp | sed 's/.*from/from/'`
+        fi
+        if [[ $2 =~ t ]];then
+            tmp=`echo $tmp | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
+        fi
+        if [[ $2 =~ m ]];then
+            tmp=`echo $tmp | sed "s/begindate/monthfirst{-1m}/g;s/enddate/monthfirst/g"`
+        fi
     fi
+    echo $tmp
 }
 
-spo=`fun detail_myshow_salepayorder.sql` 
+spo=`fun detail_myshow_salepayorder.sql m`
 per=`fun dim_myshow_performance.sql`
 
 file="xk01"
@@ -31,10 +36,11 @@ select
     sum(spo.grossprofit) as grossprofit
 from (
     $spo
+        and sellchannel not in (9,10,11)
     ) spo
    left join (
-   $per
-   ) per
+       $per
+       ) per
    on spo.performance_id=per.performance_id
 group by
     1,2

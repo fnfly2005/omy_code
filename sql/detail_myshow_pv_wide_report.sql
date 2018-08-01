@@ -7,6 +7,7 @@ select
     page_city_name,
     union_id,
     performance_id,
+    page_cat,
     category_id
 from 
     mart_movie.detail_myshow_pv_wide_report

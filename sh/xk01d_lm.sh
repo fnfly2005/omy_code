@@ -1,11 +1,26 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
-t1='$time1'
+path=""
 fun() {
-echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
+    tmp=`cat ${path}sql/${1} | grep -iv "/\*"`
+    if [ -n $2 ];then
+        if [[ $2 =~ d ]];then
+            tmp=`echo $tmp | sed 's/where.*//'`
+        fi
+        if [[ $2 =~ u ]];then
+            tmp=`echo $tmp | sed 's/.*from/from/'`
+        fi
+        if [[ $2 =~ t ]];then
+            tmp=`echo $tmp | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
+        fi
+        if [[ $2 =~ m ]];then
+            tmp=`echo $tmp | sed "s/begindate/monthfirst{-1m}/g;s/enddate/monthfirst/g"`
+        fi
+    fi
+    echo $tmp
 }
 
-spo=`fun detail_myshow_salepayorder.sql` 
+mpw=`fun detail_myshow_pv_wide_report.sql um`
+spo=`fun detail_myshow_salepayorder.sql mu`
 md=`fun myshow_dictionary.sql`
 mp=`fun myshow_pv.sql`
 
@@ -25,49 +40,19 @@ from (
     select
         dt,
         coalesce(md.value2,'其他') as pt,
-        sum(fp0.first_uv) as first_uv,
-        sum(fp0.detail_uv) as detail_uv,
-        sum(fp0.order_uv) as order_uv
+        sum(case when page_cat=1 then uv end) as first_uv,
+        sum(case when page_cat=2 then uv end) as detail_uv,
+        sum(case when page_cat=3 then uv end) as order_uv
     from (
         select
-            dt,
+            partition_date as dt,
             app_name,
-            approx_distinct(case when nav_flag=1 then union_id end) as first_uv,
-            approx_distinct(case when nav_flag=2 then union_id end) as detail_uv,
-            approx_distinct(case when nav_flag=4 then union_id end) as order_uv
-        from (
-            select
-                partition_date as dt,
-                app_name,
-                page_identifier,
-                union_id
-            from
-                mart_flow.detail_flow_pv_wide_report
-            where partition_date>='\$\$monthfirst{-1m}'
-                and partition_date<'\$\$monthfirst'
-                and partition_log_channel='movie'
-                and partition_app in (
-                'movie',
-                'dianping_nova',
-                'other_app',
-                'dp_m',
-                'group'
-                )
-                and page_identifier in (
-                select value
-                from upload_table.myshow_pv
-                where key='page_identifier'
-                and page_tag1>=0
-                )
-            ) as fpw
-            left join (
-                $mp
-                and page_tag1>=0
-                ) mp
-            on mp.value=fpw.page_identifier
+            page_cat,
+            approx_distinct(union_id) as uv
+        $mpw
+            and page_cat<>4
         group by
-            dt,
-            app_name
+            1,2,3
         ) as fp0
         left join (
             $md
@@ -75,41 +60,42 @@ from (
             ) md
         on fp0.app_name=md.key
     group by
-        dt,
-        value2
+        1,2
     ) as fp1
     left join (
-    select
-        sp0.dt,
-        md.value2 as pt,
-        sum(sp0.order_num) as order_num
-    from (
         select
-            spo.dt,
-            spo.sellchannel,
-            count(distinct spo.order_id) as order_num
-        from
-            (
+            sp0.dt,
+            md.value2 as pt,
+            sum(sp0.order_num) as order_num
+        from (
+            select
+                partition_date as dt,
+                sellchannel,
+                count(distinct order_id) as order_num
             $spo
-            ) spo
+                and sellchannel not in (9,10,11)
+            group by
+                1,2
+            ) as sp0
+            left join (
+                $md
+                and key_name='sellchannel'
+                ) as md
+            on sp0.sellchannel=md.key
         group by
-            spo.dt,
-            spo.sellchannel
-        ) as sp0
-        left join
-        (
-        $md
-        and key_name='sellchannel'
-        ) as md
-        on sp0.sellchannel=md.key
-    group by
-        sp0.dt,
-        md.value2
-    ) as sp1
+            1,2
+        ) as sp1
     on sp1.dt=fp1.dt
     and sp1.pt=fp1.pt
 group by
     1,2
 $lim">${attach}
 
-echo "succuess,detail see ${attach}"
+echo "succuess!"
+echo ${attach}
+if [ ${1}r == pr ]
+#加上任意字符，如r 避免空值报错
+then
+cat ${attach}
+#命令行参数为p时，打印输出文件
+fi

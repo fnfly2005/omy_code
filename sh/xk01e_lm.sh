@@ -1,12 +1,25 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
-t1='$time1'
+path=""
 fun() {
-echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
+    tmp=`cat ${path}sql/${1} | grep -iv "/\*"`
+    if [ -n $2 ];then
+        if [[ $2 =~ d ]];then
+            tmp=`echo $tmp | sed 's/where.*//'`
+        fi
+        if [[ $2 =~ u ]];then
+            tmp=`echo $tmp | sed 's/.*from/from/'`
+        fi
+        if [[ $2 =~ t ]];then
+            tmp=`echo $tmp | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
+        fi
+        if [[ $2 =~ m ]];then
+            tmp=`echo $tmp | sed "s/begindate/monthfirst{-1m}/g;s/enddate/monthfirst/g"`
+        fi
+    fi
+    echo $tmp
 }
 
-spo=`fun detail_myshow_salepayorder.sql` 
-ss=`fun detail_myshow_salesplan.sql`
+spo=`fun detail_myshow_salepayorder.sql m`
 per=`fun dim_myshow_performance.sql`
 
 file="xk01"
@@ -36,12 +49,12 @@ from (
             substr(spo.dt,1,7) mt,
             performance_id, 
             count(distinct spo.order_id) as order_num,
-            sum(spo.salesplan_count*spo.setnumber) as ticket_num,
+            sum(ticket_num) as ticket_num,
             sum(spo.totalprice) as totalprice,
             sum(spo.grossprofit) as grossprofit
-        from
-            (
+        from (
             $spo
+                and sellchannel not in (9,10,11)
             ) spo
         group by
             1,2
@@ -55,5 +68,11 @@ where
     sp1.rank<=30
 $lim">${attach}
 
-echo "succuess,detail see ${attach}"
-
+echo "succuess!"
+echo ${attach}
+if [ ${1}r == pr ]
+#加上任意字符，如r 避免空值报错
+then
+cat ${attach}
+#命令行参数为p时，打印输出文件
+fi

@@ -1,8 +1,20 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
-t1='$time1'
+#--------------------猫眼演出readme-------------------
+#*************************api1.0*******************
+# 优化输出方式,优化函数处理
+path=""
 fun() {
-echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
+    if [ $2x == dx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
+    elif [ $2x == ux ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
+    elif [ $2x == tx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
+    elif [ $2x == utx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
+    else
+        echo `cat ${path}sql/${1} | grep -iv "/\*"`
+    fi
 }
 
 spo=`fun detail_myshow_salepayorder.sql` 
@@ -26,62 +38,58 @@ select
     avg(fpw.uv) as uv
 from (
     select
-        ss.dt,
-        count(distinct ss.performance_id) as ap_num,
-        count(distinct ss.salesplan_id) as as_num
-    from
-        (
-        $ss
+        partition_date as dt,
+        count(distinct performance_id) as ap_num,
+        count(distinct salesplan_id) as as_num
+    from 
+        mart_movie.detail_myshow_salesplan
+    where
+        partition_date>='\$\$monthfirst{-1m}'
+        and partition_date<'\$\$monthfirst'
         and salesplan_sellout_flag=0
-        ) ss
     group by
-        ss.dt
+        1
     ) as ss1
     left join (
-    select
-        spo.dt,
-        count(distinct spo.performance_id) as sp_num,
-        count(distinct spo.order_id) as order_num,
-        sum(spo.salesplan_count*spo.setnumber) as ticket_num,
-        sum(spo.totalprice) as totalprice,
-        sum(spo.grossprofit) as grossprofit
-    from
-        (
-        $spo
-        ) spo
-    group by
-        spo.dt
+        select
+            partition_date as dt,
+            count(distinct performance_id) as sp_num,
+            count(distinct order_id) as order_num,
+            sum(salesplan_count*setnumber) as ticket_num,
+            sum(totalprice) as totalprice,
+            sum(grossprofit) as grossprofit
+        from
+            mart_movie.detail_myshow_salepayorder
+        where
+            partition_date>='\$\$monthfirst{-1m}'
+            and partition_date<'\$\$monthfirst'
+            and sellchannel not in (9,10,11)
+        group by
+            1
     ) as sp1
     on sp1.dt=ss1.dt
     left join (
-    select
-        partition_date as dt,
-        approx_distinct(union_id) as uv
-    from
-        mart_flow.detail_flow_pv_wide_report
-    where partition_date>='\$\$monthfirst{-1m}'
-        and partition_date<'\$\$monthfirst'
-        and partition_log_channel='movie'
-        and partition_app in (
-        'movie',
-        'dianping_nova',
-        'other_app',
-        'dp_m',
-        'group'
-        )
-        and page_identifier in (
-        select value
-        from upload_table.myshow_pv
-        where key='page_identifier'
-        and page_tag1>=0
-        )
-    group by
-        partition_date
+        select
+            partition_date as dt,
+            count(distinct union_id) as uv
+        from
+            mart_movie.detail_myshow_pv_wide_report
+        where partition_date>='\$\$monthfirst{-1m}'
+            and partition_date<'\$\$monthfirst'
+            and partition_biz_bg=1
+        group by
+            partition_date
     ) as fpw
     on ss1.dt=fpw.dt
 group by
     1
 $lim">${attach}
 
-echo "succuess,detail see ${attach}"
-
+echo "succuess!"
+echo ${attach}
+if [ ${1}r == pr ]
+#加上任意字符，如r 避免空值报错
+then
+cat ${attach}
+#命令行参数为p时，打印输出文件
+fi

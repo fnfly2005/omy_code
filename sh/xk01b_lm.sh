@@ -1,23 +1,28 @@
 #!/bin/bash
 #分平台流量销售
-path="/Users/fannian/Documents/my_code/"
+path=""
 fun() {
-    if [ $2x == dx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
-    elif [ $2x == ux ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
-    elif [ $2x == tx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
-    elif [ $2x == utx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
-    else
-        echo `cat ${path}sql/${1} | grep -iv "/\*"`
+    tmp=`cat ${path}sql/${1} | grep -iv "/\*"`
+    if [ -n $2 ];then
+        if [[ $2 =~ d ]];then
+            tmp=`echo $tmp | sed 's/where.*//'`
+        fi
+        if [[ $2 =~ u ]];then
+            tmp=`echo $tmp | sed 's/.*from/from/'`
+        fi
+        if [[ $2 =~ t ]];then
+            tmp=`echo $tmp | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
+        fi
+        if [[ $2 =~ m ]];then
+            tmp=`echo $tmp | sed "s/begindate/monthfirst{-1m}/g;s/enddate/monthfirst/g"`
+        fi
     fi
+    echo $tmp
 }
 
-spo=`fun detail_myshow_salepayorder.sql` 
+spo=`fun detail_myshow_salepayorder.sql m`
+mpw=`fun detail_myshow_pv_wide_report.sql um`
 md=`fun myshow_dictionary.sql`
-
 file="xk01"
 lim=";"
 attach="${path}doc/${file}.sql"
@@ -40,27 +45,9 @@ from (
             partition_date as dt,
             app_name,
             count(distinct union_id) as uv
-        from
-            mart_flow.detail_flow_pv_wide_report
-        where partition_date>='\$\$monthfirst{-1m}'
-            and partition_date<'\$\$monthfirst'
-            and partition_log_channel='movie'
-            and partition_app in (
-            'movie',
-            'dianping_nova',
-            'other_app',
-            'dp_m',
-            'group'
-            )
-            and page_identifier in (
-            select value
-            from upload_table.myshow_pv
-            where key='page_identifier'
-            and page_tag1>=0
-            )
+        $mpw
         group by
-            partition_date,
-            app_name
+            1,2
         ) as fpw
     left join (
         $md
@@ -82,19 +69,18 @@ from (
             spo.sellchannel,
             count(distinct spo.order_id) as order_num,
             sum(spo.totalprice) as totalprice
-        from
-            (
+        from (
             $spo
+            and sellchannel not in (9,10,11)
             ) spo
         group by
             spo.dt,
             spo.sellchannel
         ) as sp0
-        left join
-        (
-        $md
-        and key_name='sellchannel'
-        ) as md
+        left join (
+            $md
+            and key_name='sellchannel'
+            ) as md
         on sp0.sellchannel=md.key
     group by
         sp0.dt,

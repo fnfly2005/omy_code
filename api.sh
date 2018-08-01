@@ -1,20 +1,25 @@
-#!/bin/bash
 #--------------------猫眼演出readme-------------------
-#*************************api1.0*******************
-# 优化输出方式,优化函数处理
+#*************************api3.0*******************
+#1.0优化输出方式,函数处理;2.0新增实时模版;3.0优化函数功能
+#!/bin/bash
 path=""
 fun() {
-    if [ $2x == dx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
-    elif [ $2x == ux ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
-    elif [ $2x == tx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
-    elif [ $2x == utx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
-    else
-        echo `cat ${path}sql/${1} | grep -iv "/\*"`
+    tmp=`cat ${path}sql/${1} | grep -iv "/\*"`
+    if [ -n $2 ];then
+        if [[ $2 =~ d ]];then
+            tmp=`echo $tmp | sed 's/where.*//'`
+        fi
+        if [[ $2 =~ u ]];then
+            tmp=`echo $tmp | sed 's/.*from/from/'`
+        fi
+        if [[ $2 =~ t ]];then
+            tmp=`echo $tmp | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
+        fi
+        if [[ $2 =~ m ]];then
+            tmp=`echo $tmp | sed "s/begindate/monthfirst{-1m}/g;s/enddate/monthfirst/g"`
+        fi
     fi
+    echo $tmp
 }
 
 =`fun `
@@ -39,21 +44,24 @@ fi
 
 
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
-#*************************api2.0*******************
 path=""
 fun() {
-    if [ $2x == dx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
-    elif [ $2x == ux ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
-    elif [ $2x == tx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/-time1/$3/g;s/-time2/$4/g"`
-    elif [ $2x == utx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/-time1/$3/g;s/-time2/$4/g" | sed '1,/from/'d | sed '1s/^/from/'`
-    else
-        echo `cat ${path}sql/${1} | grep -iv "/\*"`
+    tmp=`cat ${path}sql/${1} | grep -iv "/\*"`
+    if [ -n $2 ];then
+        if [[ $2 =~ d ]];then
+            tmp=`echo $tmp | sed 's/where.*//'`
+        fi
+        if [[ $2 =~ u ]];then
+            tmp=`echo $tmp | sed 's/.*from/from/'`
+        fi
+        if [[ $2 =~ t ]];then
+            tmp=`echo $tmp | sed "s/-time1/$3/g;s/-time2/$4/g"`
+        fi
+        if [[ $2 =~ m ]];then
+            tmp=`echo $tmp | sed "s/begindate/monthfirst{-1m}/g;s/enddate/monthfirst/g"`
+        fi
     fi
+    echo $tmp
 }
 beg_key=
 end_key=
@@ -159,3 +167,16 @@ fi
 
 se="set session optimize_hash_generation=true;"
 
+fun() {
+    if [ $2x == dx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
+    elif [ $2x == ux ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
+    elif [ $2x == tx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
+    elif [ $2x == utx ];then
+        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
+    else
+        echo `cat ${path}sql/${1} | grep -iv "/\*"`
+    fi
+}

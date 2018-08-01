@@ -51,52 +51,13 @@ from (
             sum(fp0.order_uv) as order_uv
         from (
             select
-                dt,
+                partition_date as dt,
                 app_name,
                 approx_distinct(union_id) as all_uv,
-                approx_distinct(case when nav_flag=1 then union_id end) as first_uv,
-                approx_distinct(case when nav_flag=2 then union_id end) as detail_uv,
-                approx_distinct(case when nav_flag=4 then union_id end) as order_uv
-            from (
-                select
-                    partition_date as dt,
-                    case when 2 in ($dim) then app_name
-                    else 'all' end as app_name,
-                    page_identifier,
-                    union_id
-                from
-                    mart_flow.detail_flow_pv_wide_report
-                where partition_date>='$$begindate'
-                    and partition_date<'$$enddate'
-                    and partition_log_channel='movie'
-                    and partition_app in (
-                        'movie',
-                        'dianping_nova',
-                        'other_app',
-                        'dp_m',
-                        'group'
-                        )
-                    and page_identifier in (
-                        select value
-                        from upload_table.myshow_pv
-                        where key='page_identifier'
-                        and page_tag1>=0
-                        )
-                    and app_name in (
-                        select
-                            key
-                        from upload_table.myshow_dictionary_s where key_name is not null
-                        and key_name='app_name'
-                        )
-                ) as fpw
-                left join (
-                    select
-                        value,
-                        nav_flag
-                    from upload_table.myshow_pv where key='page_identifier'
-                    and page_tag1>=0
-                    ) mp
-                on mp.value=fpw.page_identifier
+                approx_distinct(case when page_cat=1 then union_id end) as first_uv,
+                approx_distinct(case when page_cat=2 then union_id end) as detail_uv,
+                approx_distinct(case when page_cat=3 then union_id end) as order_uv
+            from mart_movie.detail_myshow_pv_wide_report where partition_date>='$$begindate' and partition_date<'$$enddate' and partition_biz_bg=1
             group by
                 1,2
             ) as fp0
