@@ -52,7 +52,8 @@ from (
         from (
             select
                 partition_date as dt,
-                app_name,
+                case when 2 in ($dim) then app_name
+                else 'all' end as app_name,
                 approx_distinct(union_id) as all_uv,
                 approx_distinct(case when page_cat=1 then union_id end) as first_uv,
                 approx_distinct(case when page_cat=2 then union_id end) as detail_uv,

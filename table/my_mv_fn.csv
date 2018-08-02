@@ -159,3 +159,8 @@
 159,b_zu53qhgn,项目列表,项目列表,pages/showsubs/collect/index,6,index&id,custom,0,1,2018-07-26
 160,b_93hfvvrs,为你推荐,为你推荐_项目,pages/showsubs/collect/index,6,,,10,1,2018-07-26
 161,b_4z7sol2p,为你推荐,为你推荐_项目,pages/showsubs/collect/index,6,index&id,custom,10,1,2018-07-26
+162,b_llo9fl3h,分享,弹出浮层,pages/show/detail/index,6,id&cityId&gcityId,custom,1,1,2018-07-26
+163,b_u7xnilr5,分享,弹出浮层,pages/show/detail/index,6,id&cityId&gcityId,custom,1,1,2018-07-26
+164,b_5w61fx9x,分享,推荐给好友,pages/show/detail/index,6,id&cityId&gcityId,custom,1,1,2018-07-26
+165,b_b0j2zwiq,分享,保存图片分享,pages/show/detail/index,6,id&cityId&gcityId,custom,1,1,2018-07-26
+166,b_2ifkcly9,分享,保存图片成功,pages/show/detail/index,6,id&cityId&gcityId,custom,1,1,2018-07-26
