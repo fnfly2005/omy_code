@@ -1,5 +1,6 @@
 
 select
+    mt,
     case when sor.order_id is null then 0
     else 1 end isrefund,
     sum(so.totalprice) as gmv,
@@ -18,9 +19,10 @@ from (
         ) ssp
     on ssp.order_id=so.order_id
 group by
-    1
+    1,2
 union all
 select
+    substr(sc.pay_time,1,7) as mt,
     case when yn=0 then 1
     else 0 end as isrefund,
     sum(purchase_price) as gmv,
@@ -28,6 +30,7 @@ select
     sum(purchase_price) as expense
 from (
     select 
+        pay_time,
         order_id,
         purchase_price
     from 
@@ -44,5 +47,5 @@ from (
     left join mart_movie.detail_maoyan_order_new_info mon
     on mon.order_id=sc.order_id
 group by
-    1
+    1,2
 ;
