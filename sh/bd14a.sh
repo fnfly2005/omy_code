@@ -1,18 +1,6 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
-fun() {
-    if [ $2x == dx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
-    elif [ $2x == ux ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
-    elif [ $2x == tx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
-    elif [ $2x == utx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
-    else
-        echo `cat ${path}sql/${1} | grep -iv "/\*"`
-    fi
-}
+source ./fuc.sh
+
 spe=`fun myshow_send_performance.sql`
 
 file="bd14"
@@ -45,7 +33,7 @@ from (
                     from
                         mart_movie.dim_myshow_performance
                     where (
-                            performance_name like '%\$performance_name%'
+                            regexp_like(performance_name,'\$performance_name')
                             or '测试'='\$performance_name'
                             )
                         and (
@@ -57,7 +45,7 @@ from (
                             or -99 in (\$shop_id)
                             )
                         and (
-                            shop_name like '%\$shop_name%'
+                            regexp_like(shop_name,'\$shop_name')
                             or '测试'='\$shop_name'
                             )
                         and ((
@@ -92,11 +80,11 @@ from (
                     from
                         upload_table.dim_wg_performance
                     where (
-                            performance_name like '%\$performance_name%'
+                            regexp_like(performance_name,'\$performance_name')
                             or '测试'='\$performance_name'
                             )
                         and (
-                            shop_name like '%\$shop_name%'
+                            regexp_like(shop_name,'\$shop_name')
                             or '测试'='\$shop_name'
                             )
                         and (
@@ -121,7 +109,7 @@ from (
                                 )
                             or 3 in (\$cp)
                             )
-                        and item_id not in (\$no_performance_id)
+                        and item_no not in (\$no_performance_id)
                     )
             ) so
             left join (

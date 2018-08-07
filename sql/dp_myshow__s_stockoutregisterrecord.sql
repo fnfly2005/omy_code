@@ -3,7 +3,8 @@ select
     stockoutregisterstatisticid,
     usermobileno as mobile,
     smssendstatus,
-    sellchannel
+    sellchannel,
+    mtuserid
 from
     origindb.dp_myshow__s_stockoutregisterrecord
 where

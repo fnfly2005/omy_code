@@ -6,11 +6,11 @@ file="sh/${2}.sh"
 if [ ${1}r == nr ]
 #加上任意字符，如r 避免空值报错
 then
-cat api.sh | head -43 | tail -40 >$file
+cat api.sh | head -25 | tail -22 >$file
 echo "succuess! mode:normal path:$file"
 elif [ ${1}r == rr ]
 then 
-cat api.sh | head -87 | tail -42 >$file
+cat api.sh | head -52 | tail -25 >$file
 echo "succuess! mode:realtime path:$file"
 elif [ ${1}r == hr ]
 then

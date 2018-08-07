@@ -1,15 +1,16 @@
 #!/bin/bash
 source ./fuc.sh
-tes=`fun detail_myshow_salepayorder.sql`
 
-file="test"
+=`fun `
+file=""
 lim=";"
 attach="${path}doc/${file}.sql"
-mt1="upload_table."
-mt2="mart_movie."
 
 echo "
-$tes"
+select
+from (
+    )
+$lim">${attach}
 
 echo "succuess!"
 echo ${attach}

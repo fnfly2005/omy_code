@@ -24,7 +24,7 @@ from (
                     from
                         mart_movie.dim_myshow_performance
                     where (
-                            performance_name like '%$performance_name%'
+                            regexp_like(performance_name,'$performance_name')
                             or '测试'='$performance_name'
                             )
                         and (
@@ -36,7 +36,7 @@ from (
                             or -99 in ($shop_id)
                             )
                         and (
-                            shop_name like '%$shop_name%'
+                            regexp_like(shop_name,'$shop_name')
                             or '测试'='$shop_name'
                             )
                         and ((
@@ -71,11 +71,11 @@ from (
                     from
                         upload_table.dim_wg_performance
                     where (
-                            performance_name like '%$performance_name%'
+                            regexp_like(performance_name,'$performance_name')
                             or '测试'='$performance_name'
                             )
                         and (
-                            shop_name like '%$shop_name%'
+                            regexp_like(shop_name,'$shop_name')
                             or '测试'='$shop_name'
                             )
                         and (
@@ -100,7 +100,7 @@ from (
                                 )
                             or 3 in ($cp)
                             )
-                        and item_id not in ($no_performance_id)
+                        and item_no not in ($no_performance_id)
                     )
             ) so
             left join (

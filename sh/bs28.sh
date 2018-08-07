@@ -1,21 +1,5 @@
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
-#*************************api1.0*******************
-# 优化输出方式,优化函数处理
-path="/Users/fannian/Documents/my_code/"
-fun() {
-    if [ $2x == dx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
-    elif [ $2x == ux ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
-    elif [ $2x == tx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
-    elif [ $2x == utx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
-    else
-        echo `cat ${path}sql/${1} | grep -iv "/\*"`
-    fi
-}
+source ./fuc.sh
 
 ssp=`fun detail_myshow_salesplan.sql u`
 so=`fun detail_myshow_saleorder.sql u` 
@@ -29,7 +13,8 @@ wt=`fun dim_wg_type.sql`
 wc=`fun dim_wg_citymap.sql`
 cit=`fun dim_myshow_city.sql`
 cat=`fun dim_myshow_category.sql`
-sfo=`fun detail_myshow_salefirstorder.sql u`
+scn=`fun detail_maoyan_order_sale_cost_new_info.sql u`
+ddn=`fun dim_deal_new.sql u`
 
 file="bs28"
 lim=";"
@@ -48,13 +33,13 @@ select
     sp.area_2_level_name,
     sp.province_name,
     sp.city_name,
-    show_num,
-    order_num,
-    totalprice,
-    ticket_num,
-    grossprofit,
-    sp_num,
-    ap_num
+    sum(show_num) as show_num,
+    sum(order_num) as order_num,
+    sum(totalprice) as totalprice,
+    sum(ticket_num) as ticket_num,
+    sum(grossprofit) as grossprofit,
+    sum(sp_num) as sp_num,
+    sum(ap_num) as ap_num
 from (
     select
         case when 0 in (\$dim) then '猫眼' 
@@ -114,6 +99,7 @@ from (
                 and order_create_time>='\$\$begindate'
                 and order_create_time<'\$\$enddate'
                 and \$payflag=0
+                and 0 in (\$ds)
             group by
                 1,2,3,4,5
             union all
@@ -128,6 +114,7 @@ from (
                 sum(salesplan_count*setnumber) as ticket_num,
                 sum(grossprofit) as grossprofit
             $spo
+                and 0 in (\$ds)
             group by
                 1,2,3,4,5
             union all
@@ -142,6 +129,7 @@ from (
                 sum(salesplan_count*setnumber) as ticket_num,
                 0 as grossprofit
             $so
+                and 0 in (\$ds)
                 and sellchannel in (9,10)
             group by
                 1,2,3,4,5
@@ -175,8 +163,10 @@ from (
         else 'all' end dt,
         case when 3 in (\$dim) then value2 
         else 'all' end as pt,
-        'all' customer_type_name,
-        'all' customer_lvl1_name,
+        case when 4 in (\$dim) then '自营' 
+        else 'all' end as customer_type_name,
+        case when 5 in (\$dim) then '微票开放平台' 
+        else 'all' end as customer_lvl1_name,
         case when 6 in (\$dim) then cat.category_name
         else 'all' end category_name,
         case when 7 in (\$dim) then area_1_level_name
@@ -206,7 +196,7 @@ from (
             length(pay_no)>5
             or \$payflag=0
             )
-        and 1=\$ds
+        and 1 in (\$ds)
         group by
             1,2,3
             ) wso
@@ -236,6 +226,39 @@ from (
         $cat
         ) cat
         on cat.category_id=wt.category_id
+    group by
+        1,2,3,4,5,6,7,8,9,10,11
+    union all
+    select
+        case when 0 in (\$dim) then '团购'
+        else 'all' end as ds,
+        case when 1 in (\$dim) then substr(pay_time,1,7) 
+        else 'all' end mt,
+        case when 2 in (\$dim) then substr(pay_time,1,10)
+        else 'all' end dt,
+        'all' pt,
+        case when 4 in (\$dim) then '自营' 
+        else 'all' end as customer_type_name,
+        case when 5 in (\$dim) then '团购' 
+        else 'all' end as customer_lvl1_name,
+        'all' category_name,
+        'all' area_1_level_name,
+        'all' area_2_level_name,
+        'all' province_name,
+        'all' city_name,
+        count(distinct deal_id) as sp_num,
+        0 as show_num,
+        count(distinct order_id) as order_num,
+        sum(purchase_price) as totalprice,
+        sum(quantity) as ticket_num,
+        0 as grossprofit
+    $scn
+        and 2 in (\$ds)
+        and deal_id in (
+            select 
+                deal_id
+            $ddn
+            )
     group by
         1,2,3,4,5,6,7,8,9,10,11
     ) as sp
@@ -279,7 +302,7 @@ from (
             ) cus
             on cus.customer_id=spo.customer_id
         where
-            1<>\$ds
+            0 in (\$ds)
         group by
             1,2,3,4,5,6,7,8,9,10,11
         ) ss
@@ -294,6 +317,8 @@ from (
     and sp.area_2_level_name=ss.area_2_level_name
     and sp.province_name=ss.province_name
     and sp.city_name=ss.city_name
+group by
+    1,2,3,4,5,6,7,8,9,10,11
 $lim">${attach}
 
 echo "succuess!"

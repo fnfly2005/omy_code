@@ -5,3 +5,5 @@ select
     city_id
 from
     upload_table.mobile_info
+where
+    1=1

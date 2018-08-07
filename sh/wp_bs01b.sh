@@ -1,13 +1,11 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
-fut() {
-echo `grep -iv "\-time" ${path}sql/${1} | grep -iv "/\*"`
-}
-ii=`fut item_info.sql`
-it=`fut item_type.sql`
-ven=`fut venue.sql`
-cit=`fut city.sql`
-pro=`fut province.sql`
+source ./fuc.sh
+
+ii=`fun item_info.sql`
+it=`fun item_type.sql`
+ven=`fun venue.sql`
+cit=`fun city.sql`
+pro=`fun province.sql`
 
 file="wp_bs01"
 lim=";"

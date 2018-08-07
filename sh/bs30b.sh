@@ -1,21 +1,5 @@
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
-#*************************api1.0*******************
-# 优化输出方式,优化函数处理
-path="/Users/fannian/Documents/my_code/"
-fun() {
-    if [ $2x == dx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
-    elif [ $2x == ux ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
-    elif [ $2x == tx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
-    elif [ $2x == utx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
-    else
-        echo `cat ${path}sql/${1} | grep -iv "/\*"`
-    fi
-}
+source ./fuc.sh
 
 mi=`fun mobile_info.sql`
 soi=`fun dp_myshow__s_orderidentification.sql u`
@@ -24,6 +8,8 @@ so=`fun detail_myshow_saleorder.sql u`
 cit=`fun dim_myshow_city.sql`
 sme=`fun dp_myshow__s_messagepush.sql u`
 dmu=`fun dim_myshow_userlabel.sql u`
+srs=`fun dp_myshow__s_stockoutregisterstatistic.sql u`
+ssr=`fun dp_myshow__s_stockoutregisterrecord.sql u`
 
 file="bs30"
 lim=";"
@@ -60,32 +46,14 @@ from (
         uid
     from (
         select
-            dt,
-            mobile,
+            dt, mobile,
             province_name,
             city_name,
             age,
             totalprice,
             uid,
-            row_number() over (partition by uid order by dt desc) rank
+            rank() over (partition by uid order by dt desc) rank
         from (
-            select
-                substr(CreateTime,1,10) as dt,
-                'all' as age,
-                userid as meituan_userid,
-                phonenumber as mobile,
-                'all' province_name,
-                'all' city_name,
-                case when \$uid=1 then phonenumber
-                else userid end as uid,
-                0 as totalprice
-            from
-                origindb.dp_myshow__s_messagepush 
-            where
-                phonenumber is not null
-                and performanceid in (\$performance_id)
-                and 2 in (\$action_flag)
-            union all
             select
                 dt,
                 case when 4 in (\$dim) then cast(substr(dt,1,4) as bigint)-yer
@@ -137,6 +105,39 @@ from (
                 on s1.order_id=soi.order_id
             group by
                 1,2,3,4,5,6,7
+            union all
+            select
+                substr(CreateTime,1,10) as dt,
+                'all' as age,
+                userid as meituan_userid,
+                phonenumber as mobile,
+                'all' province_name,
+                'all' city_name,
+                case when \$uid=1 then phonenumber
+                else userid end as uid,
+                0 as totalprice
+            $sme
+                and performanceid in (\$performance_id)
+                and 2 in (\$action_flag)
+            union all
+            select
+                substr(createtime,1,10) as dt,
+                'all' as age,
+                mtuserid as meituan_userid,
+                usermobileno as mobile,
+                'all' province_name,
+                'all' city_name,
+                case when \$uid=1 then usermobileno
+                else mtuserid end as uid,
+                0 as totalprice
+            $ssr
+                and 3 in (\$action_flag)
+                and stockoutregisterstatisticid in (
+                    select
+                        stockoutregisterstatisticid
+                    $srs
+                        and performanceid in (\$performance_id)
+                    )
             ) sro
         ) so
         left join (

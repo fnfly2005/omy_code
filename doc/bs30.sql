@@ -29,32 +29,14 @@ from (
         uid
     from (
         select
-            dt,
-            mobile,
+            dt, mobile,
             province_name,
             city_name,
             age,
             totalprice,
             uid,
-            row_number() over (partition by uid order by dt desc) rank
+            rank() over (partition by uid order by dt desc) rank
         from (
-            select
-                substr(CreateTime,1,10) as dt,
-                'all' as age,
-                userid as meituan_userid,
-                phonenumber as mobile,
-                'all' province_name,
-                'all' city_name,
-                case when $uid=1 then phonenumber
-                else userid end as uid,
-                0 as totalprice
-            from
-                origindb.dp_myshow__s_messagepush 
-            where
-                phonenumber is not null
-                and performanceid in ($performance_id)
-                and 2 in ($action_flag)
-            union all
             select
                 dt,
                 case when 4 in ($dim) then cast(substr(dt,1,4) as bigint)-yer
@@ -106,10 +88,43 @@ from (
                 on s1.order_id=soi.order_id
             group by
                 1,2,3,4,5,6,7
+            union all
+            select
+                substr(CreateTime,1,10) as dt,
+                'all' as age,
+                userid as meituan_userid,
+                phonenumber as mobile,
+                'all' province_name,
+                'all' city_name,
+                case when $uid=1 then phonenumber
+                else userid end as uid,
+                0 as totalprice
+            from origindb.dp_myshow__s_messagepush where phonenumber is not null and CreateTime>'2018-03-01' and regexp_like(phonenumber,'^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$') and phonenumber not in (13800138000,13000000000)
+                and performanceid in ($performance_id)
+                and 2 in ($action_flag)
+            union all
+            select
+                substr(createtime,1,10) as dt,
+                'all' as age,
+                mtuserid as meituan_userid,
+                usermobileno as mobile,
+                'all' province_name,
+                'all' city_name,
+                case when $uid=1 then usermobileno
+                else mtuserid end as uid,
+                0 as totalprice
+            from origindb.dp_myshow__s_stockoutregisterrecord where 1=1
+                and 3 in ($action_flag)
+                and stockoutregisterstatisticid in (
+                    select
+                        stockoutregisterstatisticid
+                    from origindb.dp_myshow__s_stockoutregisterstatistic where 1=1
+                        and performanceid in ($performance_id)
+                    )
             ) sro
         ) so
         left join (
-            select mobile, mobile_type, city_id from upload_table.mobile_info
+            select mobile, mobile_type, city_id from upload_table.mobile_info where 1=1
             ) mi
         on mi.mobile=substr(so.mobile,1,7)
         left join (
@@ -133,7 +148,7 @@ from (
        ) dmu
     on dmu.uid=sim.uid
     left join (
-        select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where key_name is not null
+        select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where 1=1
         and key_name='sellchannel'
         ) md
     on md.key=dmu.sellchannel

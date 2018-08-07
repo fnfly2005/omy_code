@@ -11,4 +11,4 @@ select
 from
     upload_table.myshow_dictionary_s
 where
-    key_name is not null
+    1=1
