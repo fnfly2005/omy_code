@@ -14,14 +14,14 @@ attach="${path}doc/${file}.sql"
 echo "
 select
     ii.item_id,
-    ii.item_name,
-    ii.item_no,
+    ii.performance_name,
+    ii.performance_id,
     ii.city_id,
     ii.type_id,
     it.type_lv1_name,
     it.type_lv2_name,
     ii.venue_id,
-    ven.venue_name,
+    ven.shop_name,
     ven.venue_type,
     cit.city_name,
     cit.province_id,
@@ -29,11 +29,11 @@ select
 from (
     $ii
     ) ii
-    left join (
+    join (
     $it
     ) it
     on ii.type_id=it.type_id
-    left join (
+    join (
     $ven
     ) ven
     on ven.venue_id=ii.venue_id

@@ -1,0 +1,17 @@
+/*微格项目维表*/
+select
+    item_id,
+    item_name,
+    item_no,
+    city_id,
+    type_id,
+    type_lv1_name,
+    type_lv2_name,
+    venue_id,
+    venue_name,
+    venue_type,
+    city_name,
+    province_id,
+    province_name
+from
+    upload_table.dim_wg_item_s

@@ -69,7 +69,11 @@ from (
                     select distinct
                         item_id
                     from
-                        upload_table.dim_wg_performance
+                        upload_table.dim_wg_performance it
+                        left join upload_table.dim_wg_citymap ci
+                        on ci.city_name=it.city_name
+                        left join upload_table.dim_wg_type ty
+                        on ty.type_lv1_name=it.category_name
                     where (
                             regexp_like(performance_name,'$performance_name')
                             or '测试'='$performance_name'
@@ -84,11 +88,11 @@ from (
                             )
                         and (
                             (
-                                city_id in ($city_id)
+                                ci.city_id in ($city_id)
                                 and 1 in ($cp)
                                 )
                             or (
-                                city_id in (
+                                ci.city_id in (
                                     select
                                         city_id
                                     from
