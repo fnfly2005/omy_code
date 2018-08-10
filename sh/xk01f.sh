@@ -1,26 +1,10 @@
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
-#*************************api1.0*******************
-# 优化输出方式,优化函数处理
-path=""
-fun() {
-    if [ $2x == dx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
-    elif [ $2x == ux ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
-    elif [ $2x == tx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
-    elif [ $2x == utx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
-    else
-        echo `cat ${path}sql/${1} | grep -iv "/\*"`
-    fi
-}
-
+source ./fuc.sh
 mpw=`fun detail_myshow_pv_wide_report.sql ut`
 spo=`fun detail_myshow_salepayorder.sql ut` 
 ssp=`fun detail_myshow_salesplan.sql ut`
 cat=`fun dim_myshow_category.sql`
+md=`fun myshow_dictionary.sql`
 
 file="xk01"
 lim=";"
@@ -33,21 +17,41 @@ select
     ap_num,
     sp_num,
     order_num,
+    uv_order_num,
     ticket_num,
     totalprice,
     grossprofit,
     uv
 from (
     select
-        partition_date as dt,
+        dt,
         category_id,
         count(distinct performance_id) sp_num,
-        count(distinct order_id) as order_num,
-        sum(salesplan_count*setnumber) as ticket_num,
+        sum(order_num) as order_num,
+        sum(case when key1=1 then order_num end) as uv_order_num,
+        sum(ticket_num) as ticket_num,
         sum(totalprice) as totalprice,
         sum(grossprofit) as grossprofit
-    $spo
-        and sellchannel not in (9,10,11)
+    from (
+        select
+            partition_date as dt,
+            category_id,
+            sellchannel,
+            performance_id,
+            count(distinct order_id) as order_num,
+            sum(salesplan_count*setnumber) as ticket_num,
+            sum(totalprice) as totalprice,
+            sum(grossprofit) as grossprofit
+        $spo
+        group by
+            1,2,3,4
+        ) sp1
+        join (
+        $md
+            and key_name='sellchannel'
+            and key1<>0
+            ) as md
+            on md.key=sp1.sellchannel
     group by
         1,2
     ) as spo

@@ -1,21 +1,5 @@
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
-#*************************api1.0*******************
-# 优化输出方式,优化函数处理
-path=""
-fun() {
-    if [ $2x == dx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
-    elif [ $2x == ux ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
-    elif [ $2x == tx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
-    elif [ $2x == utx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
-    else
-        echo `cat ${path}sql/${1} | grep -iv "/\*"`
-    fi
-}
+source ./fuc.sh
 
 md=`fun myshow_dictionary.sql`
 
@@ -28,17 +12,12 @@ select
     '\$\$today{-1d}' as dt,
     lv1_type,
     sum(case when dt='\$\$today{-1d}' then totalprice end) as totalprice,
-    sum(totalprice) as mtd_totalprice,
-    sum(case when dt='\$\$today{-1d}' then order_num end) as order_num,
-    sum(case when dt='\$\$today{-1d}' then ticket_num end) as ticket_num
+    sum(totalprice) as mtd_totalprice
 from (
     select
         substr(pay_time,1,10) dt,
-        'y' as type,
         '团购' as lv1_type,
-        sum(purchase_price) as totalprice,
-        count(distinct order_id) as order_num,
-        sum(quantity) as ticket_num
+        sum(purchase_price) as totalprice
     from
         mart_movie.detail_maoyan_order_sale_cost_new_info
     where
@@ -52,22 +31,17 @@ from (
                 origindb.dp_myshow__s_deal
                 )
     group by
-        1,2,3
+        1,2
     union all
     select
         dt,
-        key1 as type,
         value4 as lv1_type,
-        sum(totalprice) as totalprice,
-        sum(order_num) as order_num,
-        sum(ticket_num) as ticket_num
+        sum(totalprice) as totalprice
     from (
         select
             substr(pay_time,1,10) as dt,
             sellchannel,
-            sum(totalprice) as totalprice,
-            count(distinct order_id) as order_num,
-            sum(setnumber*salesplan_count) as ticket_num
+            sum(totalprice) as totalprice
         from
             mart_movie.detail_myshow_saleorder
         where
@@ -77,21 +51,19 @@ from (
         group by
             1,2
         ) so
-        left join (
+        join (
             $md
             and key_name='sellchannel'
+            and key1<>0
             ) md
         on so.sellchannel=md.key
     group by
-        1,2,3
+        1,2
     union all
     select
         dt,
-        'y' as type,
-        '线下分销' as lv1_type,
-        sum(totalprice) as totalprice,
-        count(distinct sale_id) as order_num,
-        sum(ticket_num) as ticket_num
+        '演出' as lv1_type,
+        sum(totalprice) as totalprice
     from
         upload_table.sale_offline
     where
@@ -99,10 +71,8 @@ from (
         and dt>='\$\$yesterday_monthfirst'
         and dt<'\$\$today{-0d}'
     group by
-        1,2,3
+        1,2
     ) as sot
-where
-    type='y'
 group by
     1,2
 $lim">${attach}

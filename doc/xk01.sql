@@ -1,41 +1,65 @@
 
 select
-    sp1.mt,
-    per.performance_name,
-    sp1.order_num,
-    sp1.ticket_num,
-    sp1.totalprice,
-    sp1.grossprofit,
-    sp1.rank
+    fp1.dt,
+    fp1.pt,
+    fp1.first_uv,
+    fp1.detail_uv,
+    fp1.order_uv,
+    sp1.order_num
 from (
     select
-        mt,
-        performance_id,
-        order_num,
-        ticket_num,
-        totalprice,
-        grossprofit,
-        row_number() over (partition by mt order by totalprice desc) as rank
+        dt,
+        md.value2 as pt,
+        sum(fp0.first_uv) as first_uv,
+        sum(fp0.detail_uv) as detail_uv,
+        sum(fp0.order_uv) as order_uv
     from (
         select
-            substr(spo.dt,1,7) mt,
-            performance_id, 
-            count(distinct spo.order_id) as order_num,
-            sum(ticket_num) as ticket_num,
-            sum(spo.totalprice) as totalprice,
-            sum(spo.grossprofit) as grossprofit
-        from (
-            select partition_date as dt, order_id, sellchannel, customer_id, performance_id, meituan_userid, show_id, totalprice, grossprofit, setnumber, salesplan_count, setnumber*salesplan_count as ticket_num, expressfee, discountamount, income, expense, totalticketprice, ticket_price, sell_price, project_id, bill_id, salesplan_id, city_id, pay_time, substr(pay_time,12,2) as ht from mart_movie.detail_myshow_salepayorder where partition_date>='$$monthfirst{-1m}' and partition_date<'$$monthfirst'
-                and sellchannel not in (9,10,11)
-            ) spo
+            partition_date as dt,
+            app_name,
+            count(distinct case when page_name_my='演出首页' then union_id end) as first_uv,
+            count(distinct case when page_name_my='演出详情页' then union_id end) as detail_uv,
+            count(distinct case when page_name_my='演出确认订单页' then union_id end) as order_uv
+        from mart_movie.detail_myshow_pv_wide_report where partition_date>='$$today{-1d}' and partition_date<'$$today{-0d}' and partition_biz_bg=1
+            and page_name_my in ('演出首页','演出详情页','演出确认订单页')
         group by
-            1,2
-        ) as sp0
-    ) as sp1
+            partition_date,
+            app_name
+        ) as fp0
+        join (
+            select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where 1=1
+            and key_name='app_name'
+            ) md
+        on fp0.app_name=md.key
+    group by
+        dt,
+        value2
+    ) as fp1
     left join (
-    select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, province_id, city_id, city_name, shop_id, shop_name from mart_movie.dim_myshow_performance where performance_id is not null
-    ) as per
-    on per.performance_id=sp1.performance_id
-where
-    sp1.rank<=30
+    select
+        sp0.dt,
+        md.value2 as pt,
+        sum(sp0.order_num) as order_num
+    from (
+        select
+            partition_date as dt,
+            sellchannel,
+            count(distinct order_id) as order_num
+        from mart_movie.detail_myshow_salepayorder where partition_date>='$$today{-1d}' and partition_date<'$$today{-0d}'
+        group by
+            partition_date,
+            sellchannel
+        ) as sp0
+        join (
+            select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where 1=1
+            and key_name='sellchannel'
+            and key1=1
+            ) as md
+        on sp0.sellchannel=md.key
+    group by
+        sp0.dt,
+        md.value2
+    ) as sp1
+    on sp1.dt=fp1.dt
+    and sp1.pt=fp1.pt
 ;

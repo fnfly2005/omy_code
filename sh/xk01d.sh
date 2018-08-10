@@ -1,22 +1,5 @@
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
-#*************************api1.0*******************
-#修改字典表地址
-path="/Users/fannian/Documents/my_code/"
-fun() {
-    if [ $2x == dx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
-    elif [ $2x == ux ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
-    elif [ $2x == tx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
-    elif [ $2x == utx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
-    else
-        echo `cat ${path}sql/${1} | grep -iv "/\*"`
-    fi
-}
-
+source ./fuc.sh
 
 spo=`fun detail_myshow_salepayorder.sql ut`
 mpw=`fun detail_myshow_pv_wide_report.sql ut`
@@ -75,14 +58,14 @@ from (
             sellchannel,
             count(distinct order_id) as order_num
         $spo
-            and sellchannel not in (9,10,11)
         group by
             partition_date,
             sellchannel
         ) as sp0
-        left join (
+        join (
             $md
             and key_name='sellchannel'
+            and key1=1
             ) as md
         on sp0.sellchannel=md.key
     group by
