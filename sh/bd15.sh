@@ -1,7 +1,8 @@
 #!/bin/bash
+#2.0 2018-08-14
 source ./fuc.sh
-so=`fun detail_myshow_saleorder.sql u`
-soi=`fun dp_myshow__s_orderidentification.sql`
+so=`fun detail_myshow_saleorder.sql`
+soi=`fun dp_myshow__s_orderidentification.sql u`
 md=`fun myshow_dictionary.sql`
 
 file="bd15"
@@ -9,11 +10,10 @@ lim=";"
 attach="${path}doc/${file}.sql"
 
 echo "
-select distinct
+select
     so.order_id,
     maoyan_order_id,
-    IDNumber,
-    UserName,
+    name_id,
     mobile,
     so.performance_id,
     order_create_time,
@@ -24,15 +24,22 @@ select distinct
     ticket_price,
     salesplan_name,
     detailedaddress,
-    TicketNumber
+    ticket_num,
+    totalprice
 from (
     $so
         and performance_id in (\$performance_id)
     ) so
     left join (
-    $soi
-    and performanceid in (\$performance_id)
-    ) soi
+        select
+            PerformanceID as performance_id,
+            OrderID as order_id,
+            map_agg(UserName,IDNumber) as name_id
+        $soi
+            and performanceid in (\$performance_id)
+        group by
+            1,2
+        ) soi
     using(order_id)
     left join (
     $md

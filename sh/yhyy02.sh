@@ -31,8 +31,25 @@ from (
         select
             city_id,
             count(distinct mobile) mys_num
-        from
-            mart_movie.dim_myshow_userlabel
+        from (
+            select
+                city_id,
+                mobile,
+            from
+                mart_movie.dim_myshow_userlabel
+            union all
+            select
+                city_id,
+                mobile
+            from
+                mart_movie.dim_wg_userlabel
+            union all
+            select
+                city_id,
+                mobile
+            from
+                mart_movie.dim_wp_userlabel
+            ) as 
         group by
             1
         ) as dmu

@@ -21,8 +21,25 @@ from (
         select
             city_id,
             count(distinct mobile) mys_num
-        from
-            mart_movie.dim_myshow_userlabel
+        from (
+            select
+                city_id,
+                mobile,
+            from
+                mart_movie.dim_myshow_userlabel
+            union all
+            select
+                city_id,
+                mobile
+            from
+                mart_movie.dim_wg_userlabel
+            union all
+            select
+                city_id,
+                mobile
+            from
+                mart_movie.dim_wp_userlabel
+            ) as 
         group by
             1
         ) as dmu
@@ -30,8 +47,8 @@ from (
     left join (
         select
             city_id as mt_city_id,
-            approx_distinct(case when active_date>=date_add('d',-90,current_date) then mobile end) as mov_90_num,
-            approx_distinct(case when active_date>=date_add('d',-180,current_date) then mobile end) as mov_180_num,
+            approx_distinct(case when active_date>=date_add('day',-90,current_date) then mobile end) as mov_90_num,
+            approx_distinct(case when active_date>=date_add('day',-180,current_date) then mobile end) as mov_180_num,
             approx_distinct(mobile) mov_all_num
         from (
             select

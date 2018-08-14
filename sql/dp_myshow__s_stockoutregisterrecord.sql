@@ -4,7 +4,8 @@ select
     usermobileno as mobile,
     smssendstatus,
     sellchannel,
-    mtuserid
+    mtuserid,
+    createtime
 from
     origindb.dp_myshow__s_stockoutregisterrecord
 where

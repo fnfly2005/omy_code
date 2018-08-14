@@ -8,8 +8,8 @@ so=`fun detail_myshow_saleorder.sql u`
 cit=`fun dim_myshow_city.sql`
 sme=`fun dp_myshow__s_messagepush.sql u`
 dmu=`fun dim_myshow_userlabel.sql u`
-srs=`fun dp_myshow__s_stockoutregisterstatistic.sql u`
-ssr=`fun dp_myshow__s_stockoutregisterrecord.sql u`
+srs=`fun dp_myshow__s_stockoutregisterstatistic.sql`
+ssr=`fun dp_myshow__s_stockoutregisterrecord.sql`
 
 file="bs30"
 lim=";"
@@ -62,6 +62,7 @@ from (
                 mobile,
                 province_name,
                 city_name,
+                performance_id,
                 case when \$uid=1 then mobile
                 else meituan_userid end as uid,
                 sum(totalprice) as totalprice
@@ -69,6 +70,7 @@ from (
                 select
                     substr(pay_time,1,10) dt,
                     order_id,
+                    performance_id,
                     meituan_userid,
                     province_name,
                     city_name,
@@ -104,7 +106,7 @@ from (
                     ) as soi
                 on s1.order_id=soi.order_id
             group by
-                1,2,3,4,5,6,7
+                1,2,3,4,5,6,7,8
             union all
             select
                 substr(CreateTime,1,10) as dt,
@@ -113,6 +115,7 @@ from (
                 phonenumber as mobile,
                 'all' province_name,
                 'all' city_name,
+                performanceid as performance_id,
                 case when \$uid=1 then phonenumber
                 else userid end as uid,
                 0 as totalprice
@@ -124,20 +127,21 @@ from (
                 substr(createtime,1,10) as dt,
                 'all' as age,
                 mtuserid as meituan_userid,
-                usermobileno as mobile,
+                mobile,
                 'all' province_name,
                 'all' city_name,
-                case when \$uid=1 then usermobileno
+                case when \$uid=1 then mobile
                 else mtuserid end as uid,
                 0 as totalprice
-            $ssr
-                and 3 in (\$action_flag)
-                and stockoutregisterstatisticid in (
-                    select
-                        stockoutregisterstatisticid
+            from (
+                $ssr
+                    and 3 in (\$action_flag)
+                ) ssr
+                join (
                     $srs
                         and performanceid in (\$performance_id)
-                    )
+                    ) srs
+                on srs.stockoutregisterstatisticid=ssr.stockoutregisterstatisticid
             ) sro
         ) so
         left join (

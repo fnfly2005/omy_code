@@ -1,22 +1,5 @@
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
-#*************************api1.0*******************
-# 优化输出方式,优化函数处理
-path=""
-fun() {
-    if [ $2x == dx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
-    elif [ $2x == ux ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
-    elif [ $2x == tx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
-    elif [ $2x == utx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
-    else
-        echo `cat ${path}sql/${1} | grep -iv "/\*"`
-    fi
-}
-
+source ./fuc.sh
 srs=`fun dp_myshow__s_stockoutregisterstatistic.sql`
 srr=`fun dp_myshow__s_stockoutregisterrecord.sql`
 so=`fun detail_myshow_saleorder.sql u`
@@ -29,6 +12,7 @@ echo "
 select
     sr_show_name,
     sr_ticket_price,
+    value2 as pt,
     coalesce(show_name,'all') as show_name,
     coalesce(ticket_price,'all') as ticket_price,
     count(distinct sr.mobile) as sr_num,
@@ -39,6 +23,7 @@ select
 from (
     select
         mobile,
+        sellchannel,
         case when 2 in (\$dim) then show_name
         else 'all' end as sr_show_name,
         case when 2 in (\$dim) then ticket_price
@@ -47,7 +32,7 @@ from (
         $srs
             and performanceid in (\$performance_id)
         ) srs
-        left join (
+        join (
             $srr
             and createtime>='\$str_date'
             and createtime<'\$end_date'
@@ -55,8 +40,13 @@ from (
             ) srr
         on srs.stockoutregisterstatisticid=srr.stockoutregisterstatisticid
     group by
-        1,2,3
+        1,2,3,4
     ) as sr
+    left join (
+        $md
+            and key_name='sellchannel'
+        ) md
+        on md.key=sr.sellchannel
     left join (
         select
             usermobileno as mobile,
@@ -74,7 +64,7 @@ from (
         ) so
         on so.mobile=sr.mobile
 group by
-    1,2,3,4
+    1,2,3,4,5
 $lim">${attach}
 
 echo "succuess!"
