@@ -11,10 +11,11 @@ select
     salesplan_id,
     ticketclass_id,
     city_id,
-    category_id
+    category_id,
+    sell_price
 from
     mart_movie.detail_myshow_salesplan
 where
-    salesplan_id is not null
+    1=1
     and partition_date>='$$begindate'
     and partition_date<'$$enddate'

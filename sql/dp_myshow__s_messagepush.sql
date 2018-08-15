@@ -7,6 +7,7 @@ from
     origindb.dp_myshow__s_messagepush 
 where
     phonenumber is not null
-    and CreateTime>'2018-03-01'
+    and createtime>='$$begindate'
+    and createtime<'$$enddate'
     and regexp_like(phonenumber,'^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$')
     and phonenumber not in (13800138000,13000000000)

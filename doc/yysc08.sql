@@ -20,8 +20,8 @@ select
     case when sp.performance_id is null then 0
     else sp.grossprofit end as grossprofit
 from (
-    select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, province_id, city_id, city_name, shop_id, shop_name from mart_movie.dim_myshow_performance where performance_id is not null
-        and (performance_name like '%$performance_name%'
+    select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, province_id, city_id, city_name, shop_id, shop_name from mart_movie.dim_myshow_performance where 1=1
+        and (regexp_like(performance_name,'$performance_name')
         or '测试'='$performance_name')
         and (performance_id in ($performance_id)
         or -99 in ($performance_id))
@@ -42,6 +42,7 @@ from (
             case when 2 in ($dim) then substr(stat_time,12,2) 
             else 'all' end as ht,
             case when 3 in ($dim) then (cast(substr(stat_time,15,1) as bigint)+1)*10
+                when 30 in ($dim) then substr(stat_time,15,2)
             else 'all' end as mit,
             case when 4 in ($dim) then app_name
             else 'all' end as app_name,
@@ -82,12 +83,12 @@ from (
             1,2,3,4,5,6
         ) fp
         left join (
-        select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where key_name is not null
+        select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where 1=1
         and key_name='app_name'
         ) md
         on md.key=fp.app_name
     group by
-        1,2,3,4,5
+        1,2,3,4,5,6
     ) vp
     on vp.performance_id=dp.performance_id
     left join (
@@ -150,7 +151,7 @@ from (
                 1,2,3,4,5
                 ) as spo
             left join (
-            select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where key_name is not null
+            select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where 1=1
             and key_name='sellchannel'
             ) md
             on md.key=spo.sellchannel

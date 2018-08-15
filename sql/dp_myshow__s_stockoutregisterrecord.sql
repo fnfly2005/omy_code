@@ -9,4 +9,5 @@ select
 from
     origindb.dp_myshow__s_stockoutregisterrecord
 where
-    1=1
+    createtime>='$$begindate'
+    and createtime<'$$enddate'

@@ -1,23 +1,10 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
-fun() {
-    if [ $2x == dx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
-    elif [ $2x == ux ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
-    elif [ $2x == tx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
-    elif [ $2x == utx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
-    else
-        echo `cat ${path}sql/${1} | grep -iv "/\*"`
-    fi
-}
-
+source ./fuc.sh
 spo=`fun detail_myshow_saleorder.sql`
 md=`fun myshow_dictionary.sql`
 ssp=`fun dim_myshow_salesplan.sql`
 sor=`fun dp_myshow__s_orderrefund.sql`
+mss=`fun detail_myshow_salesplan.sql u`
 
 
 file="bd09"
@@ -26,11 +13,10 @@ attach="${path}doc/${file}.sql"
 
 echo "
 select
-    dt,
+    spo.dt,
     ht,
     mit,
-    case when 2 in (\$dim) then md.value2
-    else 'all' end as pt,
+    md.value2 as pt,
     case when 3 in (\$dim) then customer_type_name
     else 'all' end as customer_type_name,
     case when 3 in (\$dim) then customer_lvl1_name
@@ -51,10 +37,11 @@ select
     else 'all' end as salesplan_name,
     case when 5 in (\$dim) then refund_flag
     else 'all' end as refund_flag,
-    count(distinct meituan_userid) as user_num,
     sum(order_num) as order_num,
     sum(ticket_num) as ticket_num,
-    sum(TotalPrice) as TotalPrice
+    sum(TotalPrice) as TotalPrice,
+    sum(current_amount) as current_amount,
+    sum(amount_gmv) as amount_gmv
 from (
     select
         case when 1 in (\$dim) then spo.dt
@@ -63,11 +50,10 @@ from (
         else 'all' end as ht,
         case when 8 in (\$dim) then (cast(substr(pay_time,15,1) as bigint)+1)*10
         else 'all' end as mit,
-        spo.sellchannel,
+        case when 2 in (\$dim) then spo.sellchannel
+        else -99 end as sellchannel,
         spo.salesplan_id,
-        spo.meituan_userid,
         case when sor.order_id is null then 'no'
-            when sor.issuc=0 then 'apply'
         else 'yes' end as refund_flag,
         count(distinct spo.order_id) as order_num,
         sum(ticket_num) as ticket_num,
@@ -90,7 +76,7 @@ from (
             and ht<\$hte
                 )
     group by
-        1,2,3,4,5,6,7
+        1,2,3,4,5,6
     union all
     select
         case when 1 in (\$dim) then substr(pay_time,1,10)
@@ -101,7 +87,6 @@ from (
         else 'all' end as mit,
         sellchannel,
         salesplan_id,
-        meituan_userid,
         'all' refund_flag,
         count(distinct order_id) as order_num,
         sum(salesplan_count*setnumber) as ticket_num,
@@ -123,19 +108,19 @@ from (
             and substr(pay_time,12,2)<\$hte
                 ))
     group by
-        1,2,3,4,5,6,7
+        1,2,3,4,5,6
         ) as spo
     join (
         $ssp
-        and (customer_name like '%\$customer_name%'
+        and (regexp_like(customer_name,'\$customer_name')
         or '全部'='\$customer_name')
         and (customer_code in (\$customer_code)
         or -99 in (\$customer_code))
-        and (performance_name like '%\$name%'
+        and (regexp_like(performance_name,'\$name')
         or '全部'='\$name')
         and (performance_id in (\$id)
             or -99 in (\$id))
-        and (shop_name like '%\$shop_name%'
+        and (regexp_like(shop_name,'\$shop_name')
         or '全部'='\$shop_name')
         ) ssp
         on spo.salesplan_id=ssp.salesplan_id
@@ -144,6 +129,26 @@ from (
         and key_name='sellchannel'
         ) md
         on md.key=spo.sellchannel
+    left join (
+        select
+            case when 1 in (\$dim) then partition_date
+            else 'all' end as dt,
+            salesplan_id,
+            sum(current_amount) as current_amount,
+            sum(sell_price*current_amount) as amount_gmv
+        $mss
+            and islimited=1
+            and salesplan_sellout_flag=0
+            and current_amount>=0
+            and 2 not in (\$dim)
+            and 5 not in (\$dim)
+            and 7 not in (\$dim)
+            and 8 not in (\$dim)
+        group by
+            1,2
+        ) mss
+    on spo.salesplan_id=mss.salesplan_id
+    and spo.dt=mss.dt
 group by
     1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18
 $lim">${attach}

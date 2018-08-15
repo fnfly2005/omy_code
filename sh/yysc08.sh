@@ -1,19 +1,5 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
-fun() {
-    if [ $2x == dx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
-    elif [ $2x == ux ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
-    elif [ $2x == tx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
-    elif [ $2x == utx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
-    else
-        echo `cat ${path}sql/${1} | grep -iv "/\*"`
-    fi
-}
-
+source ./fuc.sh
 spo=`fun detail_myshow_salepayorder.sql u`
 dp=`fun dim_myshow_performance.sql`
 fp=`fun detail_flow_pv_wide_report.sql`
@@ -48,7 +34,7 @@ select
     else sp.grossprofit end as grossprofit
 from (
     $dp
-        and (performance_name like '%\$performance_name%'
+        and (regexp_like(performance_name,'\$performance_name')
         or '测试'='\$performance_name')
         and (performance_id in (\$performance_id)
         or -99 in (\$performance_id))
@@ -69,6 +55,7 @@ from (
             case when 2 in (\$dim) then substr(stat_time,12,2) 
             else 'all' end as ht,
             case when 3 in (\$dim) then (cast(substr(stat_time,15,1) as bigint)+1)*10
+                when 30 in (\$dim) then substr(stat_time,15,2)
             else 'all' end as mit,
             case when 4 in (\$dim) then app_name
             else 'all' end as app_name,

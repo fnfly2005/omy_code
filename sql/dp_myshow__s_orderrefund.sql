@@ -4,5 +4,5 @@ select
 from
     origindb.dp_myshow__s_orderrefund
 where
-    orderrefundid is not null
+    1=1
     and finishtime is not null

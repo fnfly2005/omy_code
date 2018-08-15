@@ -16,4 +16,4 @@ select
 from
     mart_movie.dim_myshow_performance
 where
-    performance_id is not null
+    1=1
