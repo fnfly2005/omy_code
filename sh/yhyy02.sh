@@ -1,7 +1,7 @@
 #!/bin/bash
 source ./fuc.sh
 
-snb=`fun dp_myshow__s_nearbycitylist_p.sql`
+nbc=`fun dim_myshow_nearbycity.sql`
 cit=`fun dim_myshow_city.sql u`
 
 file="yy01"
@@ -11,22 +11,23 @@ attach="${path}doc/${file}.sql"
 echo "
 select
     city_name,    
-    dis_tag,
-    mys_num,
-    mov_90_num,
-    mov_180_num,
-    mov_all_num
+    km_num,
+    coalesce(mys_num,0) as mys_num,
+    coalesce(mov_90_num,0) as mov_90_num,
+    coalesce(mov_180_num,0) as mov_180_num,
+    coalesce(mov_all_num,0) as mov_all_num
 from (
-    $snb
-        and cityid in (\$city_id)
+    $nbc
+        and dpcity_id in (\$dpcity_id)
+        and km_num<=300
     union all
     select
-        \$city_id as dp_city_id,
-        \$city_id as ner_city_id,
-        100 as dis_tag
-    ) as snb
+        \$dpcity_id as dpcity_id,
+        \$dpcity_id as nearbydpcity_id,
+        0 as km_num
+    ) as nbc
     join mart_movie.dim_myshow_city dmc
-    on dmc.city_id=snb.ner_city_id
+    on dmc.city_id=nbc.nearbydpcity_id
     left join (
         select
             city_id,
@@ -34,7 +35,7 @@ from (
         from (
             select
                 city_id,
-                mobile,
+                mobile
             from
                 mart_movie.dim_myshow_userlabel
             union all
@@ -49,11 +50,11 @@ from (
                 mobile
             from
                 mart_movie.dim_wp_userlabel
-            ) as 
+            ) as mww
         group by
             1
         ) as dmu
-    on dmu.city_id=snb.ner_city_id
+    on dmu.city_id=nbc.nearbydpcity_id
     left join (
         select
             city_id as mt_city_id,
@@ -80,8 +81,11 @@ from (
         ) as dmm
     on dmm.mt_city_id=dmc.mt_city_id
     and dmc.dp_flag=0
+where
+    dmm.mt_city_id is not null
+    or dmu.city_id is not null
 order by
-    dis_tag,
+    km_num,
     mov_all_num desc
 $lim">${attach}
 

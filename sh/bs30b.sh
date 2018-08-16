@@ -29,7 +29,7 @@ select
     city_name,
     age,
     sex,
-    case when 6 in (\$dim) then pay_num
+    case when 6 in (\$dim) then coalesce(pay_num,0)
     else 'all' end as pay_num,
     count(distinct sim.uid) user_num,
     sum(order_num) order_num,
@@ -37,14 +37,16 @@ select
 from (
     select
         dt,
-        case when 20 in (\$dim) then ciy.province_name
-        else 'all' end as mi_province_name,
-        case when 30 in (\$dim) then ciy.city_name 
-        else 'all' end as mi_city_name,
-        case when 2 in (\$dim) then so.province_name
-        else 'all' end as province_name,
-        case when 3 in (\$dim) then so.city_name 
-        else 'all' end as city_name,
+        case when 20 not in (\$dim) then 'all'
+        else coalesce(ciy.province_name,'未知') end as mi_province_name,
+        case when 30 not in (\$dim) then 'all'
+        else coalesce(ciy.city_name,'未知') end as mi_city_name,
+        case when 2 not in (\$dim) then 'all'
+            when action_flag%2=0 then coalesce(ciy.province_name,'未知')
+        else coalesce(so.province_name,ciy.province_name,'未知') end as province_name,
+        case when 3 not in (\$dim) then 'all'
+            when action_flag%2=0 then coalesce(ciy.city_name,'未知')
+        else coalesce(so.city_name,ciy.city_name,'未知') end as city_name,
         uid,
         cel_name,
         age,
@@ -61,7 +63,7 @@ from (
             cel_name,
             case when 4 not in (\$dim) then 'all'
                 when soi.order_id is null then '未知'
-            else cast(substr(sro.dt,1,4) as bigint)-yer end as age,
+            else year(current_date)-yer end as age,
             case when 40 not in (\$dim) then 'all' 
                 when soi.order_id is null then '未知'
                 when sex=0 then '女'
@@ -89,6 +91,7 @@ from (
                     or -99 in (\$performance_id)
                     )
                 and 1 in (\$action_flag)
+                and sellchannel not in (9,10)
             union all
             select
                 case when 5 in (\$dim) then substr(CreateTime,1,10)
@@ -161,12 +164,18 @@ from (
             left join (
                 select
                     orderid as order_id,
-                    substr(idnumber,7,4) as yer,
-                    case when length(idnumber)=15 
-                        then substr(idnumber,15,1)%2
+                    case when length(idnumber)=15 then concat('19',substr(idnumber,7,2))
+                    else substr(idnumber,7,4) end as yer,
+                    case when length(idnumber)=15 then substr(idnumber,15,1)%2
                     else substr(idnumber,17,1)%2 end as sex,
                     row_number() over (partition by orderid order by 1) as id_rank
                 $soi
+                    and ((length(idnumber)=18
+                            and regexp_like(idnumber,
+                        '^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$'))
+                        or (length(idnumber)=15
+                            and regexp_like(idnumber,'^[1-9]\d{5}\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{2}$')
+                        ))
                     and (
                         performanceid in (\$performance_id)
                         or -99 in (\$performance_id)

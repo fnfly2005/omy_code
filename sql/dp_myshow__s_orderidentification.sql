@@ -10,3 +10,4 @@ from
     origindb.dp_myshow__s_orderidentification
 where
     TicketNumber>0
+    and idtype=1
