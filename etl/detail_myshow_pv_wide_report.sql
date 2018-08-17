@@ -47,8 +47,8 @@ select
     category_name,
     shop_id,
     shop_name,
-    city_id,
-    city_name,
+    per.city_id,
+    per.city_name,
     province_id,
     province_name,
     union_id,
@@ -64,6 +64,8 @@ select
     extension,
     page_city_id,
     page_city_name,
+    cit.city_id as pagedpcity_id,
+    coalesce(cit.city_name,page_city_name) as pagedpcity_name,
     geo_city_id,
     geo_city_name,
     ip_location_city_id,
@@ -99,7 +101,8 @@ from (
         refer_page_identifier,
         custom,
         extension,
-        page_city_id,
+        case when app_name='maoyan_wxwallet_i' then custom['cityId']
+        else page_city_id end as page_city_id,
         page_city_name,
         geo_city_id,
         geo_city_name,
@@ -128,6 +131,19 @@ from (
         from mart_movie.dim_myshow_performance where performance_id is not null
         ) per
     on fp1.performance_id=per.performance_id
+    left join (
+        select
+            city_id,
+            city_name,
+            mt_city_id
+        from
+            mart_movie.dim_myshow_city
+        where
+            dp_flag=0
+            ) cit
+        on (case when fp1.app_name='dianping_nova' then cit.city_id
+            else cit.mt_city_id end)=fp1.page_city_id
+            and fp1.page_city_id is not null
 ;
 ##TargetDDL##
 CREATE TABLE IF NOT EXISTS `$target.table`
@@ -155,11 +171,13 @@ CREATE TABLE IF NOT EXISTS `$target.table`
     imei                 string    COMMENT 'imei',    
     session_id           string    COMMENT 'session_id',     
     stat_time            string    COMMENT 'stat_time',
-   refer_page_identifier string    COMMENT 'refer_page_identifier',  
+    refer_page_identifier string    COMMENT 'refer_page_identifier',  
     custom               map<string,string>    COMMENT 'custom',
     extension            map<string,string>    COMMENT 'extension',
     page_city_id         bigint    COMMENT '页面城市id',
     page_city_name       string    COMMENT '页面城市名称',
+    pagedpcity_id        bigint    COMMENT '页面城市id-点评',
+    pagedpcity_name      string    COMMENT '页面城市名称-点评',
     geo_city_id          bigint    COMMENT 'geohash 城市ID',
     geo_city_name        string    COMMENT 'geohash 城市名称',
     ip_location_city_id  bigint    COMMENT 'ip城市ID',

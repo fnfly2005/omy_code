@@ -26,4 +26,4 @@ select
 from
     mart_movie.dim_myshow_salesplan
 where
-    salesplan_id is not null
+    1=1

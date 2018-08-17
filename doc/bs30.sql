@@ -139,8 +139,10 @@ from (
                     case when 1=$cam then performance_id 
                     else 'all' end as cel_name
                 from mart_movie.dim_myshow_performance where 1=1
-                    and performance_id in ($performance_id)
-                    and -99 not in ($performance_id)
+                    and (performance_id in ($performance_id)
+                        or ('$cel_name_a'='测试'
+                            and '$cel_name_b'='测试'
+                            and -99 in ($performance_id)))
                 ) per
             on per.performance_id=sro.performance_id
             left join (
