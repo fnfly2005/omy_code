@@ -10,4 +10,4 @@ select
 from
     mart_movie.dim_myshow_customer
 where
-    customer_id is not null
+    1=1

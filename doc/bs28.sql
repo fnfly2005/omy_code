@@ -121,8 +121,9 @@ from (
         and value2 in ('$pt')
         ) md1
         on md1.key=spo.sellchannel
-        left join (
-        select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, province_id, city_id, city_name, shop_id, shop_name from mart_movie.dim_myshow_performance where performance_id is not null
+        join (
+        select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, province_id, city_id, city_name, shop_id, shop_name from mart_movie.dim_myshow_performance where 1=1
+        and performance_seattype in ($performance_seattype)
         ) per
         on spo.performance_id=per.performance_id
         left join (
@@ -269,10 +270,10 @@ from (
                 partition_date as dt,
                 customer_id,
                 performance_id
-            from mart_movie.detail_myshow_salesplan where salesplan_id is not null and partition_date>='$$begindate' and partition_date<'$$enddate'
+            from mart_movie.detail_myshow_salesplan where 1=1 and partition_date>='$$begindate' and partition_date<'$$enddate'
             ) spo
             left join (
-            select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, province_id, city_id, city_name, shop_id, shop_name from mart_movie.dim_myshow_performance where performance_id is not null
+            select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, province_id, city_id, city_name, shop_id, shop_name from mart_movie.dim_myshow_performance where 1=1
             ) per
             on spo.performance_id=per.performance_id
             left join (

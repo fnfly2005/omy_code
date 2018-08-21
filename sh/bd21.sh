@@ -1,26 +1,10 @@
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
-#*************************项目历史数据-数据源*******************
-#新增TOPX
-path="/Users/fannian/Documents/my_code/"
-fun() {
-    if [ $2x == dx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
-    elif [ $2x == ux ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
-    elif [ $2x == tx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
-    elif [ $2x == utx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
-    else
-        echo `cat ${path}sql/${1} | grep -iv "/\*"`
-    fi
-}
-
+source ./fuc.sh
 per=`fun dim_myshow_performance.sql` 
-spo=`fun detail_myshow_salepayorder.sql`
+spo=`fun detail_myshow_salepayorder.sql u`
 so=`fun detail_wg_saleorder.sql`
 dit=`fun dim_wg_performance.sql`
+md=`fun myshow_dictionary.sql`
 
 file="bd21"
 lim=";"
@@ -29,6 +13,7 @@ attach="${path}doc/${file}.sql"
 echo "
 select
     ds,
+    mt,
     province_name,
     city_name,
     category_name,
@@ -41,6 +26,7 @@ select
 from (
     select
         ds,
+        mt,
         province_name,
         city_name,
         category_name,
@@ -49,18 +35,19 @@ from (
         performance_name,
         totalprice,
         order_num,
-        row_number() over (order by totalprice desc) rank
+        row_number() over (partition by \$par order by totalprice desc) rank
     from (
         select
             '范特西' as ds,
+            mt,
             per.province_name,
             per.city_name,
             per.category_name,
             per.shop_name,
             per.performance_id,
             per.performance_name,
-            totalprice,
-            order_num
+            sum(totalprice) totalprice,
+            sum(order_num) order_num
         from (
             $per
                 and (
@@ -72,31 +59,41 @@ from (
                     or performance_id in (\$id)
                     )
                 and 1 in (\$source)
+                and performance_seattype in (\$performance_seattype)
             ) as per
             join (
             select
+                case when 1 in (\$dim) then substr(partition_date,1,7)
+                else 'all' end as mt,
                 performance_id,
+                sellchannel,
                 sum(totalprice) as totalprice,
                 count(distinct order_id) as order_num
-            from mart_movie.detail_myshow_salepayorder
-            where
-                partition_date<'\$enddate'
-                and partition_date>='\$begindate'
+            $spo
             group by
-                1
+                1,2,3
             ) as sp1
             on per.performance_id=sp1.performance_id
+            join (
+                $md
+                and key_name='sellchannel'
+                and value2 in ('\$pt')
+                ) as md
+            on md.key=sp1.sellchannel
+        group by
+            1,2,3,4,5,6,7,8
         union all
         select
             '微格' as ds,
+            mt,
             province_name,
             city_name,
             category_name,
             shop_name,
             item_no as performance_id,
             performance_name,
-            totalprice,
-            order_num
+            sum(totalprice) totalprice,
+            sum(order_num) order_num
         from (
             $dit
                 and (
@@ -111,19 +108,23 @@ from (
             ) dit
             join (
             select
+                case when 1 in (\$dim) then substr(dt,1,7)
+                else 'all' end as mt,
                 item_id,
                 sum(total_money) as totalprice,
                 count(distinct order_id) as order_num
             from 
                 upload_table.detail_wg_saleorder
             where 
-                dt<'\$enddate'
-                and dt>='\$begindate'
+                dt<'\$\$enddate'
+                and dt>='\$\$begindate'
                 and pay_no is not null
             group by
-                1
+                1,2
             ) so
             on so.item_id=dit.item_id
+        group by
+            1,2,3,4,5,6,7,8
         ) as rs
     ) as rr
 where

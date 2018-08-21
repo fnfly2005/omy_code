@@ -143,8 +143,9 @@ from (
         and value2 in ('\$pt')
         ) md1
         on md1.key=spo.sellchannel
-        left join (
+        join (
         $per
+        and performance_seattype in (\$performance_seattype)
         ) per
         on spo.performance_id=per.performance_id
         left join (
