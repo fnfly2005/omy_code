@@ -13,6 +13,8 @@ select
     dp_shop_first_cate_name,
     dp_shop_second_cate_id,
     dp_shop_second_cate_name,
-    dp_shop_address
+    dp_shop_address,
+    latitude,
+    longitude
 from
     dw.dim_dp_shop

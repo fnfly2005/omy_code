@@ -4,7 +4,7 @@
 ##-- 流程应该命名成: 目标表meta名(库名).表名
 
 ##Description##
-##-- 这个节点填写本ETL的描述信息, 包括目标表定义, 建立时的需求jira编号等
+##--
 
 ##TaskInfo##
 creator = 'fannian@maoyan.com'

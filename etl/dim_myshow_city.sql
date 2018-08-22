@@ -11,85 +11,45 @@ select
     area_1_level_name,
     area_2_level_id,
     area_2_level_name,
+    mcm.parentdpcity_id,
+    mcm.parentdpcity_name,
     dpct.mt_city_id,
     dp_flag,
     case when cl.mt_city_id is null then 4
     else city_level end city_level,
     from_unixtime(unix_timestamp(),'yyyy-MM-dd HH:mm:ss') AS etl_time
 from (
-    select 
-        sd.cityid as city_id,
-        sd.cityname as city_name,
+    select distinct
+        dc.cityid as city_id,
+        dc.cityname as city_name,
         dp.province_id,
         dp.province_name,
-        dp.area_1_level_id,
-        dp.area_1_level_name,
-        dp.area_2_level_id,
-        dp.area_2_level_name,
-        sd.mt_city_id,
-        dp_flag
-    from (
-        select distinct
-            dc.cityid,
-            dc.cityname,
-            dc.provinceid,
-            mt_city_id,
-            case when cms.mt_city_id is null then 1
-                when cms.mt_city_id=0 then 1
-            else 0 end as dp_flag
-        from 
-            origindb.dp_myshow__s_dpcitylist dc
-            join dw.dim_dp_mt_city_mapping_scd cms
-            on cast(dc.cityid as bigint)=cms.dp_city_id
-            and cms.is_enabled=1
-        where 
-            dc.cityid<>7
-        ) as sd
+        case when dc.cityid<>7 then dp.area_1_level_id
+        else 4 end as area_1_level_id,
+        case when dc.cityid<>7 then dp.area_1_level_name
+        else '南部' end as area_1_level_name,
+        case when dc.cityid<>7 then dp.area_2_level_id
+        else 10 end as area_2_level_id,
+        case when dc.cityid<>7 then dp.area_2_level_name
+        else '华南' end as area_2_level_name,
+        mt_city_id,
+        case when cms.mt_city_id is null then 1
+            when cms.mt_city_id=0 then 1
+        else 0 end as dp_flag
+    from 
+        origindb.dp_myshow__s_dpcitylist dc
+        join dw.dim_dp_mt_city_mapping_scd cms
+        on cast(dc.cityid as bigint)=cms.dp_city_id
+        and cms.is_enabled=1
         left join upload_table.dim_myshow_province_s as dp
-        on dp.province_id=sd.provinceid
-    union all 
-    select 
-        sd.cityid as city_id,
-        sd.cityname as city_name,
-        sd.provinceid as province_id,
-        '广东' as province_name,
-        dp.area_1_level_id,
-        dp.area_1_level_name,
-        dp.area_2_level_id,
-        dp.area_2_level_name,
-        sd.mt_city_id,
-        0 as dp_flag
-    from (
-        select
-            1 as link,
-            dc.cityid,
-            dc.cityname,
-            dc.provinceid,
-            cms.mt_city_id
-        from 
-            origindb.dp_myshow__s_dpcitylist dc
-            join dw.dim_dp_mt_city_mapping_scd cms
-            on cast(dc.cityid as bigint)=cms.dp_city_id
-            and cms.is_enabled=1
-        where 
-            dc.cityid=7
-        ) as sd
-        join (
-            select distinct 
-                1 as link,
-                area_1_level_id,
-                area_1_level_name,
-                area_2_level_id,
-                area_2_level_name
-            from 
-                upload_table.dim_myshow_province_s
-            where 
-                area_2_level_id=10
-            ) as dp
-        on sd.link=dp.link
+        on dp.province_id=dc.provinceid
     ) as dpct
     left join upload_table.dim_myshow_citylevel cl
     on cl.mt_city_id=dpct.mt_city_id
+    and dp_flag=0
+    left join upload_table.dim_myshow_dxcitymap mcm
+    on mcm.mtcity_id=dpct.mt_city_id
+    and dp_flag=0
 
 #if $isRELOAD
 drop table `$target.table`
@@ -107,6 +67,8 @@ CREATE TABLE IF NOT EXISTS `$target.table`
 `area_1_level_name` string COMMENT '战区名称',
 `area_2_level_id` int COMMENT '分区ID',
 `area_2_level_name` string COMMENT '分区名称',
+`parentdpcity_id` bigint COMMENT '点评父级城市ID',
+`parentdpcity_name` bigint COMMENT '点评父级城市名称',
 `mt_city_id` bigint COMMENT '美团城市ID',
 `dp_flag` int COMMENT '点评专属城市标志 0:美团点评共有 1:点评专属',
 `city_level` int COMMENT '猫眼城市等级',

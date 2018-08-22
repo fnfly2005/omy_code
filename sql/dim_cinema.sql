@@ -1,6 +1,11 @@
 /*影院维度表*/
 select
     cinema_id,
-    city_id
+    city_id,
+    city_name,
+    secondary_city_id,
+    secondary_city_name
 from
     mart_movie.dim_cinema
+where
+    is_enabled=1
