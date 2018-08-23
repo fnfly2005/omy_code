@@ -35,7 +35,7 @@ from (
             dt,
             performance_id, 
             sum(order_num) as order_num,
-            sum(case when key1=1 then order_num end) as uv_order_num,
+            sum(case when key1='1' then order_num end) as uv_order_num,
             sum(ticket_num) as ticket_num,
             sum(totalprice) as totalprice,
             sum(grossprofit) as grossprofit
@@ -55,7 +55,7 @@ from (
             join (
             $md
                 and key_name='sellchannel'
-                and key1<>0
+                and key1<>'0'
             ) as md
             on spo.sellchannel=md.key
         group by

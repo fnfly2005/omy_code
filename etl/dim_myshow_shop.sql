@@ -30,42 +30,36 @@ target = {
 
 ##Load##
 ##-- Load节点, (可以留空)
-drop table if EXISTS mart_movie_test.dim_myshow_shop_tempa1;
-create table mart_movie_test.dim_myshow_shop_tempa1 as
-select
-    venueid as venue_id,
-    dpshopid as shop_id,
-    name as shop_name,
-    address as shop_address,
-    cityid as city_id,
-    cityname as city_name,
-    status as shop_status,
-    createtime as create_time,
-    updatetime as update_time,
-    protectstatus as protect_status,
-    topstatus as top_status,
-    audittime as audit_time,
-    applytime as apply_time,
-    bduserid as bduser_id,
-    audituserid as audituser_id,
-    bdusername as bduser_time,
-    auditusername as audituser_time,
-    branchname as branch_name,
-    mtshopid as mtshop_id
-from
-    origindb.dp_myshow__t_venue --基础场馆表
-;
 insert OVERWRITE TABLE `$target.table`
 select
-    ShopID as shop_id,
-    TPVenueName as shop_name,
-    city_id,
-    city_name,
+	pov.venue_id,
+	pov.shop_id,
+	case when shop_name is null then dp_shop_name
+    else shop_name end as shop_name,
+	case when pov.shop_address is null then dp_shop_address
+    else pov.shop_address end as shop_address,
+	case when pov.city_id is null then dp_city_id
+    else pov.city_id end as city_id,
+	case when pov.city_name is null then dp_city_name
+    else pov.city_name end as city_name,
+	pov.shop_status,
+	case when pov.create_time is null then dds.create_time
+    else pov.create_time end as create_time,
+	case when pov.update_time is null then dds.update_time
+    else pov.update_time end as update_time,
+	pov.protect_status,
+	pov.top_status,
+	pov.audit_time,
+	pov.apply_time,
+	pov.bduser_id,
+	pov.audituser_id,
+	pov.bduser_time,
+	pov.audituser_time,
+	pov.branch_name,
+	pov.mtshop_id,
     longitude,
     latitude,
     from_unixtime(unix_timestamp(),'yyyy-MM-dd HH:mm:ss') AS etl_time
-union all
-select
 from (
     select
         poi.shop_id as venue_id,
@@ -93,33 +87,33 @@ from (
         from 
             origindb.dp_myshow__s_poishopmap --第三方场馆表
         ) as poi
-        left join mart_movie_test.dim_myshow_shop_tempa1 ven
-            on ven.shop_id=poi.shop_id
+        left join origindb.dp_myshow__t_venue ven
+            on ven.dpshopid=poi.shop_id
     where
-        ven.shop_id is null
+        ven.dpshopid is null
     union all
     select
-		venue_id,
-		shop_id,
-		shop_name,
-		shop_address,
-		city_id,
-		city_name,
-		shop_status,
-		create_time,
-		update_time,
-		protect_status,
-		top_status,
-		audit_time,
-		apply_time,
-		bduser_id,
-		audituser_id,
-		bduser_time,
-		audituser_time,
-		branch_name,
-		mtshop_id
+        venueid as venue_id,
+        dpshopid as shop_id,
+        name as shop_name,
+        address as shop_address,
+        cityid as city_id,
+        cityname as city_name,
+        status as shop_status,
+        createtime as create_time,
+        updatetime as update_time,
+        protectstatus as protect_status,
+        topstatus as top_status,
+        audittime as audit_time,
+        applytime as apply_time,
+        bduserid as bduser_id,
+        audituserid as audituser_id,
+        bdusername as bduser_time,
+        auditusername as audituser_time,
+        branchname as branch_name,
+        mtshopid as mtshop_id
     from
-        mart_movie_test.dim_myshow_shop_tempa1
+        origindb.dp_myshow__t_venue --基础场馆表
     ) as pov
     left join dw.dim_dp_shop dds
         on dds.dp_shop_id=pov.shop_id
@@ -128,12 +122,25 @@ from (
 ##-- 目标表表结构
 CREATE TABLE IF NOT EXISTS `$target.table`
 (
-`shop_id` bigint COMMENT '演出场馆ID',
-`shop_name` string COMMENT '演出场馆名称',
+`venue_id` bigint COMMENT '主键',
+`shop_id` bigint COMMENT '点评场馆ID',
+`shop_name` string COMMENT '场馆名称',
+`shop_address` string COMMENT '场馆地址',
 `city_id` bigint COMMENT '城市ID',
-`city_name` string COMMENT '城市名称',
-`province_id` int COMMENT '省份ID',
-`province_name` string COMMENT '省份名称',
+`city_name` string COMMENT '城市名字',
+`shop_status` int COMMENT '状态',
+`create_time` string COMMENT '创建时间',
+`update_time` string COMMENT '更新时间',
+`protect_status` int COMMENT '是否保护POI 1保护',
+`top_status` int COMMENT '置顶状态1不置顶2申请置顶3置顶',
+`audit_time` string COMMENT '审核时间',
+`apply_time` string COMMENT '申请时间',
+`bduser_id` bigint COMMENT '申请人ID',
+`audituser_id` bigint COMMENT '审核人ID',
+`bduser_name` string COMMENT '申请人名称',
+`audituser_name` string COMMENT '审核人姓名',
+`branch_name` string COMMENT '分店名称',
+`mtshop_id` bigint COMMENT '美团场馆ID',
 `longitude` double COMMENT '经度',
 `latitude` double COMMENT '纬度',
 `etl_time` string COMMENT '更新时间'

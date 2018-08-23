@@ -1,23 +1,5 @@
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
-#*************************来源追踪-来源/日期/平台/UV/销售数据*******************
-# 优化输出方式,优化函数处理
-path="/Users/fannian/Documents/my_code/"
-fun() {
-    if [ $2x == dx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
-    elif [ $2x == ux ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
-    elif [ $2x == tx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
-    elif [ $2x == utx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
-    else
-        echo `cat ${path}sql/${1} | grep -iv "/\*"`
-    fi
-}
-path="/Users/fannian/Documents/my_code/"
-
+source ./fuc.sh
 fpw=`fun detail_flow_pv_wide_report.sql` 
 md=`fun myshow_dictionary.sql`
 per=`fun dim_myshow_performance.sql`
@@ -98,7 +80,7 @@ from (
                 1,2,3
             union all
             select
-                case when fromTag=0 then '其他'
+                case when fromTag='0' then '其他'
                 when fromTag is null then '其他'
                 else fromTag end as fromTag,
                 dt,
@@ -167,7 +149,7 @@ from (
                 sum(grossprofit) as grossprofit
             from (
                 select
-                    case when fromTag=0 then '其他'
+                    case when fromTag='0' then '其他'
                     when fromTag is null then '其他'
                     else fromTag
                     end as fromTag,

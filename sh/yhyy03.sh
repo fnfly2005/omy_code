@@ -104,7 +104,7 @@ from (
             join (
                 $md
                     and key_name='sellchannel'
-                    and key1<>0
+                    and key1<>'0'
                 ) md
             on spo.sellchannel=md.key
             left join (

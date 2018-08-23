@@ -36,7 +36,7 @@ from (
         join (
             $md
             and key_name='sellchannel'
-            and key1=1
+            and key1='1'
             ) as md
         on sp0.sellchannel=md.key
     group by

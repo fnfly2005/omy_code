@@ -63,6 +63,13 @@ select
         sp.premiumstatus,
         sp.seattype as performance_seattype,
         sp.iscomplete,
+        sp.StockOutRegister,
+        sp.NeedAnswer,
+        sp.QuestionBankId,
+        sp.QuestionHint,
+        pes.OnSaleTime,
+        pes.NeedRemind,
+        pes.CountdownTime,
         from_unixtime(unix_timestamp(),'yyyy-MM-dd HH:mm:ss') AS etl_time
   from origindb.dp_myshow__s_performance sp
   left join mart_movie.dim_myshow_city ci
@@ -71,7 +78,27 @@ select
     on sp.CategoryID=ca.category_id
   left join mart_movie.dim_myshow_shop ds
     on sp.ShopID=ds.shop_id
-    left join 
+  left join (
+    select
+        Performanceid,
+        OnSaleTime,
+        NeedRemind,
+        CountdownTime
+    from (
+        select
+            max(SaleRemindID) as saleremindid
+        from
+            origindb.dp_myshow__s_performancesaleremind
+        where
+            status=1
+        group by
+            performanceid
+        ) as pe1
+        left join origindb.dp_myshow__s_performancesaleremind pe2
+        on pe1.saleremindid=pe2.saleremindid
+    ) as pes
+    on sp.PerformanceID=pes.Performanceid
+    
 
 ##TargetDDL##
 ##-- 目标表表结构
@@ -104,6 +131,13 @@ CREATE TABLE IF NOT EXISTS `$target.table`
 `premiumstatus` int COMMENT '溢价状态 1:未知 2:溢价 3:没有溢价',
 `performance_seattype` int COMMENT '场次座位类型 0:非选座 1:选座 2:既有选座也有非选座',
 `iscomplete` int COMMENT '用于校验完整性 0:不完整 1:完整',
+`stockoutregister` int COMMENT '是否缺货登记项目0不是1是',
+`needanswer` int COMMENT '是否开启答题1是 0否',
+`questionbankid` bigint COMMENT '题库ID',
+`questionhint` string COMMENT '答题提示语',
+`onsaletime` string COMMENT '开售时间',
+`needremind` int COMMENT '是否设置开售提醒',
+`countdowntime` string COMMENT '开始倒计时的时间',
 `etl_time` string COMMENT '更新时间'
 ) ROW FORMAT DELIMITED 
 FIELDS TERMINATED BY '\t'
