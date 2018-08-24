@@ -1,64 +1,45 @@
 
-select
-    case when 1 in ($dim) then dt
-    else 'all' end as dt,
-    case when 2 in ($dim) then md.value2 
-    else 'all' end as pt,
-    case when 3 in ($dim) then customer_type_name
-    else 'all' end as customer_type_name,
-    case when 3 in ($dim) then customer_lvl1_name
-    else 'all' end as customer_lvl1_name,
-    area_1_level_name,
-    area_2_level_name,
-    province_name,
-    city_name,
-    category_name,
-    spo.performance_id,
-    performance_name,
-    shop_name,
-    case when 3 in ($dim) then 'all'
-        when dpr.bd_name is null then '无'
-    else dpr.bd_name end as bd_name,
-    sum(order_id) as order_num,
-    sum(ticket_num) as ticket_num,
-    sum(TotalPrice) as TotalPrice,
-    sum(grossprofit) as grossprofit
+select distinct
+    case when $online=1 then dt
+    else minon_dt end as dt,
+	ssp.customer_type_name,
+	ssp.customer_lvl1_name,
+	ssp.area_1_level_name,
+	ssp.area_2_level_name,
+	ssp.province_name,
+	ssp.city_name,
+	ssp.category_name,
+	ssp.performance_id,
+	ssp.performance_name,
+	ssp.shop_name,
+	ssp.bd_name
 from (
-    select
-        partition_date as dt,
-        sellchannel,
-        customer_id,
-        project_id,
-        performance_id,
-        count(distinct order_id) as order_num,
-        sum(salesplan_count*setnumber) as ticket_num,
-        sum(TotalPrice) as TotalPrice,
-        sum(grossprofit) as grossprofit
-    from 
-        mart_movie.detail_myshow_salepayorder
-    where 
-        partition_date>='$$begindate'
-        and partition_date<'$$enddate'
-    group by
-        1,2,3,4,5
-    ) spo
+    select salesplan_id, salesplan_name, shop_id, category_name, show_starttime, performance_id, performance_name, show_id, show_name, ticketclass_id, ticket_price, salesplan_ontime, salesplan_createtime, customer_id, customer_name, customer_type_name, customer_lvl1_name, shop_name, city_name, area_1_level_name, area_2_level_name, province_name, setnumber, bd_name from mart_movie.dim_myshow_salesplan where 1=1
+    ) ssp
     left join (
-    select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, city_id, city_name, shop_name from mart_movie.dim_myshow_performance where performance_id is not null
-    ) dmp
-    using(performance_id)
+        select
+            partition_date as dt,
+            salesplan_id
+        from mart_movie.detail_myshow_salesplan where 1=1 and partition_date>='$$begindate' and partition_date<'$$enddate'
+            and salesplan_sellout_flag=0
+            and $online=1
+        ) dms
+    on ssp.salesplan_id=dms.salesplan_id
     left join (
-    select customer_id, customer_type_id, customer_type_name, customer_lvl1_name, customer_name, customer_shortname, customer_code from mart_movie.dim_myshow_customer where customer_id is not null
-    ) dc
-    on dms.customer_id=dc.customer_id
-    left join (
-    select project_id, insteaddelivery, bd_name from mart_movie.dim_myshow_project where project_id is not null
-    ) dpr
-    on dpr.project_id=dms.project_id
-    left join (
-    select key, value1, value2, value3 from upload_table.myshow_dictionary where key_name is not null
-    and key_name='sellchannel'
-    ) md
-    on md.key=spo.sellchannel
-group by
-    1,2,3,4,5,6,7,8,9,10,11,12,13
+        select
+            performance_id,
+            substr(min(salesplan_ontime),1,10) as minon_dt
+        from mart_movie.dim_myshow_salesplan where 1=1
+            and $online=0
+        group by
+            1
+        ) ssu
+    on ssp.performance_id=ssu.performance_id
+    and minon_dt>='$$begindate'
+    and minon_dt<'$$enddate'
+where
+    ($online=1 
+    and dms.salesplan_id is not null)
+    or ($online=0
+    and ssu.performance_id is not null)
 ;

@@ -22,7 +22,8 @@ select
     area_1_level_name,
     area_2_level_name,
     province_name,
-    setnumber
+    setnumber,
+    bd_name
 from
     mart_movie.dim_myshow_salesplan
 where

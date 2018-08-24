@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `$target.table`
 `area_2_level_id` int COMMENT '分区ID',
 `area_2_level_name` string COMMENT '分区名称',
 `parentdpcity_id` bigint COMMENT '点评父级城市ID',
-`parentdpcity_name` bigint COMMENT '点评父级城市名称',
+`parentdpcity_name` string COMMENT '点评父级城市名称',
 `mt_city_id` bigint COMMENT '美团城市ID',
 `dp_flag` int COMMENT '点评专属城市标志 0:美团点评共有 1:点评专属',
 `city_level` int COMMENT '猫眼城市等级',
