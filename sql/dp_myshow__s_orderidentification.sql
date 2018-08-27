@@ -9,5 +9,7 @@ select
 from
     origindb.dp_myshow__s_orderidentification
 where
-    TicketNumber>0
-    and idtype=1
+    idtype=1
+    and (createtime>='2018-07-14'
+        or (createtime<'2018-07-14'
+        and ticketnumber>0))

@@ -47,19 +47,42 @@ from (
                     or performance_id in ($id)
                     )
                 and 1 in ($source)
-                and performance_seattype in ($performance_seattype)
             ) as per
             join (
-            select
-                case when 1 in ($dim) then substr(partition_date,1,7)
-                else 'all' end as mt,
-                performance_id,
-                sellchannel,
-                sum(totalprice) as totalprice,
-                count(distinct order_id) as order_num
-            from mart_movie.detail_myshow_salepayorder where partition_date>='$$begindate' and partition_date<'$$enddate'
-            group by
-                1,2,3
+                select
+                    mt,
+                    performance_id,
+                    sellchannel,
+                    sum(totalprice) as totalprice,
+                    sum(order_num) as order_num
+                from (
+                    select
+                        case when 1 in ($dim) then substr(partition_date,1,7)
+                        else 'all' end as mt,
+                        performance_id,
+                        customer_id,
+                        sellchannel,
+                        show_id,
+                        sum(totalprice) as totalprice,
+                        count(distinct order_id) as order_num
+                    from mart_movie.detail_myshow_salepayorder where partition_date>='$$begindate' and partition_date<'$$enddate'
+                    group by
+                        1,2,3,4,5
+                    ) as spo
+                    join (
+                        select
+                            show_id
+                        from mart_movie.dim_myshow_show where 1=1
+                            and show_seattype in ($show_seattype)
+                        ) dsh
+                    on dsh.show_id=spo.show_id
+                    join (
+                        select customer_id, customer_type_id, customer_type_name, customer_lvl1_name, customer_name, customer_shortname, customer_code from mart_movie.dim_myshow_customer where 1=1
+                            and customer_type_id in ($customer_type_id)
+                        ) cus
+                    on spo.customer_id=cus.customer_id
+                group by
+                    1,2,3
             ) as sp1
             on per.performance_id=sp1.performance_id
             join (
@@ -106,7 +129,9 @@ from (
             where 
                 dt<'$$enddate'
                 and dt>='$$begindate'
-                and pay_no is not null
+                and (pay_no is not null
+                    or 1=$pay_no)
+                and 2 in ($customer_type_id)
             group by
                 1,2
             ) so

@@ -17,6 +17,7 @@ from
     upload_table.dim_wg_performance
 where
     performance_name NOT LIKE '%测试%'
+    and type_lv2_name NOT LIKE '%测试%'
     AND performance_name NOT LIKE '%调试%'
     AND performance_name NOT LIKE '%勿动%'
     AND performance_name NOT LIKE '%test%'

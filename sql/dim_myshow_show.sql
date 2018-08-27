@@ -8,4 +8,4 @@ select
 from
     mart_movie.dim_myshow_show
 where
-    show_id is not null
+    1=1

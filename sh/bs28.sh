@@ -15,6 +15,7 @@ cit=`fun dim_myshow_city.sql`
 cat=`fun dim_myshow_category.sql`
 scn=`fun detail_maoyan_order_sale_cost_new_info.sql u`
 ddn=`fun dim_deal_new.sql u`
+dsh=`fun dim_myshow_show.sql u`
 
 file="bs28"
 lim=";"
@@ -76,7 +77,7 @@ from (
             sellchannel,
             customer_id,
             performance_id,
-            count(distinct show_id) as show_num,
+            count(distinct sp1.show_id) as show_num,
             sum(order_num) as order_num,
             sum(totalprice) as totalprice,
             sum(ticket_num) as ticket_num,
@@ -134,6 +135,13 @@ from (
             group by
                 1,2,3,4,5
             ) sp1
+            join (
+                select
+                    show_id
+                $dsh
+                    and show_seattype in (\$show_seattype)
+                ) dsh
+                on dsh.show_id=sp1.show_id
         group by
             1,2,3,4
             ) spo
@@ -145,11 +153,12 @@ from (
         on md1.key=spo.sellchannel
         join (
         $per
-        and performance_seattype in (\$performance_seattype)
+        and category_id in (\$category_id)
         ) per
         on spo.performance_id=per.performance_id
-        left join (
+        join (
         $cus
+            and customer_type_id in (\$customer_type_id)
         ) cus
         on cus.customer_id=spo.customer_id
     group by
@@ -198,6 +207,7 @@ from (
             or \$payflag=0
             )
         and 1 in (\$ds)
+        and 2 in (\$customer_type_id)
         group by
             1,2,3
             ) wso
@@ -227,6 +237,9 @@ from (
         $cat
         ) cat
         on cat.category_id=wt.category_id
+    where
+        cat.category_id in (\$category_id)
+        or 0 in (\$category_id)
     group by
         1,2,3,4,5,6,7,8,9,10,11
     union all
@@ -291,15 +304,28 @@ from (
             select distinct
                 partition_date as dt,
                 customer_id,
-                performance_id
+                performance_id,
+                show_id
             $ssp
+                and salesplan_sellout_flag=0
+                and customer_type_id in (\$customer_type_id)
+                and category_id in (\$category_id)
             ) spo
+            join (
+                select
+                    show_id
+                $dsh
+                    and show_seattype in (\$show_seattype)
+                ) as dsh
+                on dsh.show_id=spo.show_id
             left join (
             $per
+            and category_id in (\$category_id)
             ) per
             on spo.performance_id=per.performance_id
             left join (
             $cus
+            and customer_type_id in (\$customer_type_id)
             ) cus
             on cus.customer_id=spo.customer_id
         where

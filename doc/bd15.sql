@@ -24,7 +24,7 @@ from (
             PerformanceID as performance_id,
             OrderID as order_id,
             map_agg(UserName,IDNumber) as name_id
-        from origindb.dp_myshow__s_orderidentification where TicketNumber>0
+        from origindb.dp_myshow__s_orderidentification where idtype=1 and (createtime>='2018-07-14' or (createtime<'2018-07-14' and ticketnumber>0))
             and performanceid in ($performance_id)
         group by
             1,2

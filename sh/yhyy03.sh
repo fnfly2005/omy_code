@@ -8,12 +8,16 @@ md=`fun myshow_dictionary.sql`
 cus=`fun dim_myshow_customer.sql`
 cel=`fun dp_myshow__s_celebrityperformancerelation.sql u`
 cit=`fun dim_myshow_city.sql u`
+wso=`fun detail_wg_saleorder.sql ud`
+wpe=`fun dim_wg_performance_s.sql`
+
 file="yhyy03"
 lim=";"
 attach="${path}doc/${file}.sql"
 
 echo "
 select
+    '猫眼' as das,
     ss.performance_id,
     performance_name,
     customer_type_name,
@@ -73,6 +77,7 @@ from (
         and ((show_starttime>='\$\$begindate'
             and show_starttime<'\$\$enddate')
             or \$timerange=0)
+        and customer_type_id in (\$customer_type_id)
     group by
         1,2,3,4,5,6,7,8
     ) as ss
@@ -125,6 +130,61 @@ from (
             1
         ) cel
         on ss.performance_id=cel.performance_id
+where
+    salesplan_sellout_flag in (\$salesplan_sellout_flag)
+union all
+select
+    '微格' as das,
+    performance_id,
+    performance_name,
+    '自营' as customer_type_name,
+    category_name,
+    province_name,
+    city_name,
+    shop_name,
+    null as celebrityname,
+    '停售' salesplan_sellout_flag,
+    null as onsaletime,
+    null as salesplan_ontime,
+    null as salesplan_offtime,
+    totalprice
+from (
+    $wpe
+        and category_id in (\$category_id)
+        and ((city_id in (\$city_id) and \$dit=1)
+            or (city_id in (
+                    select
+                        city_id
+                    $cit
+                        and province_id in (\$province_id)
+                        )
+                and \$dit=0))
+        and (performance_id in (\$performance_id)
+            or -99 in (\$performance_id))
+        and (
+            regexp_like(performance_name,'\$performance_name')
+            or '全部'='\$performance_name'
+            )
+        and (
+            regexp_like(shop_name,'\$shop_name')
+            or '全部'='\$shop_name'
+            )
+        and \$timerange=0
+        and \$das=1
+        and 3 in (\$salesplan_sellout_flag)
+        and 2 in (\$customer_type_id)
+    ) wpe
+    left join (
+        select
+            item_id,
+            sum(total_money) as totalprice
+        $wso
+        where
+            length(pay_no)>5
+        group by
+            1
+        ) wso
+    on wso.item_id=wpe.item_id
 $lim">${attach}
 
 echo "succuess!"

@@ -2,6 +2,7 @@
 select
     project_id,
     insteaddelivery,
+    maxbuylimitperid,
     bd_name
 from
     mart_movie.dim_myshow_project
