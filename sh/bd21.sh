@@ -4,9 +4,9 @@ per=`fun dim_myshow_performance.sql`
 spo=`fun detail_myshow_salepayorder.sql u`
 so=`fun detail_wg_saleorder.sql`
 dit=`fun dim_wg_performance_s.sql`
-md=`fun myshow_dictionary.sql`
+md=`fun dim_myshow_dictionary.sql`
 dsh=`fun dim_myshow_show.sql u`
-cus=`fun dim_myshow_customer.sql`
+cus=`fun dim_myshow_customer.sql u`
 
 file="bd21"
 lim=";"
@@ -88,6 +88,8 @@ from (
                         ) dsh
                     on dsh.show_id=spo.show_id
                     join (
+                        select
+                            customer_id
                         $cus
                             and customer_type_id in (\$customer_type_id)
                         ) cus

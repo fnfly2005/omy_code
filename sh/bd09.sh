@@ -1,6 +1,6 @@
 #!/bin/bash
 source ./fuc.sh
-spo=`fun detail_myshow_saleorder.sql`
+spo=`fun detail_myshow_salepayorder.sql`
 md=`fun myshow_dictionary.sql`
 ssp=`fun dim_myshow_salesplan.sql`
 sor=`fun dp_myshow__s_orderrefund.sql`
@@ -40,6 +40,7 @@ select
     sum(order_num) as order_num,
     sum(ticket_num) as ticket_num,
     sum(TotalPrice) as TotalPrice,
+    sum(grossprofit) as grossprofit,
     sum(current_amount) as current_amount,
     sum(amount_gmv) as amount_gmv
 from (
@@ -57,10 +58,10 @@ from (
         else 'yes' end as refund_flag,
         count(distinct spo.order_id) as order_num,
         sum(ticket_num) as ticket_num,
-        sum(spo.TotalPrice) as TotalPrice
+        sum(spo.TotalPrice) as TotalPrice,
+        sum(spo.grossprofit) as grossprofit
     from (
         $spo
-            and sellchannel in (\$sellchannel)
             and (performance_id in (\$id)
                 or -99 in (\$id))
         ) spo
@@ -85,17 +86,18 @@ from (
         else 'all' end as ht,
         case when 8 in (\$dim) then (cast(substr(pay_time,15,1) as bigint)+1)*10
         else 'all' end as mit,
-        sellchannel,
+        case when 2 in (\$dim) then sellchannel
+        else -99 end as sellchannel,
         salesplan_id,
         'all' refund_flag,
         count(distinct order_id) as order_num,
         sum(salesplan_count*setnumber) as ticket_num,
-        sum(TotalPrice) as TotalPrice
+        sum(TotalPrice) as TotalPrice,
+        0 as grossprofit
     from
         upload_table.detail_myshow_salerealorder
     where
-        sellchannel in (\$sellchannel)
-        and pay_time is not null
+        pay_time is not null
         and pay_time>='\$\$begindate'
         and pay_time<'\$\$enddate'
         and (performance_id in (\$id)
@@ -122,11 +124,13 @@ from (
             or -99 in (\$id))
         and (regexp_like(shop_name,'\$shop_name')
         or '全部'='\$shop_name')
+        and customer_type_id in (\$customer_type_id)
         ) ssp
         on spo.salesplan_id=ssp.salesplan_id
-    left join (
+    join (
         $md
-        and key_name='sellchannel'
+            and key_name='sellchannel'
+            and value2 in ('\$sellchannel')
         ) md
         on md.key=spo.sellchannel
     left join (

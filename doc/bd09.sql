@@ -27,6 +27,7 @@ select
     sum(order_num) as order_num,
     sum(ticket_num) as ticket_num,
     sum(TotalPrice) as TotalPrice,
+    sum(grossprofit) as grossprofit,
     sum(current_amount) as current_amount,
     sum(amount_gmv) as amount_gmv
 from (
@@ -44,10 +45,10 @@ from (
         else 'yes' end as refund_flag,
         count(distinct spo.order_id) as order_num,
         sum(ticket_num) as ticket_num,
-        sum(spo.TotalPrice) as TotalPrice
+        sum(spo.TotalPrice) as TotalPrice,
+        sum(spo.grossprofit) as grossprofit
     from (
-        select substr(pay_time,1,7) as mt, substr(pay_time,1,10) as dt, substr(pay_time,12,2) as ht, order_id, maoyan_order_id, usermobileno as mobile, recipientidno, sellchannel, city_id, totalprice, customer_id, performance_id, meituan_userid, dianping_userid, show_name, show_id, pay_time, consumed_time, show_endtime, show_starttime, order_create_time, order_refund_status, setnumber, salesplan_count, setnumber*salesplan_count as ticket_num, ticket_price, province_name, city_name, ticketclass_description, detailedaddress, salesplan_id, salesplan_name from mart_movie.detail_myshow_saleorder where pay_time is not null and pay_time>='$$begindate' and pay_time<'$$enddate'
-            and sellchannel in ($sellchannel)
+        select partition_date as dt, order_id, sellchannel, customer_id, performance_id, meituan_userid, show_id, totalprice, grossprofit, setnumber, salesplan_count, setnumber*salesplan_count as ticket_num, expressfee, discountamount, income, expense, totalticketprice, ticket_price, sell_price, project_id, bill_id, salesplan_id, city_id, pay_time, substr(pay_time,12,2) as ht from mart_movie.detail_myshow_salepayorder where partition_date>='$$begindate' and partition_date<'$$enddate'
             and (performance_id in ($id)
                 or -99 in ($id))
         ) spo
@@ -72,17 +73,18 @@ from (
         else 'all' end as ht,
         case when 8 in ($dim) then (cast(substr(pay_time,15,1) as bigint)+1)*10
         else 'all' end as mit,
-        sellchannel,
+        case when 2 in ($dim) then sellchannel
+        else -99 end as sellchannel,
         salesplan_id,
         'all' refund_flag,
         count(distinct order_id) as order_num,
         sum(salesplan_count*setnumber) as ticket_num,
-        sum(TotalPrice) as TotalPrice
+        sum(TotalPrice) as TotalPrice,
+        0 as grossprofit
     from
         upload_table.detail_myshow_salerealorder
     where
-        sellchannel in ($sellchannel)
-        and pay_time is not null
+        pay_time is not null
         and pay_time>='$$begindate'
         and pay_time<'$$enddate'
         and (performance_id in ($id)
@@ -98,7 +100,7 @@ from (
         1,2,3,4,5,6
         ) as spo
     join (
-        select salesplan_id, salesplan_name, shop_id, category_name, show_starttime, performance_id, performance_name, show_id, show_name, ticketclass_id, ticket_price, salesplan_ontime, salesplan_createtime, customer_id, customer_name, customer_type_name, customer_lvl1_name, shop_name, city_name, area_1_level_name, area_2_level_name, province_name, setnumber from mart_movie.dim_myshow_salesplan where salesplan_id is not null
+        select salesplan_id, salesplan_name, shop_id, category_id, category_name, show_starttime, performance_id, performance_name, show_id, show_name, ticketclass_id, ticket_price, salesplan_ontime, salesplan_createtime, customer_id, customer_name, customer_type_name, customer_lvl1_name, shop_name, city_name, area_1_level_name, area_2_level_name, province_name, setnumber, bd_name from mart_movie.dim_myshow_salesplan where 1=1
         and (regexp_like(customer_name,'$customer_name')
         or '全部'='$customer_name')
         and (customer_code in ($customer_code)
@@ -109,11 +111,13 @@ from (
             or -99 in ($id))
         and (regexp_like(shop_name,'$shop_name')
         or '全部'='$shop_name')
+        and customer_type_id in ($customer_type_id)
         ) ssp
         on spo.salesplan_id=ssp.salesplan_id
-    left join (
+    join (
         select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where 1=1
-        and key_name='sellchannel'
+            and key_name='sellchannel'
+            and value2 in ($sellchannel)
         ) md
         on md.key=spo.sellchannel
     left join (

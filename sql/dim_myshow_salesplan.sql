@@ -3,6 +3,7 @@ select
     salesplan_id,
     salesplan_name,
     shop_id,
+    category_id,
     category_name,
     show_starttime,
     performance_id,

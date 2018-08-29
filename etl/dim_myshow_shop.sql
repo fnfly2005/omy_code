@@ -85,7 +85,7 @@ from (
         select distinct
             shopid as shop_id
         from 
-            origindb.dp_myshow__s_poishopmap --第三方场馆表
+            origindb.dp_myshow__s_performance sp --未同步场馆数据
         ) as poi
         left join origindb.dp_myshow__t_venue ven
             on ven.dpshopid=poi.shop_id
