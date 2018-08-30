@@ -20,7 +20,7 @@ select
     sum(ap_num) as ap_num
 from (
     select
-        case when 0 in ($dim) then '猫眼' 
+        case when 0 in ($dim) then '猫眼演出'
         else 'all' end as ds,
         case when 1 in ($dim) then substr(dt,1,7) 
         else 'all' end mt,
@@ -142,7 +142,7 @@ from (
         1,2,3,4,5,6,7,8,9,10,11
     union all
     select
-        case when 0 in ($dim) then '微格'
+        case when 0 in ($dim) then '微格演出'
         else 'all' end as ds,
         case when 1 in ($dim) then substr(dt,1,7) 
         else 'all' end mt,
@@ -154,15 +154,15 @@ from (
         else 'all' end as customer_type_name,
         case when 5 in ($dim) then '微票开放平台' 
         else 'all' end as customer_lvl1_name,
-        case when 6 in ($dim) then cat.category_name
+        case when 6 in ($dim) then category_name
         else 'all' end category_name,
         case when 7 in ($dim) then area_1_level_name
         else 'all' end area_1_level_name,
         case when 8 in ($dim) then area_2_level_name
         else 'all' end area_2_level_name,
-        case when 9 in ($dim) then cit.province_name
+        case when 9 in ($dim) then province_name
         else 'all' end province_name,
-        case when 10 in ($dim) then cit.city_name
+        case when 10 in ($dim) then city_name
         else 'all' end city_name,
         count(distinct wso.item_id) as sp_num,
         0 as show_num,
@@ -178,50 +178,33 @@ from (
             count(distinct order_id) as order_num,
             sum(total_money) as totalprice
         from upload_table.detail_wg_saleorder where dt>='$$begindate' and dt<'$$enddate'
-        and order_src<>10
-        and (
-            length(pay_no)>5
-            or $payflag=0
-            )
-        and 1 in ($ds)
-        and 2 in ($customer_type_id)
+            and order_src<>10
+            and (
+                length(pay_no)>5
+                or $payflag=0
+                )
+            and 1 in ($ds)
+            and 2 in ($customer_type_id)
         group by
             1,2,3
             ) wso
         join (
-        select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where 1=1
-        and key_name='order_src'
-        and value2 in ('$pt')
-        ) md2
+            select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where 1=1
+                and key_name='order_src'
+                and value2 in ('$pt')
+            ) md2
         on wso.order_src=md2.key
-        left join (
-        select item_id, performance_name, item_no, city_id, type_id, category_name, type_lv2_name, venue_id, shop_name, city_name, venue_type, province_id, province_name from upload_table.dim_wg_performance where performance_name NOT LIKE '%测试%' AND performance_name NOT LIKE '%调试%' AND performance_name NOT LIKE '%勿动%' AND performance_name NOT LIKE '%test%' AND performance_name NOT LIKE '%废%' AND performance_name NOT LIKE '%ceshi%'
-        ) wi
+        join (
+            select performance_id, item_id, performance_name, category_id, category_name, city_id, city_name, province_id, province_name, area_1_level_id, area_1_level_name, area_2_level_id, area_2_level_name, venue_id, shop_name, type_id, type_lv2_name, venue_type from upload_table.dim_wg_performance_s where 1=1
+                and (category_id in ($category_id)
+                or 0 in ($category_id))
+            ) wi
         on wso.item_id=wi.item_id
-        left join (
-        select category_id, type_lv1_name from upload_table.dim_wg_type
-        ) wt
-        on wt.type_lv1_name=wi.category_name
-        left join (
-        select city_id, city_name from upload_table.dim_wg_citymap
-        ) wc
-        on wc.city_name=wi.city_name
-        left join (
-        select city_id, mt_city_id, city_name, province_name, area_1_level_name, area_2_level_name from mart_movie.dim_myshow_city where dp_flag=0
-        ) cit
-        on cit.city_id=wc.city_id
-        left join (
-        select category_id, category_name from mart_movie.dim_myshow_category where category_id is not null
-        ) cat
-        on cat.category_id=wt.category_id
-    where
-        cat.category_id in ($category_id)
-        or 0 in ($category_id)
     group by
         1,2,3,4,5,6,7,8,9,10,11
     union all
     select
-        case when 0 in ($dim) then '团购'
+        case when 0 in ($dim) then '猫眼团购'
         else 'all' end as ds,
         case when 1 in ($dim) then substr(pay_time,1,7) 
         else 'all' end mt,
@@ -230,7 +213,7 @@ from (
         'all' pt,
         case when 4 in ($dim) then '自营' 
         else 'all' end as customer_type_name,
-        case when 5 in ($dim) then '团购' 
+        case when 5 in ($dim) then '猫眼团购' 
         else 'all' end as customer_lvl1_name,
         'all' category_name,
         'all' area_1_level_name,
@@ -255,7 +238,7 @@ from (
     ) as sp
     left join (
         select
-            case when 0 in ($dim) then '猫眼' 
+            case when 0 in ($dim) then '猫眼演出'
             else 'all' end as ds,
             case when 1 in ($dim) then substr(dt,1,7) 
             else 'all' end mt,
@@ -287,6 +270,7 @@ from (
                 and salesplan_sellout_flag=0
                 and customer_type_id in ($customer_type_id)
                 and category_id in ($category_id)
+                and 0 in ($ds)
             ) spo
             join (
                 select
@@ -296,17 +280,15 @@ from (
                 ) as dsh
                 on dsh.show_id=spo.show_id
             left join (
-            select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, province_id, city_id, city_name, shop_id, shop_name from mart_movie.dim_myshow_performance where 1=1
-            and category_id in ($category_id)
-            ) per
+                select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, province_id, city_id, city_name, shop_id, shop_name from mart_movie.dim_myshow_performance where 1=1
+                and category_id in ($category_id)
+                ) per
             on spo.performance_id=per.performance_id
             left join (
-            select customer_id, customer_type_id, customer_type_name, customer_lvl1_name, customer_name, customer_shortname, customer_code from mart_movie.dim_myshow_customer where 1=1
-            and customer_type_id in ($customer_type_id)
-            ) cus
+                select customer_id, customer_type_id, customer_type_name, customer_lvl1_name, customer_name, customer_shortname, customer_code from mart_movie.dim_myshow_customer where 1=1
+                and customer_type_id in ($customer_type_id)
+                ) cus
             on cus.customer_id=spo.customer_id
-        where
-            0 in ($ds)
         group by
             1,2,3,4,5,6,7,8,9,10,11
         ) ss

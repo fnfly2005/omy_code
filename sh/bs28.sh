@@ -8,11 +8,7 @@ per=`fun dim_myshow_performance.sql`
 cus=`fun dim_myshow_customer.sql`
 md=`fun myshow_dictionary.sql`
 wso=`fun detail_wg_saleorder.sql u`
-wi=`fun dim_wg_performance.sql`
-wt=`fun dim_wg_type.sql`
-wc=`fun dim_wg_citymap.sql`
-cit=`fun dim_myshow_city.sql`
-cat=`fun dim_myshow_category.sql`
+wi=`fun dim_wg_performance_s.sql`
 scn=`fun detail_maoyan_order_sale_cost_new_info.sql u`
 ddn=`fun dim_deal_new.sql u`
 dsh=`fun dim_myshow_show.sql u`
@@ -43,7 +39,7 @@ select
     sum(ap_num) as ap_num
 from (
     select
-        case when 0 in (\$dim) then '猫眼' 
+        case when 0 in (\$dim) then '猫眼演出'
         else 'all' end as ds,
         case when 1 in (\$dim) then substr(dt,1,7) 
         else 'all' end mt,
@@ -165,7 +161,7 @@ from (
         1,2,3,4,5,6,7,8,9,10,11
     union all
     select
-        case when 0 in (\$dim) then '微格'
+        case when 0 in (\$dim) then '微格演出'
         else 'all' end as ds,
         case when 1 in (\$dim) then substr(dt,1,7) 
         else 'all' end mt,
@@ -177,15 +173,15 @@ from (
         else 'all' end as customer_type_name,
         case when 5 in (\$dim) then '微票开放平台' 
         else 'all' end as customer_lvl1_name,
-        case when 6 in (\$dim) then cat.category_name
+        case when 6 in (\$dim) then category_name
         else 'all' end category_name,
         case when 7 in (\$dim) then area_1_level_name
         else 'all' end area_1_level_name,
         case when 8 in (\$dim) then area_2_level_name
         else 'all' end area_2_level_name,
-        case when 9 in (\$dim) then cit.province_name
+        case when 9 in (\$dim) then province_name
         else 'all' end province_name,
-        case when 10 in (\$dim) then cit.city_name
+        case when 10 in (\$dim) then city_name
         else 'all' end city_name,
         count(distinct wso.item_id) as sp_num,
         0 as show_num,
@@ -201,50 +197,33 @@ from (
             count(distinct order_id) as order_num,
             sum(total_money) as totalprice
         $wso
-        and order_src<>10
-        and (
-            length(pay_no)>5
-            or \$payflag=0
-            )
-        and 1 in (\$ds)
-        and 2 in (\$customer_type_id)
+            and order_src<>10
+            and (
+                length(pay_no)>5
+                or \$payflag=0
+                )
+            and 1 in (\$ds)
+            and 2 in (\$customer_type_id)
         group by
             1,2,3
             ) wso
         join (
-        $md
-        and key_name='order_src'
-        and value2 in ('\$pt')
-        ) md2
+            $md
+                and key_name='order_src'
+                and value2 in ('\$pt')
+            ) md2
         on wso.order_src=md2.key
-        left join (
-        $wi
-        ) wi
+        join (
+            $wi
+                and (category_id in (\$category_id)
+                or 0 in (\$category_id))
+            ) wi
         on wso.item_id=wi.item_id
-        left join (
-        $wt
-        ) wt
-        on wt.type_lv1_name=wi.category_name
-        left join (
-        $wc
-        ) wc
-        on wc.city_name=wi.city_name
-        left join (
-        $cit
-        ) cit
-        on cit.city_id=wc.city_id
-        left join (
-        $cat
-        ) cat
-        on cat.category_id=wt.category_id
-    where
-        cat.category_id in (\$category_id)
-        or 0 in (\$category_id)
     group by
         1,2,3,4,5,6,7,8,9,10,11
     union all
     select
-        case when 0 in (\$dim) then '团购'
+        case when 0 in (\$dim) then '猫眼团购'
         else 'all' end as ds,
         case when 1 in (\$dim) then substr(pay_time,1,7) 
         else 'all' end mt,
@@ -253,7 +232,7 @@ from (
         'all' pt,
         case when 4 in (\$dim) then '自营' 
         else 'all' end as customer_type_name,
-        case when 5 in (\$dim) then '团购' 
+        case when 5 in (\$dim) then '猫眼团购' 
         else 'all' end as customer_lvl1_name,
         'all' category_name,
         'all' area_1_level_name,
@@ -278,7 +257,7 @@ from (
     ) as sp
     left join (
         select
-            case when 0 in (\$dim) then '猫眼' 
+            case when 0 in (\$dim) then '猫眼演出'
             else 'all' end as ds,
             case when 1 in (\$dim) then substr(dt,1,7) 
             else 'all' end mt,
@@ -310,6 +289,7 @@ from (
                 and salesplan_sellout_flag=0
                 and customer_type_id in (\$customer_type_id)
                 and category_id in (\$category_id)
+                and 0 in (\$ds)
             ) spo
             join (
                 select
@@ -319,17 +299,15 @@ from (
                 ) as dsh
                 on dsh.show_id=spo.show_id
             left join (
-            $per
-            and category_id in (\$category_id)
-            ) per
+                $per
+                and category_id in (\$category_id)
+                ) per
             on spo.performance_id=per.performance_id
             left join (
-            $cus
-            and customer_type_id in (\$customer_type_id)
-            ) cus
+                $cus
+                and customer_type_id in (\$customer_type_id)
+                ) cus
             on cus.customer_id=spo.customer_id
-        where
-            0 in (\$ds)
         group by
             1,2,3,4,5,6,7,8,9,10,11
         ) ss
