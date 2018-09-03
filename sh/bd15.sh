@@ -1,7 +1,7 @@
 #!/bin/bash
-#2.0 2018-08-14
+#项目购票信息
 source ./fuc.sh
-so=`fun detail_myshow_saleorder.sql`
+so=`fun detail_myshow_saleorder.sql d`
 soi=`fun dp_myshow__s_orderidentification.sql u`
 md=`fun myshow_dictionary.sql`
 
@@ -13,12 +13,14 @@ echo "
 select
     so.order_id,
     maoyan_order_id,
-    name_id,
+    md2.value2 as pt,
+    UserName,
+    IDNumber,
     mobile,
     so.performance_id,
     order_create_time,
     pay_time,
-    value2,
+    md.value2,
     show_name,
     show_id,
     ticket_price,
@@ -28,17 +30,21 @@ select
     totalprice
 from (
     $so
+    where
+        pay_time is not null
+        and ((pay_time>='\$\$begindate'
+        and pay_time<'\$\$enddate')
+        or 1=\$pay_flag)
         and performance_id in (\$performance_id)
     ) so
     left join (
-        select
+        select distinct
             PerformanceID as performance_id,
             OrderID as order_id,
-            map_agg(UserName,IDNumber) as name_id
+            UserName,
+            IDNumber
         $soi
             and performanceid in (\$performance_id)
-        group by
-            1,2
         ) soi
     using(order_id)
     left join (
@@ -46,6 +52,11 @@ from (
     and key_name='order_refund_status'
     ) md
     on md.key=so.order_refund_status
+    left join (
+    $md
+    and key_name='sellchannel'
+    ) md2
+    on md2.key=so.sellchannel
 $lim">${attach}
 
 echo "succuess!"
