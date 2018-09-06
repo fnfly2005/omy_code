@@ -48,14 +48,14 @@ from (
         ) soi
     using(order_id)
     left join (
-    $md
-    and key_name='order_refund_status'
-    ) md
+        $md
+        and key_name='order_refund_status'
+        ) md
     on md.key=so.order_refund_status
     left join (
-    $md
-    and key_name='sellchannel'
-    ) md2
+        $md
+        and key_name='sellchannel'
+        ) md2
     on md2.key=so.sellchannel
 $lim">${attach}
 

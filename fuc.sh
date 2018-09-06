@@ -5,7 +5,12 @@
 #!/bin/bash
 path=""
 fun() {
-    tmp=`cat ${path}sql/${1} | grep -iv "/\*"`
+    if [[ ${1} =~ / ]];then
+        pdir="${path}"
+    else
+        pdir="${path}sql/"
+    fi
+    tmp=`cat ${pdir}${1} | grep -iv "/\*"`
     if [ -n $2 ];then
         if [[ $2 =~ d ]];then
             tmp=`echo $tmp | sed 's/where.*//'`

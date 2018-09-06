@@ -1,6 +1,6 @@
 #!/bin/bash
 source ./fuc.sh
-tes=`fun detail_myshow_salepayorder.sql`
+tes=`fun sql/detail_myshow_salepayorder.sql`
 
 file="test"
 lim=";"

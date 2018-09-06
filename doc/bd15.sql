@@ -9,7 +9,7 @@ select
     so.performance_id,
     order_create_time,
     pay_time,
-    value2,
+    md.value2,
     show_name,
     show_id,
     ticket_price,

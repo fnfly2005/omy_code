@@ -2,7 +2,10 @@
 select
     user_id,
     mobile，
+    sellchannel,
+    city_id,
     category_flag,
+    action_flag,
     pay_num
 from
     mart_movie.dim_myshow_userlabel
