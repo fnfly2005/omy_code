@@ -15,12 +15,13 @@ source = {
 }
 
 stream = {
-    'format': '', ##-- 这里的单引号中填写目标表的列名, 以逗号分割, 按照Extract节点的结果顺序做对应, 特殊情况Extract的列数可以小于目标表列数
+  'unique_keys': 'stockoutregisterrecordid',
+    'format': 'stockoutregisterrecordid,mobile,dpuser_id,mtuser_id,sellchannel,smssendstatus,sendsmsuserid,status,version,createtime,updatetime,stockoutregisterstatisticid,performance_id,show_id,ticketclass_id,ticketprice,etl_time', ##-- 这里的单引号中填写目标表的列名, 以逗号分割, 按照Extract节点的结果顺序做对应, 特殊情况Extract的列数可以小于目标表列数
 }
 
 target = {
     'db': META['hmart_movie'], ##-- 单引号中填写目标表所在库
-    'table': 'detail_myshow_saleorder', ##-- 单引号中填写目标表名
+    'table': 'detail_myshow_stockout', ##-- 单引号中填写目标表名
 }
 
 ##Extract##
@@ -35,13 +36,100 @@ drop table `$target.table`
 ##Load##
 ##-- Load节点, (可以留空)
 set hive.auto.convert.join=true;
+#if $isRELOAD
 insert OVERWRITE TABLE `$delta.table`
+select
+    ord.stockoutregisterrecordid,
+    ord.usermobileno as mobile,
+    ord.dpuserid as dpuser_id,
+    coalesce(ord.mtuserid,ser.mt_user_id) as mtuser_id,
+    ord.sellchannel,
+    ord.smssendstatus,
+    ord.sendsmsuserid,
+    ord.status,
+    ord.version,
+    ord.createtime,
+    ord.updatetime,
+    tic.stockoutregisterstatisticid,
+    tic.performanceid as performance_id,
+    tic.showid as show_id,
+    tic.ticketclassid as ticketclass_id,
+    tic.ticketprice,
+    from_unixtime(unix_timestamp(),'yyyy-MM-dd HH:mm:ss') as etl_time
+from
+    origindb.dp_myshow__s_stockoutregisterrecord ord
+    left join origindb.dp_myshow__s_stockoutregisterstatistic tic
+    on ord.stockoutregisterstatisticid=tic.stockoutregisterstatisticid
+    left join dw.dim_mt_user ser
+    on ser.recom_dp_user_id=ord.dpuserid
+    and ord.sellchannel in (1,3)
+#else
+insert OVERWRITE TABLE `$delta.table`
+select
+    ord.stockoutregisterrecordid,
+    ord.mobile,
+    ord.dpuser_id,
+    coalesce(ord.mtuserid,ser.mt_user_id) as mtuser_id,
+    ord.sellchannel,
+    ord.smssendstatus,
+    ord.sendsmsuserid,
+    ord.status,
+    ord.version,
+    ord.createtime,
+    ord.updatetime,
+    tic.stockoutregisterstatisticid,
+    tic.performanceid as performance_id,
+    tic.showid as show_id,
+    tic.ticketclassid as ticketclass_id,
+    tic.ticketprice,
+    from_unixtime(unix_timestamp(),'yyyy-MM-dd HH:mm:ss') as etl_time
+from (
+    select
+		stockoutregisterrecordid,
+		usermobileno as mobile,
+		dpuserid as dpuser_id,
+		mtuserid as mtuser_id,
+		sellchannel,
+		smssendstatus,
+		sendsmsuserid,
+		status,
+		version,
+		createtime,
+		updatetime
+    from
+        origindb.dp_myshow__s_stockoutregisterrecord 
+    where
+        to_date(updatetime)='$now.date'
+    ) as ord
+    left join origindb.dp_myshow__s_stockoutregisterstatistic tic
+    on ord.stockoutregisterstatisticid=tic.stockoutregisterstatisticid
+    left join dw.dim_mt_user ser
+    on ser.recom_dp_user_id=ord.dpuserid
+    and ord.sellchannel in (1,3)
+#end if
 
 ##TargetDDL##
 ##-- 目标表表结构
 CREATE TABLE IF NOT EXISTS `$target.table`
 (
-) COMMENT ''
+`stockoutregisterrecordid` bigint COMMENT '主键',
+`mobile` string COMMENT '用户手机号',
+`dpuser_id` bigint COMMENT '点评用户ID',
+`mtuser_id` bigint COMMENT '美团用户ID',
+`sellchannel` int COMMENT '销售渠道',
+`smssendstatus` bigint COMMENT '短信发送状态,1未发送,2待发送,3已发送',
+`sendsmsuserid` bigint COMMENT '发送短信用户id',
+`status` int COMMENT '0无效1有效',
+`version` bigint COMMENT '版本号',
+`createtime` string COMMENT '创建时间',
+`updatetime` string COMMENT '更新时间',
+`stockoutregisterstatisticid` bigint COMMENT '缺货登记统计表ID',
+`performance_id` bigint COMMENT '项目ID',
+`show_id` bigint COMMENT '场次ID',
+`ticketclass_id` bigint COMMENT '票档ID',
+`ticketprice` double COMMENT '票面价',
+`etl_time` string COMMENT '更新时间'
+) COMMENT '演出缺货登记事实明细表'
 ROW FORMAT DELIMITED 
 FIELDS TERMINATED BY '\t'
 stored as orc

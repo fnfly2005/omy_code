@@ -2,8 +2,8 @@
 #电子票检票二维码
 source ./fuc.sh
 
-ket=`fun sql/dp_myshow__s_orderticket.sql d`
-spo=`fun sql/detail_myshow_salepayorder.sql ud`
+ket=`fun sql/dp_myshow__s_orderticket.sql`
+spo=`fun sql/detail_myshow_salepayorder.sql u`
 file="bd26"
 lim=";"
 attach="${path}doc/${file}.sql"
@@ -15,10 +15,12 @@ from (
     select
         order_id
     $spo
-    where performance_id in (\$performance_id)
+        and performance_id in (\$performance_id)
     ) spo
     join (
         $ket
+            and qrcode is not null
+            and CreateTime>'2017-11-17'
         ) ket
     on ket.order_id=spo.order_id
 $lim">${attach}
