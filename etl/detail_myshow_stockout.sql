@@ -36,40 +36,12 @@ drop table `$target.table`
 ##Load##
 ##-- Load节点, (可以留空)
 set hive.auto.convert.join=true;
-#if $isRELOAD
-insert OVERWRITE TABLE `$delta.table`
-select
-    ord.stockoutregisterrecordid,
-    ord.usermobileno as mobile,
-    ord.dpuserid as dpuser_id,
-    coalesce(ord.mtuserid,ser.mt_user_id) as mtuser_id,
-    ord.sellchannel,
-    ord.smssendstatus,
-    ord.sendsmsuserid,
-    ord.status,
-    ord.version,
-    ord.createtime,
-    ord.updatetime,
-    tic.stockoutregisterstatisticid,
-    tic.performanceid as performance_id,
-    tic.showid as show_id,
-    tic.ticketclassid as ticketclass_id,
-    tic.ticketprice,
-    from_unixtime(unix_timestamp(),'yyyy-MM-dd HH:mm:ss') as etl_time
-from
-    origindb.dp_myshow__s_stockoutregisterrecord ord
-    left join origindb.dp_myshow__s_stockoutregisterstatistic tic
-    on ord.stockoutregisterstatisticid=tic.stockoutregisterstatisticid
-    left join dw.dim_mt_user ser
-    on ser.recom_dp_user_id=ord.dpuserid
-    and ord.sellchannel in (1,3)
-#else
 insert OVERWRITE TABLE `$delta.table`
 select
     ord.stockoutregisterrecordid,
     ord.mobile,
     ord.dpuser_id,
-    coalesce(ord.mtuserid,ser.mt_user_id) as mtuser_id,
+    ord.mtuser_id,
     ord.sellchannel,
     ord.smssendstatus,
     ord.sendsmsuserid,
@@ -85,28 +57,29 @@ select
     from_unixtime(unix_timestamp(),'yyyy-MM-dd HH:mm:ss') as etl_time
 from (
     select
-		stockoutregisterrecordid,
-		usermobileno as mobile,
-		dpuserid as dpuser_id,
-		mtuserid as mtuser_id,
-		sellchannel,
-		smssendstatus,
-		sendsmsuserid,
-		status,
-		version,
-		createtime,
-		updatetime
+        stockoutregisterrecordid,
+        stockoutregisterstatisticid,
+        usermobileno as mobile,
+        dpuserid as dpuser_id,
+        mtuserid as mtuser_id,
+        sellchannel,
+        smssendstatus,
+        sendsmsuserid,
+        status,
+        version,
+        createtime,
+        updatetime
     from
         origindb.dp_myshow__s_stockoutregisterrecord 
     where
+    #if $isRELOAD
+        1=1
+    #else
         to_date(updatetime)='$now.date'
+    #end if
     ) as ord
     left join origindb.dp_myshow__s_stockoutregisterstatistic tic
     on ord.stockoutregisterstatisticid=tic.stockoutregisterstatisticid
-    left join dw.dim_mt_user ser
-    on ser.recom_dp_user_id=ord.dpuserid
-    and ord.sellchannel in (1,3)
-#end if
 
 ##TargetDDL##
 ##-- 目标表表结构

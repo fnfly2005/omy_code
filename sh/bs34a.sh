@@ -1,27 +1,10 @@
 #!/bin/bash
-path=""
-fun() {
-    tmp=`cat ${path}sql/${1} | grep -iv "/\*"`
-    if [ -n $2 ];then
-        if [[ $2 =~ d ]];then
-            tmp=`echo $tmp | sed 's/where.*//'`
-        fi
-        if [[ $2 =~ u ]];then
-            tmp=`echo $tmp | sed 's/.*from/from/'`
-        fi
-        if [[ $2 =~ t ]];then
-            tmp=`echo $tmp | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
-        fi
-        if [[ $2 =~ m ]];then
-            tmp=`echo $tmp | sed "s/begindate/monthfirst{-1m}/g;s/enddate/monthfirst/g"`
-        fi
-    fi
-    echo $tmp
-}
+#历史流量-全量-多维度-多指标
+source ./fuc.sh
 
 spo=`fun detail_myshow_salepayorder.sql u`
-md=`fun myshow_dictionary.sql`
-mdc=`fun myshow_dictionary.sql u`
+md=`fun sql/dim_myshow_dictionary.sql`
+mdc=`fun sql/dim_myshow_dictionary.sql u`
 mpw=`fun detail_myshow_pv_wide_report.sql u`
 
 file="bs34"

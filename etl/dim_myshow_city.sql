@@ -87,15 +87,15 @@ from (
 ##-- 目标表表结构
 CREATE TABLE IF NOT EXISTS `$target.table`
 (
-`city_id` bigint COMMENT '城市ID',
-`city_name` string COMMENT '城市名称',
-`province_id` int COMMENT '省份ID',
+`city_id` bigint COMMENT '点评城市ID',
+`city_name` string COMMENT '点评城市名称',
+`province_id` int COMMENT '点评省份ID',
 `province_name` string COMMENT '省份名称',
 `area_1_level_id` int COMMENT '战区ID',
 `area_1_level_name` string COMMENT '战区名称',
 `area_2_level_id` int COMMENT '分区ID',
 `area_2_level_name` string COMMENT '分区名称',
-`parentdpcity_id` bigint COMMENT '点评父级城市ID',
+`parentdpcity_id` bigint COMMENT '点评父级城市ID,若无父级城市则为空',
 `parentdpcity_name` string COMMENT '点评父级城市名称',
 `mt_city_id` bigint COMMENT '美团城市ID',
 `dp_flag` int COMMENT '点评专属城市标志 0:美团点评共有 1:点评专属',
