@@ -28,6 +28,7 @@ select
     ticket_price,
     province_name,
     city_name,
+    district_name,
     ticketclass_description,
     detailedaddress,
     salesplan_id,

@@ -3,7 +3,8 @@
 source ./fuc.sh
 so=`fun detail_myshow_saleorder.sql d`
 soi=`fun dp_myshow__s_orderidentification.sql u`
-md=`fun myshow_dictionary.sql`
+md=`fun dim_myshow_dictionary.sql`
+ket=`fun dp_myshow__s_orderticket.sql`
 
 file="bd15"
 lim=";"
@@ -25,9 +26,13 @@ select
     show_id,
     ticket_price,
     salesplan_name,
+    province_name,
+    city_name,
+    district_name,
     detailedaddress,
     ticket_num,
-    totalprice
+    totalprice,
+    qrcode
 from (
     $so
     where
@@ -37,26 +42,35 @@ from (
         or 1=\$pay_flag)
         and performance_id in (\$performance_id)
     ) so
-    left join (
-        select distinct
-            PerformanceID as performance_id,
-            OrderID as order_id,
-            UserName,
-            IDNumber
-        $soi
-            and performanceid in (\$performance_id)
-        ) soi
-    using(order_id)
+    join (
+        $md
+        and key_name='sellchannel'
+        and key1>'0'
+        ) md2
+    on md2.key=so.sellchannel
     left join (
         $md
         and key_name='order_refund_status'
         ) md
     on md.key=so.order_refund_status
     left join (
-        $md
-        and key_name='sellchannel'
-        ) md2
-    on md2.key=so.sellchannel
+        select
+            OrderID as order_id,
+            UserName,
+            IDNumber
+        $soi
+            and performanceid in (\$performance_id)
+            and \$typ=1
+        ) soi
+    using(order_id)
+    left join (
+        $ket
+        and qrcode is not null
+        and createtime>'2017-11-17'
+        and \$typ=2
+        ) as ket
+    on ket.order_id=so.order_id
+
 $lim">${attach}
 
 echo "succuess!"

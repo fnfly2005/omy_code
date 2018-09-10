@@ -1,8 +1,8 @@
 
 select
     spo.dt,
-    ht,
-    mit,
+    spo.ht,
+    spo.mit,
     md.value2 as pt,
     case when 3 in ($dim) then customer_type_name
     else 'all' end as customer_type_name,
@@ -29,14 +29,15 @@ select
     sum(TotalPrice) as TotalPrice,
     sum(grossprofit) as grossprofit,
     sum(current_amount) as current_amount,
-    sum(amount_gmv) as amount_gmv
+    sum(amount_gmv) as amount_gmv,
+    sum(nopayorder_num) as nopayorder_num
 from (
     select
         case when 1 in ($dim) then spo.dt
         else 'all' end as dt,
         case when 7 in ($dim) then ht
         else 'all' end as ht,
-        case when 8 in ($dim) then (cast(substr(pay_time,15,1) as bigint)+1)*10
+        case when 8 in ($dim) then (floor(cast(substr(pay_time,15,2) as double)/$tie)+1)*$tie
         else 'all' end as mit,
         case when 2 in ($dim) then spo.sellchannel
         else -99 end as sellchannel,
@@ -71,7 +72,7 @@ from (
         else 'all' end as dt,
         case when 7 in ($dim) then substr(pay_time,12,2)
         else 'all' end as ht,
-        case when 8 in ($dim) then (cast(substr(pay_time,15,1) as bigint)+1)*10
+        case when 8 in ($dim) then (floor(cast(substr(pay_time,15,2) as double)/$tie)+1)*$tie
         else 'all' end as mit,
         case when 2 in ($dim) then sellchannel
         else -99 end as sellchannel,
@@ -90,12 +91,9 @@ from (
         and (performance_id in ($id)
             or -99 in ($id))
         and $real=1
-        and ((8 not in ($dim)
-        and 7 not in ($dim)
-            )
-        or (substr(pay_time,12,2)>=$hts
-            and substr(pay_time,12,2)<$hte
-                ))
+        and sellchannel not in (9,10)
+        and ((8 not in ($dim) and 7 not in ($dim))
+        or (substr(pay_time,12,2)>=$hts and substr(pay_time,12,2)<$hte))
     group by
         1,2,3,4,5,6
         ) as spo
@@ -117,7 +115,7 @@ from (
     join (
         select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where 1=1
             and key_name='sellchannel'
-            and value2 in ($sellchannel)
+            and value2 in ('$sellchannel')
         ) md
         on md.key=spo.sellchannel
     left join (
@@ -140,6 +138,32 @@ from (
         ) mss
     on spo.salesplan_id=mss.salesplan_id
     and spo.dt=mss.dt
+    left join (
+        select
+            case when 1 in ($dim) then substr(order_create_time,1,10)
+            else 'all' end as dt,
+            case when 7 in ($dim) then substr(order_create_time,12,2)
+            else 'all' end as ht,
+            case when 8 in ($dim) then (floor(cast(substr(order_create_time,15,2) as double)/$tie)+1)*$tie
+            else 'all' end as mit,
+            salesplan_id,
+            count(distinct order_id) as nopayorder_num
+        from mart_movie.detail_myshow_saleorder
+        where
+            order_create_time>='$$begindate'
+            and order_create_time<'$$enddate'
+            and pay_time is null
+            and 2 not in ($dim)
+            and 5 not in ($dim)
+            and ((8 not in ($dim) and 7 not in ($dim))
+            or (substr(order_create_time,12,2)>=$hts and substr(order_create_time,12,2)<$hte))
+        group by
+            1,2,3,4
+        ) so
+    on spo.salesplan_id=so.salesplan_id
+    and spo.dt=so.dt
+    and spo.ht=so.ht
+    and spo.mit=so.mit
 group by
     1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18
 ;

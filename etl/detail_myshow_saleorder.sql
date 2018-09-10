@@ -8,7 +8,6 @@
 
 ##TaskInfo##
 creator = 'fannian@maoyan.com'
-tasktype = 'DeltaMerge'
 
 source = {
     'db': META['horigindb'], ##-- 这里的单引号内填写在哪个数据库链接执行 Extract阶段, 具体有哪些链接请点击"查看META"按钮查看
@@ -34,8 +33,7 @@ drop table `$target.table`
 
 ##Load##
 ##-- Load节点, (可以留空)
-set hive.auto.convert.join=true;
-insert OVERWRITE TABLE `$delta.table`
+insert OVERWRITE TABLE `$target.table`
 select so.orderid as order_id,
        so.sellchannel,
        so.clientplatform,
@@ -113,26 +111,30 @@ select so.orderid as order_id,
        dis.discountamount,
        dci.deliverydpcity_id,
        from_unixtime(unix_timestamp(),'yyyy-MM-dd HH:mm:ss') AS etl_time
-  from origindb.dp_myshow__s_order as so
-  left join origindb.dp_myshow__s_ordersalesplansnapshot sos
-    on so.orderid=sos.orderid
-  left join origindb.dp_myshow__s_orderdelivery as sod
-    on so.orderid=sod.orderid
-  left join mart_movie.dim_myshow_show as ds
-    on sos.showid=ds.show_id
-  left join (
-    select
-        orderid,
-        sum(discountamount) as discountamount
-    from
-        origindb.dp_myshow__s_orderdiscountdetail
-    group BY
-        orderid
-    ) as dis
-    on dis.orderid=so.orderid
-    left join upload_table.dim_myshow_deliverycity dci
-    on dci.deliverycity_name=sod.cityname
+    from 
+        origindb.dp_myshow__s_order as so
+        left join origindb.dp_myshow__s_ordersalesplansnapshot sos
+        on so.orderid=sos.orderid
+        left join origindb.dp_myshow__s_orderdelivery as sod
+        on so.orderid=sod.orderid
+        left join mart_movie.dim_myshow_show as ds
+        on sos.showid=ds.show_id
+        left join mart_movie.dim_myshow_dictionary ary
+        on so.sellchannel=ary.key
+        and ary.key_name='sellchannel'
+        left join origindb.dp_myshow__s_settlementpayment ent
+        on so.orderid=ent.orderid
+        and so.pay_time is not null
+        and ary.key1>'0'
+        left join origindb.dp_myshow__s_orderpartner ner
+        on so.orderid=ner.orderid
+        and ary.key1='2'
+        left join origindb.dp_myshow__s_ordergift ift
+        on so.orderid=ift.orderid
+        and ary.key1='0'
 
+        left join upload_table.dim_myshow_deliverycity dci
+        on dci.deliverycity_name=sod.cityname
 ##TargetDDL##
 ##-- 目标表表结构
 CREATE TABLE IF NOT EXISTS `$target.table`
@@ -207,7 +209,32 @@ CREATE TABLE IF NOT EXISTS `$target.table`
 `fetchcode` string COMMENT '订单取票码',
 `fetchqrcode` string COMMENT '订单取票二维码',
 `discountamount` double COMMENT '实际优惠金额',
-`etl_time` string COMMENT '更新时间'
-)  ROW FORMAT DELIMITED 
+`etl_time` string COMMENT '更新时间',
+`printstatus` int COMMENT '打票状态0:未打票1:打票失败2打票成功',
+`notprintticketprice` int COMMENT '是否不打印票面价',
+`partner_id` bigint COMMENT '分销商id',
+`gift_flag` int COMMENT '是否赠票',
+`showtype` int COMMENT '场次类型 1为单场票 2 通票 3 连票 ',
+`project_id` bigint COMMENT '商品ID',
+`contract_id` string COMMENT '合同ID',
+`bd_id` bigint COMMENT 'BD用户ID',
+`bd_name` string COMMENT 'BD用户名称',
+`settlementpayment_id` bigint COMMENT '结算支付明细表主键',
+`bill_id` bigint COMMENT '账单id',
+`lastshowtime` string COMMENT '最后一场演出时间',
+`income` double COMMENT '代收',
+`expense` double COMMENT '应付',
+`grossprofit` double COMMENT '毛收入',
+`takerate` double COMMENT '抽成比例',
+`discountamount` double COMMENT '优惠金额',
+`mydiscountamount` double COMMENT '猫眼优惠金额',
+`settlementuserid` bigint COMMENT '结算标记人ID',
+`settlementusername` string COMMENT '结算标记人名称',
+`settlementcreatetime` string COMMENT '结算标记时间',
+`settlementtype` bigint COMMENT '结算类型（1自动2人工)',
+`deliverydpcity_id` bigint COMMENT '收件人城市ID',
+`channel_type` string COMMENT '平台类型 0 非GMV统计范围 1 内部平台 2 外部平台'
+) COMMENT '猫眼演出订单事实明细表'
+ROW FORMAT DELIMITED
 FIELDS TERMINATED BY '\t'
 stored as orc
