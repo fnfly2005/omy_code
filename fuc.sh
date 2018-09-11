@@ -3,7 +3,8 @@
 #1.0优化输出方式,函数处理;2.0新增实时模版;3.0优化函数功能
 #4.0函数模块化
 #!/bin/bash
-path=""
+this="${BASH_SOURCE-$0}"
+path=$(dirname -- "$this")"/"
 fun() {
     if [[ ${1} =~ \. ]];then
         fil=${1}
