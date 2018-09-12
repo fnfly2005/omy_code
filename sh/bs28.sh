@@ -1,4 +1,5 @@
 #!/bin/bash
+#历史销售-全量-多维度-多指标-多数据源
 source ./fuc.sh
 
 ssp=`fun detail_myshow_salesplan.sql u`
@@ -6,7 +7,7 @@ so=`fun detail_myshow_saleorder.sql u`
 spo=`fun detail_myshow_salepayorder.sql u` 
 per=`fun dim_myshow_performance.sql`
 cus=`fun dim_myshow_customer.sql`
-md=`fun myshow_dictionary.sql`
+md=`fun dim_myshow_dictionary.sql`
 wso=`fun detail_wg_saleorder.sql u`
 wi=`fun dim_wg_performance_s.sql`
 scn=`fun detail_maoyan_order_sale_cost_new_info.sql u`
