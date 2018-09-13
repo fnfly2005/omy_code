@@ -1,5 +1,6 @@
 
 select 
+    app_name,
     page_identifier,
 	event_id,
     custom,
@@ -13,6 +14,7 @@ select
 	order_id
 from (
     select
+        app_name,
         page_identifier,
         event_id,
         custom,
@@ -24,9 +26,10 @@ from (
         event_type,
         event_attribute,
         order_id,
-        row_number() over (partition by event_id order by 1) as rank
+        row_number() over (partition by $event_id order by 1) as rank
     from (
         select distinct
+            app_name,
             page_identifier,
             event_id,
             custom,
@@ -40,6 +43,7 @@ from (
             order_id
         from (
             select
+                app_name,
                 page_identifier,
                 page_identifier as event_id,
                 'all' as event_category,
@@ -66,8 +70,10 @@ from (
                         )
                     or page_identifier in ('$identifier')
                     )
+                and app_name in ('$app_name')
             union all
             select
+                app_name,
                 page_identifier,
                 event_id,
                 event_category,
@@ -80,7 +86,7 @@ from (
                 utm_source,
                 $custom_id,
                 row_number() over (partition by event_id order by 1) as rak
-            from mart_flow.detail_flow_mv_wide_report where partition_date>='$$begindate' and partition_date<'$$enddate' and partition_log_channel='movie' and partition_etl_source='2_5x' and partition_app in ( 'movie', 'dianping_nova', 'other_app', 'dp_m', 'group' )
+            from mart_flow.detail_flow_mv_wide_report where partition_date>='$$begindate' and partition_date<'$$enddate' and partition_log_channel='movie' and partition_app in ( 'movie', 'dianping_nova', 'other_app', 'dp_m', 'group' )
                 and 2 in ($type)
                 and substr(stat_time,12,2)>='$ht'
                 and (
@@ -94,6 +100,7 @@ from (
                         )
                     or event_id in ('$identifier')
                     )
+                and app_name in ('$app_name')
             ) as fw
         where
             rak<=1000

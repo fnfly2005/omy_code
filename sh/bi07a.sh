@@ -1,4 +1,5 @@
 #!/bin/bash
+#埋点逻辑数据验证工具
 source ./fuc.sh
 fpw=`fun detail_flow_pv_wide_report.sql u`
 fmw=`fun detail_flow_mv_wide_report.sql u`
@@ -9,6 +10,7 @@ attach="${path}doc/${file}.sql"
 
 echo "
 select 
+    app_name,
     page_identifier,
 	event_id,
     custom,
@@ -22,6 +24,7 @@ select
 	order_id
 from (
     select
+        app_name,
         page_identifier,
         event_id,
         custom,
@@ -33,9 +36,10 @@ from (
         event_type,
         event_attribute,
         order_id,
-        row_number() over (partition by event_id order by 1) as rank
+        row_number() over (partition by \$event_id order by 1) as rank
     from (
         select distinct
+            app_name,
             page_identifier,
             event_id,
             custom,
@@ -49,6 +53,7 @@ from (
             order_id
         from (
             select
+                app_name,
                 page_identifier,
                 page_identifier as event_id,
                 'all' as event_category,
@@ -75,8 +80,10 @@ from (
                         )
                     or page_identifier in ('\$identifier')
                     )
+                and app_name in ('\$app_name')
             union all
             select
+                app_name,
                 page_identifier,
                 event_id,
                 event_category,
@@ -103,6 +110,7 @@ from (
                         )
                     or event_id in ('\$identifier')
                     )
+                and app_name in ('\$app_name')
             ) as fw
         where
             rak<=1000

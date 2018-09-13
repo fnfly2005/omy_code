@@ -48,7 +48,8 @@ select
     case when cl.mt_city_id is null then 4
     else city_level end city_level,
     from_unixtime(unix_timestamp(),'yyyy-MM-dd HH:mm:ss') AS etl_time,
-    region_code
+    region_code,
+    citykey
 from (
     select distinct
         dc.cityid as city_id,
@@ -82,6 +83,8 @@ from (
     left join upload_table.dim_myshow_dxcitymap mcm
     on mcm.mtcity_id=dpct.mt_city_id
     and dp_flag=0
+    left join upload_table.dim_myshow_dpcitykey ke
+    on ke.dpcityid=dpct.city_id
 
 ##TargetDDL##
 ##-- 目标表表结构
@@ -101,7 +104,8 @@ CREATE TABLE IF NOT EXISTS `$target.table`
 `dp_flag` int COMMENT '点评专属城市标志 0:美团点评共有 1:点评专属',
 `city_level` int COMMENT '猫眼城市等级',
 `etl_time` string COMMENT '更新时间',
-`region_code` bigint COMMENT '行政区编码'
+`region_code` bigint COMMENT '行政区编码',
+`citykey` string COMMENT '城市关键词'
 ) COMMENT '猫眼演出城市维度表'
 ROW FORMAT DELIMITED 
 FIELDS TERMINATED BY '\t'
