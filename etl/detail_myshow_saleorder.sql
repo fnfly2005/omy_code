@@ -1,4 +1,4 @@
-##-- 这个是sqlweaver(美团自主研发的ETL工具)的编辑模板
+#-- 这个是sqlweaver(美团自主研发的ETL工具)的编辑模板
 ##-- 本模板内容均以 ##-- 开始,完成编辑后请删除
 ##-- ##xxxx## 型的是ETL专属文档节点标志, 每个节点标志到下一个节点标志为本节点内容
 ##-- 流程应该命名成: 目标表meta名(库名).表名
@@ -27,114 +27,176 @@ target = {
 
 ##Preload##
 ##-- Preload节点, 这里填写一个在load到目标表之前target.db上执行的sql(可以留空)
-#if $isRELOAD
-drop table `$target.table`
-#end if
 
 ##Load##
 ##-- Load节点, (可以留空)
-insert OVERWRITE TABLE `$target.table`
-select so.orderid as order_id,
-       so.sellchannel,
-       so.clientplatform,
-       so.dpuserid as dianping_userid,
-       so.mtuserid as meituan_userid,
-       so.usermobileno,
-       so.dpcityid as city_id,
-       so.salesplanid as salesplan_id,
-       so.salesplansupplyprice as supply_price,
-       so.salesplansellprice as sell_price,
-       so.salesplancount as salesplan_count,
-       so.totalprice,
-       so.myorderid as maoyan_order_id,
-       so.tpid as customer_id,
-       so.tporderid,
-       so.reservestatus as order_reserve_status,
-       so.deliverstatus as order_deliver_status,
-       so.refundstatus as order_refund_status,
-       so.createtime as order_create_time,
-       so.lockedtime,
-       so.payexpiretime,
-       so.paidtime as pay_time,
-       so.ticketedtime as ticketed_time,
-       so.showstatus,
-       so.wxopenid,
-       so.prepayid as prepay_id,
-       so.needrealname,
-       case when so.paidtime is null then so.consumedtime
-       when sod.fetchtype=6 then 
-            case when ds.show_endtime>'$now.now()' then so.consumedtime 
-            when so.consumedtime is null then ds.show_endtime 
-            else so.consumedtime end
-       else ds.show_endtime end as consumed_time,
-       so.needseat,
-       so.totalticketprice,
-       sos.ordersalesplansnapshotid as ordersalesplansnapshot_id,
-       sos.performanceid as performance_id,
-       sos.performancename as performance_name,
-       sos.shopname as shop_name,
-       sos.ticketid as ticketclass_id,
-       sos.ticketname as ticketclass_description,
-       sos.showid as show_id,
-       sos.showname as show_name,
-       sos.showstarttime as show_starttime,
-       ds.show_endtime,
-       sos.salesplanname as salesplan_name,
-       sos.isthrough as show_isthrough,
-       sos.setnum as setnumber,
-       sos.salesplanticketprice as ticket_price,
-       sos.tpshowid,
-       sos.tpsalesplanid,
-       sos.agenttype as agent_type,
-       sod.orderdeliveryid as orderdelivery_id,
-       sod.fetchticketwayid as fetchticketway_id,
-       sod.fetchtype as fetch_type,
-       sod.needidcard,
-       sod.recipientidno,
-       sod.provincename as province_name,
-       sod.cityname as city_name,
-       sod.districtname as district_name,
-       sod.detailedaddress,
-       sod.postcode,
-       sod.recipientname,
-       sod.recipientmobileno,
-       sod.expresscompany,
-       sod.expressno,
-       sod.expressfee,
-       sod.delivertime as deliver_time,
-       sod.deliveredtime as delivered_time,
-       sod.createtime as deliver_create_time,
-       sod.localeaddress,
-       sod.localecontactpersons,
-       sod.fetchcode,
-       sod.fetchqrcode,
-       dis.discountamount,
-       dci.deliverydpcity_id,
-       from_unixtime(unix_timestamp(),'yyyy-MM-dd HH:mm:ss') AS etl_time
-    from 
-        origindb.dp_myshow__s_order as so
-        left join origindb.dp_myshow__s_ordersalesplansnapshot sos
-        on so.orderid=sos.orderid
-        left join origindb.dp_myshow__s_orderdelivery as sod
-        on so.orderid=sod.orderid
-        left join mart_movie.dim_myshow_show as ds
-        on sos.showid=ds.show_id
-        left join mart_movie.dim_myshow_dictionary ary
-        on so.sellchannel=ary.key
-        and ary.key_name='sellchannel'
-        left join origindb.dp_myshow__s_settlementpayment ent
-        on so.orderid=ent.orderid
-        and so.pay_time is not null
-        and ary.key1>'0'
-        left join origindb.dp_myshow__s_orderpartner ner
-        on so.orderid=ner.orderid
-        and ary.key1='2'
-        left join origindb.dp_myshow__s_ordergift ift
-        on so.orderid=ift.orderid
-        and ary.key1='0'
-
-        left join upload_table.dim_myshow_deliverycity dci
-        on dci.deliverycity_name=sod.cityname
+set hive.exec.dynamic.partition=true;
+set hive.exec.dynamic.partition.mode=nonstrict;
+set hive.exec.dynamic.partition=true;
+set hive.exec.dynamic.partition.mode=nonstrict;
+set hive.exec.parallel=true;
+set hive.exec.reducers.max =1000;
+set mapreduce.reduce.memory.mb=4096;
+set mapreduce.map.memory.mb=4096;
+set mapred.child.java.opts=-Xmx3072m;
+set hive.auto.convert.join=true;
+set mapred.max.split.size=256000000;
+set mapred.min.split.size.per.node=256000000;
+set mapred.min.split.size.per.rack=256000000;
+set hive.merge.size.per.task=256000000;
+set hive.merge.smallfiles.avgsize=256000000;
+set hive.merge.mapfiles=true;
+set hive.merge.mapredfiles=true;
+set hive.input.format=org.apache.hadoop.hive.ql.io.CombineHiveInputFormat;
+INSERT OVERWRITE TABLE `$target.table` PARTITION (partition_sellchannel,partition_payflag)
+select
+    der.orderid as order_id,
+    der.sellchannel,
+    der.clientplatform,
+    der.dpuserid as dianping_userid,
+    der.mtuserid as meituan_userid,
+    der.usermobileno,
+    der.dpcityid as city_id,
+    der.salesplanid as salesplan_id,
+    der.salesplansupplyprice as supply_price,
+    der.salesplansellprice as sell_price,
+    der.salesplancount as salesplan_count,
+    der.totalprice,
+    der.myorderid as maoyan_order_id,
+    der.tpid as customer_id,
+    der.tporderid,
+    der.reservestatus as order_reserve_status,
+    der.deliverstatus as order_deliver_status,
+    der.refundstatus as order_refund_status,
+    der.createtime as order_create_time,
+    der.lockedtime,
+    der.payexpiretime,
+    der.paidtime as pay_time,
+    der.ticketedtime as ticketed_time,
+    der.showstatus,
+    der.wxopenid,
+    der.prepayid as prepay_id,
+    der.needrealname,
+    der.consumedtime as consumed_time,
+    der.needseat,
+    der.totalticketprice,
+    hot.ordersalesplansnapshotid as ordersalesplansnapshot_id,
+    hot.performanceid as performance_id,
+    hot.performancename as performance_name,
+    hot.shopname as shop_name,
+    hot.ticketid as ticketclass_id,
+    hot.ticketname as ticketclass_description,
+    hot.showid as show_id,
+    hot.showname as show_name,
+    hot.showstarttime as show_starttime,
+    hot.showendtime as show_endtime,
+    hot.salesplanname as salesplan_name,
+    hot.isthrough as show_isthrough,
+    hot.setnum as setnumber,
+    hot.salesplanticketprice as ticket_price,
+    hot.tpshowid,
+    hot.tpsalesplanid,
+    hot.agenttype as agent_type,
+    ery.orderdelivery_id,
+    ery.fetchticketway_id,
+    ery.fetch_type,
+    ery.needidcard,
+    ery.recipientidno,
+    ery.province_name,
+    ery.city_name,
+    ery.district_name,
+    ery.detailedaddress,
+    ery.postcode,
+    ery.recipientname,
+    ery.recipientmobileno,
+    ery.expresscompany,
+    ery.expressno,
+    ery.expressfee,
+    ery.deliver_time,
+    ery.delivered_time,
+    ery.deliver_create_time,
+    ery.localeaddress,
+    ery.localecontactpersons,
+    ery.fetchcode,
+    ery.fetchqrcode,
+    from_unixtime(unix_timestamp(),'yyyy-MM-dd HH:mm:ss') as etl_time,
+    der.printstatus,
+    der.notprintticketprice,
+    hot.showtype,
+    hot.projectid as project_id,
+    hot.contractid as contract_id,
+    hot.bduserid as bd_id,
+    hot.bdusername as bd_name,
+    enl.settlementpayment_id,
+    enl.bill_id,
+    enl.lastshowtime,
+    enl.income,
+    enl.expense,
+    enl.grossprofit,
+    enl.takerate,
+    enl.discountamount,
+    enl.mydiscountamount,
+    enl.settlementuserid,
+    enl.settlementusername,
+    enl.settlementcreatetime,
+    enl.settlementtype,
+    ery.dpcity_id as deliverydpcity_id,
+    ary.key1 as sellchannel_lv1,
+    und.finishtime,
+    enl.payfinishtime,
+    enl.paymentstatus,
+    coalesce(ary.key2,'0') as partition_sellchannel,
+    case when der.paidtime is null then 0
+        when und.finishtime is not null then 2 
+    else 1 end partition_payflag
+from 
+    origindb.dp_myshow__s_order der
+    left join origindb.dp_myshow__s_ordersalesplansnapshot hot
+    on der.orderid=hot.orderid
+    left join mart_movie.detail_myshow_orderdelivery ery
+    on der.orderid=ery.order_id
+    left join (
+        select
+            ent.orderid,
+            ent.settlementpaymentid as settlementpayment_id,
+            ent.billid as bill_id,
+            ent.lastshowtime,
+            ent.income,
+            ent.expense,
+            ent.grossprofit,
+            ent.takerate,
+            ent.discountamount,
+            ent.mydiscountamount,
+            ent.settlementuserid,
+            ent.settlementusername,
+            ent.settlementcreatetime,
+            ent.settlementtype,
+            ill.payfinishtime,
+            ill.paymentstatus
+        from 
+            origindb.dp_myshow__s_settlementpayment ent
+            left join origindb.dp_myshow__s_settlementbill ill
+            on ent.billid=ill.settlementbillid
+            and ent.billid<>0
+        ) enl
+    on der.orderid=enl.orderid
+    and der.paidtime is not null 
+    left join mart_movie.dim_myshow_dictionary ary
+    on der.sellchannel=ary.key
+    and ary.key_name='sellchannel'
+    left join (
+        select 
+            orderid,
+            finishtime,
+            row_number() over (partition by orderid order by orderrefundid desc) rrank
+        from
+            origindb.dp_myshow__s_orderrefund
+            ) und
+    on der.orderid=und.orderid
+    and der.refundstatus<>0
+    and der.paidtime is not null
+    and und.rrank=1
+;
 ##TargetDDL##
 ##-- 目标表表结构
 CREATE TABLE IF NOT EXISTS `$target.table`
@@ -191,8 +253,8 @@ CREATE TABLE IF NOT EXISTS `$target.table`
 `fetch_type` int COMMENT '取票方式 1:上门自取,2:快递,4&5:测试,7:临场派票',
 `needidcard` int COMMENT '是否需要身份证取件 0:否, 1:是',
 `recipientidno` string COMMENT '收件人身份证号',
-`province_name` string COMMENT '省份名',
-`city_name` string COMMENT '城市名',
+`province_name` string COMMENT '快递省份名',
+`city_name` string COMMENT '快递城市名',
 `district_name` string COMMENT '区县名',
 `detailedaddress` string COMMENT '收件人具体地址',
 `postcode` string COMMENT '收件人邮编',
@@ -208,12 +270,9 @@ CREATE TABLE IF NOT EXISTS `$target.table`
 `localecontactpersons` string COMMENT '现场取票的联系人',
 `fetchcode` string COMMENT '订单取票码',
 `fetchqrcode` string COMMENT '订单取票二维码',
-`discountamount` double COMMENT '实际优惠金额',
 `etl_time` string COMMENT '更新时间',
 `printstatus` int COMMENT '打票状态0:未打票1:打票失败2打票成功',
 `notprintticketprice` int COMMENT '是否不打印票面价',
-`partner_id` bigint COMMENT '分销商id',
-`gift_flag` int COMMENT '是否赠票',
 `showtype` int COMMENT '场次类型 1为单场票 2 通票 3 连票 ',
 `project_id` bigint COMMENT '商品ID',
 `contract_id` string COMMENT '合同ID',
@@ -233,8 +292,13 @@ CREATE TABLE IF NOT EXISTS `$target.table`
 `settlementcreatetime` string COMMENT '结算标记时间',
 `settlementtype` bigint COMMENT '结算类型（1自动2人工)',
 `deliverydpcity_id` bigint COMMENT '收件人城市ID',
-`channel_type` string COMMENT '平台类型 0 非GMV统计范围 1 内部平台 2 外部平台'
-) COMMENT '猫眼演出订单事实明细表'
-ROW FORMAT DELIMITED
-FIELDS TERMINATED BY '\t'
-stored as orc
+`sellchannel_lv1` string COMMENT '平台一级分类 0 批量出票 1 内部平台 2 外部平台',
+`expressdetail_id` bigint COMMENT '快递明细ID',
+`finishtime` string COMMENT '退款流程完成时间',
+`payfinishtime` string COMMENT '结算账单支付终态时间(成功或者失败)',
+`paymentstatus` int COMMENT '结算账单支付状态，0-未支付 1-支付中 2-支付成功 3-支付失败'
+) COMMENT '演出订单事实明细表'
+PARTITIONED BY (
+`partition_sellchannel` string COMMENT '平台二级分类 0 其他1 点评,2 美团,3 微信吃喝玩乐,4 微信演出赛事,5 猫眼,6 格瓦拉,7 api分销,8 演出M站,9 批量出票',
+`partition_payflag` int COMMENT '交易标识 0 未支付 1 已支付 2 已退款'
+) STORED AS ORC;

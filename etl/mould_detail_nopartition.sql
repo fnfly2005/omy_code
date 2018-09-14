@@ -27,9 +27,6 @@ target = {
 
 ##Preload##
 ##-- Preload节点, 这里填写一个在load到目标表之前target.db上执行的sql(可以留空)
-#if $isRELOAD
-drop table `$target.table`
-#end if
 
 ##Load##
 ##-- Load节点, (可以留空)

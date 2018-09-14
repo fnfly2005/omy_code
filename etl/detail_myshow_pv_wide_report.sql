@@ -184,7 +184,7 @@ CREATE TABLE IF NOT EXISTS `$target.table`
 `ip_location_city_name` string COMMENT 'ip城市名称',
 `page_stay_time` bigint COMMENT '页面访问时长-秒',
 `sequence` bigint COMMENT 'session内的事件序号(同一union_id，session内唯一)'
-) COMMENT '猫眼演出业务流量宽表'
+) COMMENT '演出业务流量宽表'
 PARTITIONED BY (
     partition_date    string  COMMENT '日志生成日期',
     partition_biz_bg  string  COMMENT 'biz_bg'
