@@ -88,6 +88,48 @@ from (
                 3 in ($dim)
                 and mobile is not null
                 and regexp_like(mobile,'^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$')
+            union all
+            select
+                mobile_phone as mobile
+            from mart_movie.detail_movie_seat_info_monthly where ordermonth>=substr('$$begindatekey',1,6) and ordermonth<=substr('$$enddatekey',1,6)
+                and 4 in ($dim)
+                and movie_id in ($movie_id)
+                and ((
+                        cinema_city in ($city_id)
+                        and 1 in ($cp)
+                        )
+                    or (
+                        cinema_city in (
+                            select
+                                mt_city_id
+                            from
+                                mart_movie.dim_myshow_city
+                            where
+                                province_id in ($province_id)
+                            )
+                        and 2 in ($cp)
+                        ))
+            union all
+            select
+                mobile_phone as mobile
+            from mart_movie.aggr_discount_card_seat_dwd where month>=substr('$$begindatekey',1,6) and month<=substr('$$enddatekey',1,6)
+                and 4 in ($dim)
+                and movie_id in ($movie_id)
+                and ((
+                        cinema_city in ($city_id)
+                        and 1 in ($cp)
+                        )
+                    or (
+                        cinema_city in (
+                            select
+                                mt_city_id
+                            from
+                                mart_movie.dim_myshow_city
+                            where
+                                province_id in ($province_id)
+                            )
+                        and 2 in ($cp)
+                        ))
             ) mu
         ) mou
         left join (
