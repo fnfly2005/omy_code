@@ -1,22 +1,13 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
-fun() {
-    if [ $2x == dx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
-    elif [ $2x == ux ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '1,/from/'d | sed '1s/^/from/'`
-    elif [ $2x == tx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
-    elif [ $2x == utx ];then
-        echo `cat ${path}sql/${1} | grep -iv "/\*" | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g" | sed '1,/from/'d | sed '1s/^/from/'`
-    else
-        echo `cat ${path}sql/${1} | grep -iv "/\*"`
-    fi
-}
+#选人工具-电影-短信
+source ./fuc.sh
+
 spe=`fun myshow_send_performance.sql`
 mou=`fun dim_myshow_movieuser.sql`
 cit=`fun dim_myshow_city.sql`
 mov=`fun dim_movie.sql`
+hly=`fun sql/detail_movie_seat_info_monthly.sql u`
+dwd=`fun sql/aggr_discount_card_seat_dwd.sql u`
 
 file="yysc11"
 lim=";"
@@ -112,6 +103,48 @@ from (
                 3 in (\$dim)
                 and mobile is not null
                 and regexp_like(mobile,'^1([358][0-9]|4[579]|66|7[0135678]|9[89])[0-9]{8}$')
+            union all
+            select
+                mobile_phone as mobile
+            $hly
+                and 4 in (\$dim)
+                and movie_id in (\$movie_id)
+                and ((
+                        cinema_city in (\$city_id)
+                        and 1 in (\$cp)
+                        )
+                    or (
+                        cinema_city in (
+                            select
+                                mt_city_id
+                            from
+                                mart_movie.dim_myshow_city
+                            where
+                                province_id in (\$province_id)
+                            )
+                        and 2 in (\$cp)
+                        ))
+            union all
+            select
+                mobile_phone as mobile
+            $dwd
+                and 4 in (\$dim)
+                and movie_id in (\$movie_id)
+                and ((
+                        cinema_city in (\$city_id)
+                        and 1 in (\$cp)
+                        )
+                    or (
+                        cinema_city in (
+                            select
+                                mt_city_id
+                            from
+                                mart_movie.dim_myshow_city
+                            where
+                                province_id in (\$province_id)
+                            )
+                        and 2 in (\$cp)
+                        ))
             ) mu
         ) mou
         left join (
