@@ -1,53 +1,125 @@
-#-- 这个是sqlweaver(美团自主研发的ETL工具)的编辑模板
-##-- 本模板内容均以 ##-- 开始,完成编辑后请删除
-##-- ##xxxx## 型的是ETL专属文档节点标志, 每个节点标志到下一个节点标志为本节点内容
-##-- 流程应该命名成: 目标表meta名(库名).表名
-
 ##Description##
-##-- 这个节点填写本ETL的描述信息, 包括目标表定义, 建立时的需求jira编号等
+##清洗快递城市名称并新增快递点评城市ID，新增BD、合同等数据，融合结算订单表、结算账单表、退款订单表逻辑，新增平台分层逻辑，新增分区字段，切换hive至spark引擎)
 
 ##TaskInfo##
 creator = 'fannian@maoyan.com'
 
 source = {
-    'db': META['horigindb'], ##-- 这里的单引号内填写在哪个数据库链接执行 Extract阶段, 具体有哪些链接请点击"查看META"按钮查看
+    'db': META['horigindb'], 
 }
 
 stream = {
-    'format': '', ##-- 这里的单引号中填写目标表的列名, 以逗号分割, 按照Extract节点的结果顺序做对应, 特殊情况Extract的列数可以小于目标表列数
+    'format': '', 
 }
 
 target = {
-    'db': META['hmart_movie'], ##-- 单引号中填写目标表所在库
-    'table': 'detail_myshow_saleorder', ##-- 单引号中填写目标表名
+    'db': META['hmart_movie'], 
+    'table': 'detail_myshow_saleorder', 
 }
 
-##Extract##
-##-- Extract节点, 这里填写一个能在source.db上执行的sql
-
-##Preload##
-##-- Preload节点, 这里填写一个在load到目标表之前target.db上执行的sql(可以留空)
-
 ##Load##
-##-- Load节点, (可以留空)
-set hive.exec.dynamic.partition=true;
-set hive.exec.dynamic.partition.mode=nonstrict;
-set hive.exec.dynamic.partition=true;
-set hive.exec.dynamic.partition.mode=nonstrict;
+add file $Script('get_citykey.py');
 set hive.exec.parallel=true;
 set hive.exec.reducers.max =1000;
 set mapreduce.reduce.memory.mb=4096;
 set mapreduce.map.memory.mb=4096;
 set mapred.child.java.opts=-Xmx3072m;
 set hive.auto.convert.join=true;
-set mapred.max.split.size=256000000;
-set mapred.min.split.size.per.node=256000000;
-set mapred.min.split.size.per.rack=256000000;
-set hive.merge.size.per.task=256000000;
-set hive.merge.smallfiles.avgsize=256000000;
-set hive.merge.mapfiles=true;
-set hive.merge.mapredfiles=true;
-set hive.input.format=org.apache.hadoop.hive.ql.io.CombineHiveInputFormat;
+drop table if EXISTS mart_movie_test.detail_myshow_saleorder_tempa1;
+create table mart_movie_test.detail_myshow_saleorder_tempa1 as
+select
+    ery.orderdeliveryid as orderdelivery_id,
+    ery.fetchticketwayid as fetchticketway_id,
+    ery.fetchtype as fetch_type,
+    ery.needidcard,
+    ery.recipientidno,
+    ery.provincename as province_name,
+    ery.cityname as city_name,
+    ery.districtname as district_name,
+    ery.detailedaddress,
+    ery.postcode,
+    ery.recipientname,
+    ery.recipientmobileno,
+    ery.expresscompany,
+    ery.expressno,
+    ery.expressfee,
+    ery.delivertime as deliver_time,
+    ery.deliveredtime as delivered_time,
+    ery.createtime as deliver_create_time,
+    ery.localeaddress,
+    ery.localecontactpersons,
+    ery.fetchcode,
+    ery.fetchqrcode,
+    ery.expressdetailid as expressdetail_id,
+    ery.orderid as order_id,
+    ity.city_id as dpcity_id
+from (
+    select
+        *
+    from 
+        origindb.dp_myshow__s_orderdelivery
+    ) as ery
+    left join mart_movie.dim_myshow_city ity
+    on ery.cityname=ity.city_name
+;
+drop table if EXISTS mart_movie_test.detail_myshow_saleorder_tempb1;
+create table mart_movie_test.detail_myshow_saleorder_tempb1 as
+select
+	ery.orderdelivery_id,
+	ery.fetchticketway_id,
+	ery.fetch_type,
+	ery.needidcard,
+	ery.recipientidno,
+	coalesce(ity.province_name,ery.province_name) as province_name,
+	coalesce(ity.city_name,ery.city_name) as city_name,
+	ery.district_name,
+	ery.detailedaddress,
+	ery.postcode,
+	ery.recipientname,
+	ery.recipientmobileno,
+	ery.expresscompany,
+	ery.expressno,
+	ery.expressfee,
+	ery.deliver_time,
+	ery.delivered_time,
+	ery.deliver_create_time,
+	ery.localeaddress,
+	ery.localecontactpersons,
+	ery.fetchcode,
+	ery.fetchqrcode,
+	coalesce(ery.dpcity_id,ity.city_id) as dpcity_id,
+	ery.expressdetail_id,
+    ery.order_id
+from 
+    mart_movie_test.detail_myshow_orderdelivery_tempa1 as ery
+    left join (
+        reduce *
+            using 'python get_citykey.py'
+        as
+            orderdelivery_id,
+            city_name,
+            citykey
+        from (
+            select 
+                orderdelivery_id,
+                city_name
+            from
+                mart_movie_test.detail_myshow_orderdelivery_tempa1
+            where
+                dpcity_id is null
+                and city_name is not null
+                and city_name not like '%区划'
+                and city_name <> '海外'
+            ) as ery_a
+        ) as ery_k
+    on ery.orderdelivery_id = ery_k.orderdelivery_id
+    left join mart_movie.dim_myshow_city ity
+    on ity.citykey = ery_k.citykey
+;
+set hive.exec.dynamic.partition=true;
+set hive.exec.dynamic.partition.mode=nonstrict;
+set hive.exec.dynamic.partition=true;
+set hive.exec.dynamic.partition.mode=nonstrict;
 INSERT OVERWRITE TABLE `$target.table` PARTITION (partition_sellchannel,partition_payflag)
 select
     der.orderid as order_id,
@@ -129,7 +201,6 @@ select
     hot.bdusername as bd_name,
     enl.settlementpayment_id,
     enl.bill_id,
-    enl.lastshowtime,
     enl.income,
     enl.expense,
     enl.grossprofit,
@@ -137,15 +208,15 @@ select
     enl.discountamount,
     enl.mydiscountamount,
     enl.settlementuserid,
-    enl.settlementusername,
     enl.settlementcreatetime,
     enl.settlementtype,
     ery.dpcity_id as deliverydpcity_id,
-    ary.key1 as sellchannel_lv1,
+    ary.key2 as sellchannel_lv1,
+    ery.expressdetail_id,
     und.finishtime,
     enl.payfinishtime,
     enl.paymentstatus,
-    coalesce(ary.key2,'0') as partition_sellchannel,
+    coalesce(ary.key1,0) as partition_sellchannel,
     case when der.paidtime is null then 0
         when und.finishtime is not null then 2 
     else 1 end partition_payflag
@@ -153,14 +224,13 @@ from
     origindb.dp_myshow__s_order der
     left join origindb.dp_myshow__s_ordersalesplansnapshot hot
     on der.orderid=hot.orderid
-    left join mart_movie.detail_myshow_orderdelivery ery
+    left join mart_movie_test.detail_myshow_saleorder_tempb1 as ery
     on der.orderid=ery.order_id
     left join (
         select
             ent.orderid,
             ent.settlementpaymentid as settlementpayment_id,
             ent.billid as bill_id,
-            ent.lastshowtime,
             ent.income,
             ent.expense,
             ent.grossprofit,
@@ -168,7 +238,6 @@ from
             ent.discountamount,
             ent.mydiscountamount,
             ent.settlementuserid,
-            ent.settlementusername,
             ent.settlementcreatetime,
             ent.settlementtype,
             ill.payfinishtime,
@@ -181,9 +250,17 @@ from
         ) enl
     on der.orderid=enl.orderid
     and der.paidtime is not null 
-    left join mart_movie.dim_myshow_dictionary ary
+    left join (
+        select
+            cast(key as int) key,
+            cast(key1 as int) key1,
+            cast(key2 as int) key2
+        from 
+            mart_movie.dim_myshow_dictionary 
+        where
+            key_name='sellchannel'
+        ) as ary
     on der.sellchannel=ary.key
-    and ary.key_name='sellchannel'
     left join (
         select 
             orderid,
@@ -198,7 +275,6 @@ from
     and und.rrank=1
 ;
 ##TargetDDL##
-##-- 目标表表结构
 CREATE TABLE IF NOT EXISTS `$target.table`
 (
 `order_id` bigint COMMENT '主预定ID',
@@ -280,7 +356,6 @@ CREATE TABLE IF NOT EXISTS `$target.table`
 `bd_name` string COMMENT 'BD用户名称',
 `settlementpayment_id` bigint COMMENT '结算支付明细表主键',
 `bill_id` bigint COMMENT '账单id',
-`lastshowtime` string COMMENT '最后一场演出时间',
 `income` double COMMENT '代收',
 `expense` double COMMENT '应付',
 `grossprofit` double COMMENT '毛收入',
@@ -288,17 +363,16 @@ CREATE TABLE IF NOT EXISTS `$target.table`
 `discountamount` double COMMENT '优惠金额',
 `mydiscountamount` double COMMENT '猫眼优惠金额',
 `settlementuserid` bigint COMMENT '结算标记人ID',
-`settlementusername` string COMMENT '结算标记人名称',
 `settlementcreatetime` string COMMENT '结算标记时间',
 `settlementtype` bigint COMMENT '结算类型（1自动2人工)',
 `deliverydpcity_id` bigint COMMENT '收件人城市ID',
-`sellchannel_lv1` string COMMENT '平台一级分类 0 批量出票 1 内部平台 2 外部平台',
+`sellchannel_lv1` int COMMENT '平台一级分类 0 其他1 点评,2 美团,3 微信吃喝玩乐,4 微信演出赛事,5 猫眼,6 格瓦拉,7 api分销,8 演出M站,9 批量出票',
 `expressdetail_id` bigint COMMENT '快递明细ID',
 `finishtime` string COMMENT '退款流程完成时间',
 `payfinishtime` string COMMENT '结算账单支付终态时间(成功或者失败)',
 `paymentstatus` int COMMENT '结算账单支付状态，0-未支付 1-支付中 2-支付成功 3-支付失败'
 ) COMMENT '演出订单事实明细表'
 PARTITIONED BY (
-`partition_sellchannel` string COMMENT '平台二级分类 0 其他1 点评,2 美团,3 微信吃喝玩乐,4 微信演出赛事,5 猫眼,6 格瓦拉,7 api分销,8 演出M站,9 批量出票',
+`partition_sellchannel` int COMMENT '平台分类 0 批量出票 1 内部平台 2 外部平台',
 `partition_payflag` int COMMENT '交易标识 0 未支付 1 已支付 2 已退款'
 ) STORED AS ORC;
