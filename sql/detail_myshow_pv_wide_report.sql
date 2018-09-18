@@ -13,4 +13,3 @@ from
     mart_movie.detail_myshow_pv_wide_report
 where partition_date>='$$begindate'
     and partition_date<'$$enddate'
-    and partition_biz_bg=1

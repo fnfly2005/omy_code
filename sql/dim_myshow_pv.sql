@@ -1,11 +1,13 @@
 /*猫眼演出页面埋点配置维度表*/
 select
-    page_identifier,
+    biz_bg_name,
+    page_intention,
     page_name_my,
     cid_type,
+    page_identifier,
     page_cat,
-    biz_par,
-    biz_bg
+    biz_bg,
+    biz_par
 from
     mart_movie.dim_myshow_pv
 where

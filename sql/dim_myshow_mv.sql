@@ -1,13 +1,17 @@
 /*猫眼演出模块埋点配置维度表*/
 select
-    event_id,
+    page_name_my,
     event_name_lv1,
     event_name_lv2,
-    page_identifier,
-    user_int,
+    event_id,
     biz_par,
     biz_typ,
-    page_loc
+    cid_type,
+    page_identifier,
+    user_intention,
+    user_int,
+    page_loc,
+    operation_flag
 from
     mart_movie.dim_myshow_mv
 where
