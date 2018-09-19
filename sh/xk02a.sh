@@ -1,27 +1,6 @@
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
-#*************************api1.0*******************
-# 优化输出方式,优化函数处理
-path=""
-fun() {
-    tmp=`cat ${path}sql/${1} | grep -iv "/\*"`
-    if [ -n $2 ];then
-        if [[ $2 =~ d ]];then
-            tmp=`echo $tmp | sed 's/where.*//'`
-        fi
-        if [[ $2 =~ u ]];then
-            tmp=`echo $tmp | sed 's/.*from/from/'`
-        fi
-        if [[ $2 =~ t ]];then
-            tmp=`echo $tmp | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
-        fi
-        if [[ $2 =~ m ]];then
-            tmp=`echo $tmp | sed "s/begindate/monthfirst{-1m}/g;s/enddate/monthfirst/g"`
-        fi
-    fi
-    echo $tmp
-}
-
+#格瓦拉平台日报a-日期/业务单元/UV/订单/出票/销售
+source ./fuc.sh
 spo=`fun detail_myshow_salepayorder.sql ut`
 fmw=`fun detail_flow_mv_wide_report.sql ut`
 mdk=`fun topic_movie_deal_kpi_daily.sql ut`
