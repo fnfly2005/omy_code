@@ -1,21 +1,19 @@
 #!/bin/bash
 #格瓦拉平台产品数据复盘
 source ./fuc.sh
-mpw=`fun detail_myshow_pv_wide_report.sql ud`
-file="bs39"
+
+ily=`fun sql/topic_movie_deal_kpi_daily.sql u`
+file=`echo $0 | sed "s/[a-z]*\.sh//g;s/.*\///g"`
 lim=";"
 attach="${path}doc/${file}.sql"
 
 echo "
 select
-    partition_date as dt,
-    approx_distinct(union_id) as dau
-$mpw
-where
-    partition_date>='\$\$begindate'
-    and partition_date<'\$\$enddate'
-    and app_name='gewara'
-    and partition_biz_bg=2
+    substr(date_parse(dt,'%Y%m%d'),1,10) as dt,
+    sum(ordernum) as ordernum,
+    sum(seatnum) as seatnum,
+    sum(gmv) as gmv
+$ily
 group by
     1
 $lim">${attach}

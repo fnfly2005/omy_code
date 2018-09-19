@@ -1,23 +1,6 @@
 #!/bin/bash
-path=""
-fun() {
-    tmp=`cat ${path}sql/${1} | grep -iv "/\*"`
-    if [ -n $2 ];then
-        if [[ $2 =~ d ]];then
-            tmp=`echo $tmp | sed 's/where.*//'`
-        fi
-        if [[ $2 =~ u ]];then
-            tmp=`echo $tmp | sed 's/.*from/from/'`
-        fi
-        if [[ $2 =~ t ]];then
-            tmp=`echo $tmp | sed "s/begindate/today{-1d}/g;s/enddate/today{-0d}/g"`
-        fi
-        if [[ $2 =~ m ]];then
-            tmp=`echo $tmp | sed "s/begindate/monthfirst{-1m}/g;s/enddate/monthfirst/g"`
-        fi
-    fi
-    echo $tmp
-}
+#格瓦拉平台产品数据复盘
+source ./fuc.sh
 
 fmw=`fun detail_flow_mv_wide_report.sql u`
 file="bs39"
