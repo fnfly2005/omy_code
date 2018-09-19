@@ -1,11 +1,10 @@
 
 select
-    partition_date as dt,
-    approx_distinct(union_id) as uv
-from mart_flow.detail_flow_mv_wide_report where partition_date>='$$begindate' and partition_date<'$$enddate' and partition_log_channel='movie' and partition_app in ( 'movie', 'dianping_nova', 'other_app', 'dp_m', 'group' )
-    and partition_app='other_app'
-    and app_name='gewara'
-    and page_identifier='c_f740bkf7'
+    substr(date_parse(dt,'%Y%m%d'),1,10) as dt,
+    sum(ordernum) as ordernum,
+    sum(seatnum) as seatnum,
+    sum(gmv) as gmv
+from mart_movie.topic_movie_deal_kpi_daily where dt>='$$begindatekey' and dt<'$$enddatekey' and source=8 and channel_id=80001
 group by
     1
 ;

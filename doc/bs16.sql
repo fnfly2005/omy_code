@@ -39,15 +39,13 @@ from (
         1,2,3,4,5
     ) as fmw
     join (
-        select key_name, key, key1, key2, value1, value2, value3, value4 from upload_table.myshow_dictionary_s where key_name is not null
+        select key_name, key, key1, key2, value1, value2, value3, value4 from mart_movie.dim_myshow_dictionary where 1=1
         and key_name='app_name'
         ) as md
     on md.key=fmw.app_name
     join mart_movie.dim_myshow_mv mp
     on mp.event_id=fmw.event_id
     and mp.page_identifier=fmw.page_identifier
-    left join mart_movie.dim_myshow_pv msp
-    on mp.page_identifier=msp.page_identifier
 where
     md.value2 in ('$app_name')
 group by 

@@ -1,3 +1,4 @@
 #!/bin/bash
 #exec "/Users/fannian/my_code/mou.sh" "$@"
-echo $path
+file=`echo $0 | sed "s/[a-z]*\.sh//g;s/.*\///g"`
+echo $file
