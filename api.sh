@@ -5,7 +5,7 @@
 source ./fuc.sh
 
 =`fun `
-file=""
+file=`echo $0 | sed "s/[a-z]*\.sh//g;s/.*\///g"`
 lim=";"
 attach="${path}doc/${file}.sql"
 
