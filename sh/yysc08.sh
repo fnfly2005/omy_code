@@ -1,5 +1,5 @@
 #!/bin/bash
-#项目流量-多维度/多指标
+#项目流量-多维度-多指标
 source ./fuc.sh
 spo=`fun detail_myshow_salepayorder.sql u`
 dp=`fun dim_myshow_performance.sql`
@@ -36,7 +36,7 @@ select
 from (
     $dp
         and (regexp_like(performance_name,'\$performance_name')
-        or '测试'='\$performance_name')
+        or '全部'='\$performance_name')
         and (performance_id in (\$performance_id)
         or -99 in (\$performance_id))
         ) as dp
@@ -45,7 +45,8 @@ from (
         dt,
         ht,
         mit,
-        value2 as pt,
+        case when 4 in (\$dim) then value2
+        else '全部' end as pt,
         page_city_name,
         performance_id,
         sum(uv) uv
@@ -57,8 +58,7 @@ from (
             else 'all' end as ht,
             case when 3 in (\$dim) then (floor(cast(substr(stat_time,15,2) as double)/\$tie)+1)*\$tie
             else 'all' end as mit,
-            case when 4 in (\$dim) then app_name
-            else 'all' end as app_name,
+            app_name,
             case when 5 in (\$dim) then page_city_name
             else 'all' end as page_city_name,
             performance_id,
