@@ -78,7 +78,7 @@ from (
                         where
                             \$mod=1
                         )
-                    or page_identifier in ('\$identifier')
+                    or (page_identifier in ('\$identifier') and \$mod=0)
                     )
                 and app_name in ('\$app_name')
             union all
@@ -108,7 +108,8 @@ from (
                         where
                             \$mod=1
                         )
-                    or event_id in ('\$identifier')
+                    or (page_identifier in ('\$identifier') and \$mod=0)
+                    or (event_id in ('\$identifier') and \$mod=2)
                     )
                 and app_name in ('\$app_name')
             ) as fw
