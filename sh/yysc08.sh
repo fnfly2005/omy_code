@@ -139,7 +139,7 @@ from (
             case when 4 in (\$dim) then md.value2
             else '全部' end as pt,
             performance_id,
-            count(1) as ush_num
+            count(distinct mobile) as ush_num
         from (
             $ush
                 and (performanceid in (\$performance_id)
@@ -173,12 +173,13 @@ from (
             case when 4 in (\$dim) then md.value2
             else '全部' end as pt,
             performance_id,
-            count(1) as out_num
+            count(distinct mobile) as out_num
         from (
             select
                 createtime,
                 performance_id,
-                sellchannel
+                sellchannel,
+                mobile
             $out
                 and (performance_id in (\$performance_id)
                 or -99 in (\$performance_id))
