@@ -1,8 +1,3 @@
-##-- 这个是sqlweaver(美团自主研发的ETL工具)的编辑模板
-##-- 本模板内容均以 ##-- 开始,完成编辑后请删除
-##-- ##xxxx## 型的是ETL专属文档节点标志, 每个节点标志到下一个节点标志为本节点内容
-##-- 流程应该命名成: 目标库dsn名.目标表名
-
 ##Description##
 ##--演出数据字典
 
@@ -10,28 +5,28 @@
 creator = 'fannian@meituan.com'
 
 source = {
-    'db': META['horigindb'], ##-- 单引号内填写一个dsn库名，表示Extract阶段的SQL在哪个数据库里执行
+    'db': META['horigindb'], 
 }
 
 stream = {
-    'format': '', ##-- 这里的单引号中填写目标表的列名, 以逗号分割, 与Extract节点的结果顺序对应, 特殊情况Extract的列数可以小于目标表列数
+    'format': '', 
 }
 
 target = {
-    'db': META['hmart_movie'], ##-- 单引号内填写目标库的dsn名
-    'table': 'dim_myshow_dictionary', ##-- 单引号中填写目标表名
+    'db': META['hmart_movie'], 
+    'table': 'dim_myshow_dictionary', 
 }
 
 ##Extract##
-##-- Extract节点, 这里填写一个能在source.db上执行的、读取数据的sql
+
 
 ##Preload##
-##-- Preload节点, 这里填写一个能在target.db上执行的、load数据之前执行的sql(可以留空)
+
 
 ##Load##
-##-- Load节点, 这里填写一个能在target.db上执行的、load数据的sql(可以留空)
+
 insert OVERWRITE TABLE `$target.table`
-select distinct
+select
     key_name,
     key,
     key1,
@@ -80,7 +75,7 @@ from (
     ) as mds
 
 ##TargetDDL##
-##-- 目标表表结构
+
 CREATE TABLE IF NOT EXISTS `$target.table`
 (
 `key_name` string COMMENT '字段名称',
