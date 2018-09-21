@@ -1,32 +1,30 @@
 
 select
-    '$$today{-1d}' dt,
+    '$$today{-1d}' as dt,
+    biz_bg_name,
+    page_intention,
     page_name_my,
-    event_name_lv1,
-    event_name_lv2,
-    mm.event_id,
-    mm.biz_par,
-    mm.biz_typ,
     cid_type,
-    mm.page_identifier,
-    user_intention,
-    user_int,
-    page_loc,
-    event_type,
-    uv
+    mp.page_identifier,
+    page_cat,
+    biz_bg,
+    biz_par,
+    sum(uv) as uv,
+    sum(custom_uv) as custom_uv
 from (
-    select page_name_my, event_name_lv1, event_name_lv2, event_id, biz_par, biz_typ, cid_type, page_identifier, user_intention, user_int, page_loc, operation_flag from mart_movie.dim_myshow_mv where status=1
-    ) mm
+    select biz_bg_name, page_intention, page_name_my, cid_type, page_identifier, page_cat, biz_bg, biz_par from mart_movie.dim_myshow_pv where status=1
+    ) mp
     left join (
         select 
-            event_id,
             page_identifier,
-            event_type,
-            approx_distinct(union_id) uv
-        from mart_flow.detail_flow_mv_wide_report where partition_date>='$$today{-1d}' and partition_date<'$$today{-0d}' and partition_log_channel='movie' and partition_app in ( 'movie', 'dianping_nova', 'other_app', 'dp_m', 'group' )
+            app_name,
+            approx_distinct(union_id) uv,
+            approx_distinct(case when page_name_my='演出详情页' and performance_id is not null then union_id end) custom_uv
+        from mart_movie.detail_myshow_pv_wide_report where partition_date>='$$today{-1d}' and partition_date<'$$today{-0d}'
         group by
-            1,2,3
+            1,2
         ) as fpw
-    on mm.event_id=fpw.event_id
-    and mm.page_identifier=fpw.page_identifier
+    on mp.page_identifier=fpw.page_identifier
+group by
+    1,2,3,4,5,6,7,8,9
 ;

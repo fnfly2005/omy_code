@@ -1,5 +1,5 @@
 #!/bin/bashs
-#数据字典
+#数据字典-日报
 source ./fuc.sh
 mds=`fun dim_myshow_dictionary.sql` 
 

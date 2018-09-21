@@ -20,7 +20,7 @@ select
 from (
     select performance_id, activity_id, performance_name, category_id, category_name, area_1_level_name, area_2_level_name, province_name, province_id, city_id, city_name, shop_id, shop_name from mart_movie.dim_myshow_performance where 1=1
         and (regexp_like(performance_name,'$performance_name')
-        or '测试'='$performance_name')
+        or '全部'='$performance_name')
         and (performance_id in ($performance_id)
         or -99 in ($performance_id))
         ) as dp
@@ -29,7 +29,8 @@ from (
         dt,
         ht,
         mit,
-        value2 as pt,
+        case when 4 in ($dim) then value2
+        else '全部' end as pt,
         page_city_name,
         performance_id,
         sum(uv) uv
@@ -41,13 +42,12 @@ from (
             else 'all' end as ht,
             case when 3 in ($dim) then (floor(cast(substr(stat_time,15,2) as double)/$tie)+1)*$tie
             else 'all' end as mit,
-            case when 4 in ($dim) then app_name
-            else 'all' end as app_name,
+            app_name,
             case when 5 in ($dim) then page_city_name
             else 'all' end as page_city_name,
             performance_id,
             count(distinct union_id) uv
-        from mart_movie.detail_myshow_pv_wide_report where partition_date>='$$begindate' and partition_date<'$$enddate' and partition_biz_bg=1
+        from mart_movie.detail_myshow_pv_wide_report where partition_date>='$$begindate' and partition_date<'$$enddate'
             and page_name_my='演出详情页'
             and (performance_id in ($performance_id)
             or -99 in ($performance_id))
@@ -123,7 +123,7 @@ from (
             case when 4 in ($dim) then md.value2
             else '全部' end as pt,
             performance_id,
-            count(1) as ush_num
+            count(distinct mobile) as ush_num
         from (
             select CreateTime, phonenumber as mobile, sellchannel, performanceid as performance_id from origindb.dp_myshow__s_messagepush where phonenumber is not null and createtime>='$$begindate' and createtime<'$$enddate'
                 and (performanceid in ($performance_id)
@@ -157,12 +157,13 @@ from (
             case when 4 in ($dim) then md.value2
             else '全部' end as pt,
             performance_id,
-            count(1) as out_num
+            count(distinct mobile) as out_num
         from (
             select
                 createtime,
                 performance_id,
-                sellchannel
+                sellchannel,
+                mobile
             from mart_movie.detail_myshow_stockout where createtime>='$$begindate' and createtime<'$$enddate'
                 and (performance_id in ($performance_id)
                 or -99 in ($performance_id))
