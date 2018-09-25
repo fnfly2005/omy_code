@@ -21,6 +21,9 @@ fun() {
         if [[ $2 =~ d ]];then
             tmp=`echo $tmp | sed 's/where.*//'`
         fi
+        if [[ $2 =~ D ]];then
+            tmp=`echo $tmp | sed 's/where.*/where /'`
+        fi
         if [[ $2 =~ u ]];then
             tmp=`echo $tmp | sed 's/.*from/from/'`
         fi
