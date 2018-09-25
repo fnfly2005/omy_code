@@ -99,9 +99,9 @@ from (
         refer_page_identifier,
         custom,
         extension,
-        case when app_name='maoyan_wxwallet_i' then coalesce(custom['cityId'],page_city_id)
+        case when cid_type='mini_programs' then coalesce(custom['cityId'],page_city_id)
         else page_city_id end as page_city_id,
-        case when app_name='maoyan_wxwallet_i' then custom['gcityId'] end as geocity_id,
+        case when cid_type='mini_programs' then custom['gcityId'] end as geocity_id,
         page_city_name,
         geo_city_id,
         geo_city_name,

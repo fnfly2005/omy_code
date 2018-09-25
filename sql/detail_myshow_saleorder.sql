@@ -12,6 +12,7 @@ select
     totalprice,
     customer_id,
     performance_id,
+    performance_name,
     meituan_userid,
     dianping_userid,
     show_name,
