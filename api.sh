@@ -5,25 +5,15 @@
 source ./fuc.sh
 
 =`fun `
-file=`echo $0 | sed "s/[a-z]*\.sh//g;s/.*\///g"`
-lim=";"
-attach="${path}doc/${file}.sql"
 
+fus() {
 echo "
 select
 from (
-    )
-$lim">${attach}
+${lim-;}"
+}
 
-echo "succuess!"
-echo ${attach}
-if [ ${1}r == pr ]
-#加上任意字符，如r 避免空值报错
-then
-cat ${attach}
-#命令行参数为p时，打印输出文件
-fi
-
+fuc $1 $file
 
 #!/bin/bash
 source ./fuc.sh
@@ -33,23 +23,14 @@ end_key=
 
 =`fun  $beg_key $end_key`
 
-file="ss_"
-attach="${path}doc/${file}.sql"
-lim="limit 20000;"
-
+fus() {
 echo "
 select
-$lim
-">${attach}
+from (
+${lim-limit 20000;}"
+}
 
-echo "succuess!"
-echo ${attach}
-if [ ${1}r == pr ]
-#加上任意字符，如r 避免空值报错
-then
-cat ${attach}
-#命令行参数为p时，打印输出文件
-fi
+fuc $1 ss_
 
 #!/bin/bash
 path="/Users/fannian/Documents/my_code/"

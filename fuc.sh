@@ -1,10 +1,8 @@
-#--------------------猫眼演出readme-------------------
-#*************************api3.0*******************
-#1.0优化输出方式,函数处理;2.0新增实时模版;3.0优化函数功能
-#4.0函数模块化
+#1.0优化输出方式,函数处理;2.0新增实时模版;3.0优化函数功能;4.0函数模块化
 #!/bin/bash
-this="${BASH_SOURCE-$0}"
-path=$(dirname -- "$this")"/"
+path=$(dirname -- "${this-$0}")"/"
+file=`echo $0 | sed "s/[a-z]*\.sh//g;s/.*\///g"`".sql"
+
 fun() {
     if [[ ${1} =~ \. ]];then
         fil=${1}
@@ -39,3 +37,16 @@ fun() {
     fi
     echo $tmp
 }
+
+fuc() {
+    file_all="${path}doc/$2"$file
+
+    echo "success!"
+
+    if [ ${1}r == dr ];then
+        echo $file_all
+        fus > $file_all
+    else
+        fus
+    fi
+    }
