@@ -58,9 +58,9 @@ select
     custom,
     extension,
     page_city_id,
-    page_city_name,
-    cit.city_id as pagedpcity_id,
-    gitdpcity_id,
+    coalesce(cit.city_name,page_city_name) as page_city_name,
+    coalesce(cit.city_id,ity.city_id,fp1.geodpcity_id) as pagedpcity_id,
+    coalesce(ity.city_id,fp1.geodpcity_id) geodpcity_id,
     geo_city_id,
     geo_city_name,
     ip_location_city_id,
@@ -75,19 +75,17 @@ from (
         page_name_my,
         biz_bg,
         page_cat,
-        (
-        case when cid_type='h5' then custom['fromTag']
+        (case when cid_type='h5' then custom['fromTag']
              when cid_type in ('mini_programs','pc') then utm_source
-        end 
-        ) as uv_src,
-        (
-        case when biz_bg=1 and page_cat in (2,3)
+        end) as uv_src,
+        (case when biz_bg=1 and page_cat in (2,3)
              then case when cid_type='h5' then custom['performance_id']
                   when cid_type='mini_programs' then custom['id']
                   when cid_type='native' then custom['drama_id'] end
-        end
-        ) as performance_id,
-        case when page_name_my='演出列表页' and cid_type='mini_programs' then custom['categoryId'] end as category_id,
+        end) as performance_id,
+        case when page_name_my='演出列表页' and cid_type='mini_programs' 
+            then custom['categoryId'] 
+        end as category_id,
         union_id,
         user_id,
         os,
@@ -99,35 +97,58 @@ from (
         refer_page_identifier,
         custom,
         extension,
-        case when cid_type='mini_programs' then coalesce(custom['cityId'],page_city_id)
+        case cid_type 
+            when 'mini_programs' then custom['cityId']
+            when 'native' then custom['city_id']
         else page_city_id end as page_city_id,
-        case when cid_type='mini_programs' then custom['gcityId'] end as geocity_id,
         page_city_name,
-        geo_city_id,
-        geo_city_name,
+        case when cid_type='mini_programs' 
+            then custom['gcityId'] 
+        end as geomtcity_id,
+        cit.city_id as geodpcity_id,
+        coalesce(geo_city_id,ip_location_city_id) geo_city_id,
+        coalesce(cit.city_name,geo_city_name) as geo_city_name,
         ip_location_city_id,
         ip_location_city_name,
         round(page_stay_time/1000,0) as page_stay_time,
-        sequence
+        sequence,
+        cid_type
     from (
-        select page_identifier, page_name_my, cid_type, page_cat, biz_par, biz_bg from mart_movie.dim_myshow_pv where status=1
-         ) dmp    -- 演出页面维表
-        join 
-        (
-        select *
+        select 
+            page_identifier,
+            page_name_my,
+            cid_type,
+            page_cat,
+            biz_par,
+            biz_bg
         from 
-            mart_flow.detail_flow_pv_wide_report  -- 猫眼电影频道数据
-        where
-            partition_date='$now.date'
-            and
-            partition_log_channel='movie'
-            and
-            partition_app in ('movie', 'dianping_nova', 'other_app', 'dp_m', 'group')
-        ) pv
-    on dmp.page_identifier=pv.page_identifier
+            mart_movie.dim_myshow_pv
+        where 
+            status=1
+         ) dmp    -- 演出页面维表
+        join (
+            select 
+                *
+            from 
+                mart_flow.detail_flow_pv_wide_report  -- 猫眼电影频道数据
+            where
+                partition_date='$now.date'
+                and partition_log_channel='movie'
+                and partition_app in ('movie', 'dianping_nova', 'other_app', 'dp_m', 'group')
+            ) pv
+        on dmp.page_identifier=pv.page_identifier
+        left join (
+            select
+                city_id,
+                city_name,
+                region_code
+            from
+                mart_movie.dim_myshow_city
+                ) cit
+            on cit.region_code=coalesce(pv.geo_city_id,pv.ip_location_city_id)
+            and coalesce(pv.geo_city_id,pv.ip_location_city_id) is not null
     ) fp1 
-    left join 
-        (
+    left join (
         select 
             performance_id, 
             category_id, 
@@ -140,7 +161,8 @@ from (
     left join (
         select
             city_id,
-            mt_city_id
+            mt_city_id,
+            city_name
         from
             mart_movie.dim_myshow_city
         where
@@ -149,6 +171,18 @@ from (
         on (case when fp1.app_name='dianping_nova' then cit.city_id
             else cit.mt_city_id end)=fp1.page_city_id
             and fp1.page_city_id is not null
+    left join (
+        select
+            city_id,
+            mt_city_id
+        from
+            mart_movie.dim_myshow_city
+        where
+            dp_flag=0
+            ) ity
+        on fp1.geomtcity_id=ity.mt_city_id
+        and fp1.geomtcity_id is not null
+        and fp1.cid_type='mini_programs'
 ;
 ##TargetDDL##
 CREATE TABLE IF NOT EXISTS `$target.table`
@@ -184,7 +218,7 @@ CREATE TABLE IF NOT EXISTS `$target.table`
 `ip_location_city_name` string COMMENT 'ip城市名称',
 `page_stay_time` bigint COMMENT '页面访问时长-秒',
 `sequence` bigint COMMENT 'session内的事件序号(同一union_id，session内唯一)'
-) COMMENT '演出业务流量宽表'
+) COMMENT '演出页面流量宽表'
 PARTITIONED BY (
     partition_date    string  COMMENT '日志生成日期',
     partition_biz_bg  string  COMMENT 'biz_bg'
