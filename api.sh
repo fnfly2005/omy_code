@@ -13,7 +13,7 @@ from (
 ${lim-;}"
 }
 
-fuc $1 $file
+fuc $1
 
 #!/bin/bash
 source ./fuc.sh

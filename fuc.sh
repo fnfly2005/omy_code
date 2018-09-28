@@ -1,7 +1,8 @@
 #1.0优化输出方式,函数处理;2.0新增实时模版;3.0优化函数功能;4.0函数模块化
 #!/bin/bash
-path=$(dirname -- "${this-$0}")"/"
-file=`echo $0 | sed "s/[a-z]*\.sh//g;s/.*\///g"`".sql"
+downloadsql_file() {
+    file=`echo $1 | sed "s/[a-z]*\.sh//g;s/.*\///g"`".sql"
+}
 
 fun() {
     if [[ ${1} =~ \. ]];then
@@ -10,9 +11,9 @@ fun() {
         fil="${1}.sql"
     fi
     if [[ ${1} =~ / ]];then
-        pdir="${path}"
+        pdir="$CODE_HOME"
     else
-        pdir="${path}sql/"
+        pdir="${CODE_HOME}sql/"
     fi
     tmp=`cat ${pdir}${fil} | grep -iv "/\*"`
     if [ -n $2 ];then
