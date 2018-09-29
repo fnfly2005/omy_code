@@ -1,9 +1,5 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
-t1='$time1'
-fun() {
-echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
-}
+source ./fuc.sh
 
 cgr=`fun dim_myshow_batch.sql`
 cou=`fun dp_myshowcoupon__s_coupon.sql`
@@ -12,11 +8,7 @@ spo=`fun detail_myshow_salepayorder.sql`
 bat=`fun detail_myshow_batch.sql`
 per=`fun dim_myshow_performance.sql`
 
-
-file="yysc10"
-lim=";"
-attach="${path}doc/${file}.sql"
-
+fus() {
 echo "
 select
     case when \$dt=1 then cs.dt
@@ -58,11 +50,11 @@ from (
         $cur
         and useddate>='\$\$begindate'
         and useddate<'\$\$enddate'
+        and discountamount>0
         ) cur
         on cou.coupon_id=cur.coupon_id
         left join (
         $spo
-        and discountamount>0
         ) spo
         on spo.order_id=cur.order_id
         left join (
@@ -82,7 +74,7 @@ where
     or use_num>0
 group by
     1,2,3,4,5,6,7
-$lim">${attach}
+${lim-;}"
+}
 
-echo "succuess,detail see ${attach}"
-
+fuc $1
