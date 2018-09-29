@@ -8,7 +8,10 @@ select
     union_id,
     performance_id,
     page_cat,
-    category_id
+    category_id,
+    pagedpcity_id,
+    geodpcity_id,
+    page_stay_time
 from 
     mart_movie.detail_myshow_pv_wide_report
 where partition_date>='$$begindate'

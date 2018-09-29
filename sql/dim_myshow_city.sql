@@ -8,7 +8,8 @@ select
     area_1_level_id,
     area_1_level_name,
     area_2_level_id,
-    area_2_level_name
+    area_2_level_name,
+    region_code
 from
     mart_movie.dim_myshow_city
 where
