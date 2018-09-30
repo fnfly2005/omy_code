@@ -89,7 +89,7 @@ from (
         mv.is_native,
         mv.os,
         coalesce(mv.page_city_id,(
-            case when cast(user_int%10 as int)=1 then
+            case when cast(biz_tag%10 as int)=1 then
                 (case cid_type
                     when 'h5' then mv.event_attribute['city_id']
                     when 'mini_programs' then coalesce(mv.event_attribute['cityId'],mv.custom['cityId'])
@@ -98,7 +98,7 @@ from (
             end)
             ) as page_city_id,
         mv.page_identifier,
-        (case when cast(user_int%100/10 as int)=1 then
+        (case when page_cat<4 and cast(biz_tag%100/10 as int)=1 then
             case cid_type
                 when 'h5' then custom['performance_id']
                 when 'mini_programs' 
@@ -115,16 +115,16 @@ from (
         (case when cid_type='h5' then custom['fromTag']
              when cid_type in ('mini_programs','pc') then utm_source
         end) as uv_src,
-        coalesce(mv.order_id,(
-            case when cast(user_int%100000/10000 as int)=1 and cid_type='mini_programs'
+        case when page_cat=3 then coalesce(mv.order_id,(
+            case when cast(biz_tag%100000/10000 as int)=1 and cid_type='mini_programs'
                 then coalesce(mv.custom['id'],mv.event_attribute['orderId']) 
-            end)
-            ) as order_id,
-        coalesce(mv.item_index,(
-            case when cast(user_int%10000/1000 as int)=1 
+            end)) 
+        end as order_id,
+        case when page_cat=1 then coalesce(mv.item_index,(
+            case when cast(biz_tag%10000/1000 as int)=1 
                 then coalesce(mv.event_attribute['index'],mv.custom['index']) 
-            end)
-            ) as item_index,
+            end))
+        end as item_index,
         case when cid_type='mini_programs' 
             then custom['gcityId'] 
         end as geomtcity_id,
@@ -133,7 +133,7 @@ from (
         dmm.event_name_lv2,
         dmm.page_name_my,
         dmm.cid_type,
-        (case when cast(user_int%1000/100 as int)=1 then 
+        (case when page_cat=1 and cast(biz_tag%1000/100 as int)=1 then 
             case cid_type 
                 when 'mini_programs' then custom['categoryId'] 
                 when 'pc' then custom['cat_id'] 
@@ -147,7 +147,8 @@ from (
             page_identifier,
             page_name_my,
             cid_type,
-            user_int 
+            biz_tag,
+            page_cat
         from 
             mart_movie.dim_myshow_mv
         where 
