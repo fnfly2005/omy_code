@@ -25,97 +25,6 @@ set mapreduce.reduce.memory.mb=4096;
 set mapreduce.map.memory.mb=4096;
 set mapred.child.java.opts=-Xmx3072m;
 set hive.auto.convert.join=true;
-drop table if EXISTS mart_movie_test.detail_myshow_saleorder_tempa1;
-create table mart_movie_test.detail_myshow_saleorder_tempa1 as
-select
-    ery.orderdeliveryid as orderdelivery_id,
-    ery.fetchticketwayid as fetchticketway_id,
-    ery.fetchtype as fetch_type,
-    ery.needidcard,
-    ery.recipientidno,
-    ery.provincename as province_name,
-    ery.cityname as city_name,
-    ery.districtname as district_name,
-    ery.detailedaddress,
-    ery.postcode,
-    ery.recipientname,
-    ery.recipientmobileno,
-    ery.expresscompany,
-    ery.expressno,
-    ery.expressfee,
-    ery.delivertime as deliver_time,
-    ery.deliveredtime as delivered_time,
-    ery.createtime as deliver_create_time,
-    ery.localeaddress,
-    ery.localecontactpersons,
-    ery.fetchcode,
-    ery.fetchqrcode,
-    ery.expressdetailid as expressdetail_id,
-    ery.orderid as order_id,
-    ity.city_id as dpcity_id
-from (
-    select
-        *
-    from 
-        origindb.dp_myshow__s_orderdelivery
-    ) as ery
-    left join mart_movie.dim_myshow_city ity
-    on ery.cityname=ity.city_name
-;
-drop table if EXISTS mart_movie_test.detail_myshow_saleorder_tempb1;
-create table mart_movie_test.detail_myshow_saleorder_tempb1 as
-select
-	ery.orderdelivery_id,
-	ery.fetchticketway_id,
-	ery.fetch_type,
-	ery.needidcard,
-	ery.recipientidno,
-	coalesce(ity.province_name,ery.province_name) as province_name,
-	coalesce(ity.city_name,ery.city_name) as city_name,
-	ery.district_name,
-	ery.detailedaddress,
-	ery.postcode,
-	ery.recipientname,
-	ery.recipientmobileno,
-	ery.expresscompany,
-	ery.expressno,
-	ery.expressfee,
-	ery.deliver_time,
-	ery.delivered_time,
-	ery.deliver_create_time,
-	ery.localeaddress,
-	ery.localecontactpersons,
-	ery.fetchcode,
-	ery.fetchqrcode,
-	coalesce(ery.dpcity_id,ity.city_id) as dpcity_id,
-	ery.expressdetail_id,
-    ery.order_id
-from 
-    mart_movie_test.detail_myshow_orderdelivery_tempa1 as ery
-    left join (
-        reduce *
-            using 'python get_citykey.py'
-        as
-            orderdelivery_id,
-            city_name,
-            citykey
-        from (
-            select 
-                orderdelivery_id,
-                city_name
-            from
-                mart_movie_test.detail_myshow_orderdelivery_tempa1
-            where
-                dpcity_id is null
-                and city_name is not null
-                and city_name not like '%区划'
-                and city_name <> '海外'
-            ) as ery_a
-        ) as ery_k
-    on ery.orderdelivery_id = ery_k.orderdelivery_id
-    left join mart_movie.dim_myshow_city ity
-    on ity.citykey = ery_k.citykey
-;
 set hive.exec.dynamic.partition=true;
 set hive.exec.dynamic.partition.mode=nonstrict;
 set hive.exec.dynamic.partition=true;
@@ -224,7 +133,7 @@ from
     origindb.dp_myshow__s_order der
     left join origindb.dp_myshow__s_ordersalesplansnapshot hot
     on der.orderid=hot.orderid
-    left join mart_movie_test.detail_myshow_saleorder_tempb1 as ery
+    left join mart_movie.detail_myshow_orderdelivery as ery
     on der.orderid=ery.order_id
     left join (
         select
