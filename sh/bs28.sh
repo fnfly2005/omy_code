@@ -162,7 +162,7 @@ from (
         1,2,3,4,5,6,7,8,9,10,11
     union all
     select
-        case when 0 in (\$dim) then '微格ycsensitive'
+        case when 0 in (\$dim) then 'wgsensitiveycsensitive'
         else 'all' end as ds,
         case when 1 in (\$dim) then substr(dt,1,7) 
         else 'all' end mt,

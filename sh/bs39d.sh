@@ -1,5 +1,5 @@
 #!/bin/bash
-#格瓦拉平台产品数据复盘
+#gwrsensitive平台产品数据复盘
 source ./fuc.sh
 
 ily=`fun sql/topic_movie_deal_kpi_daily.sql u`

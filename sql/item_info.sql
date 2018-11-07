@@ -1,4 +1,4 @@
-/*微格项目信息表*/
+/*wgsensitive项目信息表*/
 select
     id as item_id,
     item_no as performance_id,

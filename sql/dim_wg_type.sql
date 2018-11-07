@@ -1,4 +1,4 @@
-/*微格-mysensitive类目映射表*/
+/*wgsensitive-mysensitive类目映射表*/
 select
     category_id,
     type_lv1_name

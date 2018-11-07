@@ -84,7 +84,7 @@ from (
                     and partition_date<'\$\$enddate'
                     and partition_log_channel='movie'
                     and partition_app='other_app'
-                    and app_name='gewara'
+                    and app_name='gwrsensitive'
                 group by
                     partition_date,
                     page_identifier,

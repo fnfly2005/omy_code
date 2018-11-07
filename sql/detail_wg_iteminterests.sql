@@ -1,4 +1,4 @@
-/*微格用户兴趣项目*/
+/*wgsensitive用户兴趣项目*/
 select
     dt,
     item_id,

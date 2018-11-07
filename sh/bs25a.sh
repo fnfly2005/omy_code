@@ -45,7 +45,7 @@ from (
             'group'
             )
             and page_identifier in ('pages/show/detail/index','c_Q7wY4')
-            and app_name<>'gewara'
+            and app_name<>'gwrsensitive'
         ) fp1
     on fp1.performance_id=sp.PerformanceID
 where 

@@ -1,4 +1,4 @@
-/*微格用户信息表*/
+/*wgsensitive用户信息表*/
 select
     user_id,
     mobile,

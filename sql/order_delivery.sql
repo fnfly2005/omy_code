@@ -1,4 +1,4 @@
-/*微格快递明细表*/
+/*wgsensitive快递明细表*/
 select
     order_id,
     city_id

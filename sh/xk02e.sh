@@ -58,7 +58,7 @@ from (
                 and partition_date<'\$\$today{-0d}'
                 and partition_log_channel='movie'
                 and partition_app='other_app'
-                and app_name in ('gewara','gewara_pc')
+                and app_name in ('gwrsensitive','gwrsensitive_pc')
                 and page_identifier in (
                     select 
                         value
@@ -81,7 +81,7 @@ from (
                 and partition_log_channel='movie'
                 and partition_app='other_app'
                 and page_identifier='pages/showsubs/order/confirm'
-                and utm_source='gewara_pc'
+                and utm_source='gwrsensitive_pc'
             ) as fpw
             left join (
                 $mp
@@ -105,7 +105,7 @@ from (
     left join (
         select
             partition_date as dt,
-            '格瓦拉APP' as pt,
+            'gwrsensitiveAPP' as pt,
             count(distinct order_id) as order_num
         $spo
             and sellchannel=8
@@ -114,14 +114,14 @@ from (
         union all
         select
             fmw.dt,
-            '格瓦拉PC' as pt,
+            'gwrsensitivePC' as pt,
             count(distinct fmw.order_id) as order_num
         from (
             select distinct
                 partition_date as dt,
                 order_id
             $fmw
-                and utm_source='gewara_pc'
+                and utm_source='gwrsensitive_pc'
                 and event_id='b_w047f3uw'
             ) as fmw
             left join (

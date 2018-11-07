@@ -1,4 +1,4 @@
-/*微格项目上架时间*/
+/*wgsensitive项目上架时间*/
 select
     item_id,
     business_id,

@@ -1,5 +1,5 @@
 #!/bin/bash
-#格瓦拉平台产品数据复盘
+#gwrsensitive平台产品数据复盘
 source ./fuc.sh
 
 mpw=`fun detail_myshow_pv_wide_report.sql ud`
@@ -15,7 +15,7 @@ $mpw
 where
     partition_date>='\$\$begindate'
     and partition_date<'\$\$enddate'
-    and app_name='gewara'
+    and app_name='gwrsensitive'
     and partition_biz_bg=0
     and page_name_my='平台首页'
 group by

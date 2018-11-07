@@ -1,6 +1,6 @@
 i/*周报-新上架（包含o2o推过来）*/
 SELECT b.business_user_name 'BD',a.id'项目id',a.item_no'项目编号',a.title_cn'项目名称',a.name'品类',a.city_name'城市名称',a.time'上架时间',
-case when a.source=209 then '微格o2o'
+case when a.source=209 then 'wgsensitiveo2o'
 else '其他'
 end as '来源'
 from 
@@ -32,10 +32,10 @@ when a.order_Src=11 then '喵特'
 when a.order_Src=12 then '手Q'
 when a.order_Src=13 then '开心麻花'
 when a.order_Src=14 then '小程序'
-when a.order_Src=15 then '格瓦拉andriod'
-when a.order_Src=16 then '格瓦拉ios'
+when a.order_Src=15 then 'gwrsensitiveandriod'
+when a.order_Src=16 then 'gwrsensitiveios'
 when a.order_Src=20 then '京东'
-when a.order_Src=21 then '格瓦拉'
+when a.order_Src=21 then 'gwrsensitive'
 end as '渠道',
 sum(a.sale)'销售额',sum(a.num)'销售票张数',
 case when b.balance_type=1 then '按折扣比例'

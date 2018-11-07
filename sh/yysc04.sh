@@ -64,7 +64,7 @@ from (
             and partition_app in (
             'movie','dpsensitive_nova','other_app','dp_m','group'
             )
-            and app_name<>'gewara'
+            and app_name<>'gwrsensitive'
             and page_identifier in (
             select value
             from upload_table.myshow_pv

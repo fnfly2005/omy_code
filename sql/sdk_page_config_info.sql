@@ -12,5 +12,5 @@ where
     and cid is not null
     and (
         page_name like '%ycsensitive%'
-        or app_name like '%格瓦拉%'
+        or app_name like '%gwrsensitive%'
         )

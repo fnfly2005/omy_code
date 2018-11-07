@@ -1,4 +1,4 @@
-/*微格场馆维表*/
+/*wgsensitive场馆维表*/
 select
     id as venue_id,
     replace(name,',',' ') as shop_name,

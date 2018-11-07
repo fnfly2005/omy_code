@@ -47,7 +47,7 @@ from (
             'group'
             )
             and page_identifier in ('pages/show/detail/index','c_Q7wY4')
-            and app_name<>'gewara'
+            and app_name<>'gwrsensitive'
         group by
             partition_date,
             case when page_identifier<>'pages/show/detail/index'

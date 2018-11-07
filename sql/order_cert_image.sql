@@ -1,4 +1,4 @@
-/*微格身份认证信息*/
+/*wgsensitive身份认证信息*/
 select
     cert_no，
     cert_name

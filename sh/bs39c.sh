@@ -1,5 +1,5 @@
 #!/bin/bash
-#格瓦拉平台产品数据复盘
+#gwrsensitive平台产品数据复盘
 source ./fuc.sh
 
 fmw=`fun detail_flow_mv_wide_report.sql u`
@@ -13,7 +13,7 @@ select
     approx_distinct(union_id) as uv
 $fmw
     and partition_app='other_app'
-    and app_name='gewara'
+    and app_name='gwrsensitive'
     and page_identifier='c_f740bkf7'
 group by
     1

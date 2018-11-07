@@ -84,7 +84,7 @@ from (
                         and \$source=1
                             )
                         )
-                and app_name<>'gewara'
+                and app_name<>'gwrsensitive'
                 and (
                     uv_src in ('\$from_src')
                     or 'all' in ('\$from_src')
@@ -140,7 +140,7 @@ from (
                         'group'
                         )
                     and page_name rlike '\$id'
-                    and app_name<>'gewara'
+                    and app_name<>'gwrsensitive'
                 group by
                     case when url_parameters rlike 'fromTag=' 
                         then split(regexp_extract(url_parameters,'fromTag=[^&]+'),'=')[1]
@@ -209,7 +209,7 @@ from (
                             'dp_m',
                             'group'
                             )
-                        and app_name<>'gewara'
+                        and app_name<>'gwrsensitive'
                         and event_id in ('b_WLx9n','b_w047f3uw')
                         and (case when event_id='b_w047f3uw' then utm_source
                             else custom['fromTag'] end in ('\$from_src')

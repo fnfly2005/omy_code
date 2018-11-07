@@ -134,7 +134,7 @@ where
     salesplan_sellout_flag in (\$salesplan_sellout_flag)
 union all
 select
-    '微格' as das,
+    'wgsensitive' as das,
     performance_id,
     performance_name,
     '自营' as customer_type_name,

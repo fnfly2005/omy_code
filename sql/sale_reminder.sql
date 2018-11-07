@@ -1,4 +1,4 @@
-/*微格开售提醒*/
+/*wgsensitive开售提醒*/
 select
     mobile,
     online_id,

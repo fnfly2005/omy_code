@@ -1,4 +1,4 @@
-/*微格选座订单表*/
+/*wgsensitive选座订单表*/
 select
     price_id,
     price_name,

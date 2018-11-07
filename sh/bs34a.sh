@@ -89,14 +89,14 @@ from (
             left join (
                 select
                     partition_date as dt,
-                    '格瓦拉' as pt,
+                    'gwrsensitive' as pt,
                     approx_distinct(case when page_name_my='平台首页' then union_id end) as pt_uv
                 $ort
                 where
                     partition_date>='\$\$begindate'
                     and partition_date<'\$\$enddate'
                     and partition_biz_bg=0
-                    and app_name='gewara'
+                    and app_name='gwrsensitive'
                     and 2 in (\$dim)
                 group by
                     1,2

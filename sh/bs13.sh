@@ -21,7 +21,7 @@ select
 from
     (
     $fpw
-    and app_name='gewara'
+    and app_name='gwrsensitive'
     ) fpw
     left join 
     (
@@ -41,7 +41,7 @@ select
 from
     (
     $fpw
-    and app_name='gewara'
+    and app_name='gwrsensitive'
     ) fpw
     left join 
     (
@@ -61,7 +61,7 @@ select
 from
     (
     $fpw
-    and app_name='gewara'
+    and app_name='gwrsensitive'
     ) fpw
     left join 
     (

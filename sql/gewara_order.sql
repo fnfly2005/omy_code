@@ -1,4 +1,4 @@
-/*微格历史数据*/
+/*wgsensitive历史数据*/
 select UserMobileNo
   from Gewara_Order
  where categoryname in (

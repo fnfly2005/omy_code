@@ -1,5 +1,5 @@
 #!/bin/bash
-#格瓦拉平台日报a-日期/业务单元/UV/订单/出票/销售
+#gwrsensitive平台日报a-日期/业务单元/UV/订单/出票/销售
 source ./fuc.sh
 spo=`fun detail_myshow_salepayorder.sql ut`
 fmw=`fun detail_flow_mv_wide_report.sql ut`
@@ -52,7 +52,7 @@ from (
                     partition_date as dt,
                     order_id
                 $fmw
-                    and utm_source='gewara_pc'
+                    and utm_source='gwrsensitive_pc'
                     and event_id='b_w047f3uw'
                 ) as fmw
                 left join (
@@ -110,7 +110,7 @@ from (
                 where partition_date='\$\$today{-1d}'
                     and partition_log_channel='movie'
                     and partition_app='other_app'
-                    and app_name in ('gewara','gewara_pc')
+                    and app_name in ('gwrsensitive','gwrsensitive_pc')
                 group by
                     partition_date,
                     page_identifier,

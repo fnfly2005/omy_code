@@ -1,4 +1,4 @@
-/*微格订单明细表*/
+/*wgsensitive订单明细表*/
 select
     dt,
     item_id,

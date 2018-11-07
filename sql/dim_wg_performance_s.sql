@@ -1,4 +1,4 @@
-/*微格项目维表*/
+/*wgsensitive项目维表*/
 select
     performance_id,
     item_id,

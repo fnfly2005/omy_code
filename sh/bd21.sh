@@ -108,7 +108,7 @@ from (
             1,2,3,4,5,6,7,8
         union all
         select
-            '微格ycsensitive' as ds,
+            'wgsensitiveycsensitive' as ds,
             mt,
             province_name,
             city_name,

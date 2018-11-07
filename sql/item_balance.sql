@@ -1,4 +1,4 @@
-/*微格项目结算信息表*/
+/*wgsensitive项目结算信息表*/
 select
     item_id,
     business_name

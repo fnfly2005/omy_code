@@ -1,4 +1,4 @@
-/*微格用户注册表*/
+/*wgsensitive用户注册表*/
 select
     id as user_id,
     mobile,

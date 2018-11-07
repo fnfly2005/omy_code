@@ -104,7 +104,7 @@ from (
             and partition_date<'\$\$enddate'
             and partition_log_channel='movie'
             and partition_app='other_app'
-            and app_name='gewara'
+            and app_name='gwrsensitive'
             and page_identifier in (
                 select
                     value
@@ -125,7 +125,7 @@ from (
             and partition_date<'\$\$enddate'
             and partition_log_channel='movie'
             and partition_app='other_app'
-            and app_name='gewara'
+            and app_name='gwrsensitive'
             and page_identifier in (
                 select
                     value
@@ -146,7 +146,7 @@ from (
             and partition_date<'\$\$enddate'
             and partition_log_channel='movie'
             and partition_app='other_app'
-            and app_name='gewara'
+            and app_name='gwrsensitive'
             and page_identifier in (
                 select
                     value

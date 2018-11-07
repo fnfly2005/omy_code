@@ -1,4 +1,4 @@
-/*微格省份维度表*/
+/*wgsensitive省份维度表*/
 select
     province_id,
     province_name

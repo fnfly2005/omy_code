@@ -68,7 +68,7 @@ from (
             'group'
             )
         and (
-            app_name='gewara'
+            app_name='gwrsensitive'
             or page_identifier like '%ycsensitive%'
             )
     group by

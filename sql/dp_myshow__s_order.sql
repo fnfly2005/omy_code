@@ -3,7 +3,7 @@ select
     case SellChannel
         when 1 then 'dpsensitive'
         when 2 then 'mtsensitive'
-        when 3 then '微信吃喝玩乐'
+        when 3 then '微信dpsensitive'
         when 4 then '微信搜索小程序'
         when 5 then 'mysensitive'
     else 

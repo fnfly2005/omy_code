@@ -34,7 +34,7 @@ where dp_flag=0
 1 dpsensitive
 2 mtsensitive
 5 mysensitive
-8 格瓦拉
+8 gwrsensitive
 COMMENT
 echo "
 select distinct

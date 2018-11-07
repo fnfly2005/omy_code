@@ -1,7 +1,7 @@
-/*mysensitive漏斗_微信吃喝玩乐*/
+/*mysensitive漏斗_微信dpsensitive*/
 select
     dt,
-    '微信吃喝玩乐' as pt,
+    '微信dpsensitive' as pt,
     firstpage_uv
 from
     aggr_movie_weixin_app_conversion_daily
