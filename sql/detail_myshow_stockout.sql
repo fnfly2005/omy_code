@@ -1,4 +1,4 @@
-/*演出缺货登记事实明细表*/
+/*ycsensitive缺货登记事实明细表*/
 select
     mobile,
     dpuser_id,

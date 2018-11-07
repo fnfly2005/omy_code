@@ -11,6 +11,6 @@ where
     and partition_date='$$today{-1d}'
     and cid is not null
     and (
-        page_name like '%演出%'
+        page_name like '%ycsensitive%'
         or app_name like '%格瓦拉%'
         )

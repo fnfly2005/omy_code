@@ -1,8 +1,8 @@
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
+#--------------------mysensitiveycsensitivereadme-------------------
 #*************************api1.0*******************
 # 优化输出方式,优化函数处理
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 fun() {
     if [ $2x == dx ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
@@ -17,9 +17,9 @@ fun() {
     fi
 }
 my=`fun aggr_movie_dau_client_core_page_daily.sql` 
-dp=`fun aggr_movie_dianping_app_conversion_daily.sql`
-wxycss=`fun aggr_movie_maoyan_weixin_daily.sql`
-mt=`fun aggr_movie_meituan_app_conversion_daily.sql`
+dp=`fun aggr_movie_dpsensitive_app_conversion_daily.sql`
+wxycss=`fun aggr_movie_mysensitive_weixin_daily.sql`
+mt=`fun aggr_movie_mtsensitive_app_conversion_daily.sql`
 wxchwl=`fun aggr_movie_weixin_app_conversion_daily.sql`
 file="bs11"
 lim=";"

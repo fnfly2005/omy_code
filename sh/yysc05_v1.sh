@@ -1,5 +1,5 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 t1='$time1'
 fun() {
 echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
@@ -25,7 +25,7 @@ from
     substr(so.pay_time,1,7) as mt,
     dic.value2,
     dp.category_name,
-    count(distinct so.meituan_userid) as user_num,
+    count(distinct so.mtsensitive_userid) as user_num,
     count(distinct so.order_id) as order_num,
     sum(so.totalprice) as totalprice
 from

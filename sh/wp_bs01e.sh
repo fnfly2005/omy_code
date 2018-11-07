@@ -1,5 +1,5 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 
 file="wp_bs01"
 lim=";"

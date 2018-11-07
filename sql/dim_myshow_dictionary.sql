@@ -1,4 +1,4 @@
-/*猫眼数据字典*/
+/*mysensitive数据字典*/
 select
     key_name,
     key,

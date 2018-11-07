@@ -1,5 +1,5 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 fun() {
     if [ $2x == dx ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`

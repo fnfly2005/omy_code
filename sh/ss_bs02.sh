@@ -1,8 +1,8 @@
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
+#--------------------mysensitiveycsensitivereadme-------------------
 #*************************api2.0*******************
 #实时订单导入，实时数据
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 fun() {
     if [ $2x == dx ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
@@ -28,8 +28,8 @@ lim="limit 20000;"
 echo "
 select so.order_id,
 sellchannel,
-dianping_userid,
-meituan_userid,
+dpsensitive_userid,
+mtsensitive_userid,
 usermobileno,
 city_id,
 salesplan_id,
@@ -37,7 +37,7 @@ supply_price,
 sell_price,
 salesplan_count,
 totalprice,
-maoyan_order_id,
+mysensitive_order_id,
 customer_id,
 order_reserve_status,
 order_deliver_status,

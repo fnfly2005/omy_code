@@ -1,10 +1,10 @@
-/*猫眼漏斗_点评*/
+/*mysensitive漏斗_dpsensitive*/
 select
     dt,
-    '点评' as pt,
+    'dpsensitive' as pt,
     firstpage_uv
 from
-    aggr_movie_dianping_app_conversion_daily
+    aggr_movie_dpsensitive_app_conversion_daily
 where
     dt>='$$begindatekey'
     and dt<'$$enddatekey'

@@ -29,11 +29,11 @@ from (
         select
             partition_date as dt,
             app_name,
-            count(distinct case when page_name_my='演出首页' then union_id end) as first_uv,
-            count(distinct case when page_name_my='演出详情页' then union_id end) as detail_uv,
-            count(distinct case when page_name_my='演出确认订单页' then union_id end) as order_uv
+            count(distinct case when page_name_my='ycsensitive首页' then union_id end) as first_uv,
+            count(distinct case when page_name_my='ycsensitive详情页' then union_id end) as detail_uv,
+            count(distinct case when page_name_my='ycsensitive确认订单页' then union_id end) as order_uv
         $mpw
-            and page_name_my in ('演出首页','演出详情页','演出确认订单页')
+            and page_name_my in ('ycsensitive首页','ycsensitive详情页','ycsensitive确认订单页')
         group by
             partition_date,
             app_name

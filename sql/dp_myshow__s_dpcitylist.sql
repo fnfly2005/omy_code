@@ -1,4 +1,4 @@
-/*点评城市维表*/
+/*dpsensitive城市维表*/
 select
     cityid,
     ProvinceID,

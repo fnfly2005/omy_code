@@ -17,7 +17,7 @@ attach="${path}doc/${file}.sql"
 
 echo "
 select
-    '猫眼' as das,
+    'mysensitive' as das,
     ss.performance_id,
     performance_name,
     customer_type_name,

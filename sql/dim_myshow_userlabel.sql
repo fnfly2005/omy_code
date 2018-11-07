@@ -1,4 +1,4 @@
-/*演出用户画像*/
+/*ycsensitive用户画像*/
 select
     user_id,
     mobile，

@@ -1,4 +1,4 @@
-/*美团门店维度表*/
+/*mtsensitive门店维度表*/
 select
     mainpoiid,
     typeid

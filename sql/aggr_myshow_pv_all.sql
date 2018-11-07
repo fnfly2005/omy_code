@@ -8,6 +8,6 @@ select
 from
     mart_movie.aggr_myshow_pv_all
 where
-    new_app_name='微信演出赛事'
+    new_app_name='微信ycsensitive赛事'
     and partition_date>='$$begindate'
     and partition_date<'$$enddate'

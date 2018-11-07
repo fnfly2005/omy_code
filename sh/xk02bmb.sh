@@ -1,9 +1,9 @@
 #!/bin/bash
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
+#--------------------mysensitiveycsensitivereadme-------------------
 #*************************api1.0*******************
 # 优化输出方式,优化函数处理
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 fun() {
     if [ $2x == dx ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
@@ -54,7 +54,7 @@ group by
 union all                
 select
     partition_date as dt,
-    '演出频道页' type,
+    'ycsensitive频道页' type,
     count(distinct union_id) uv
 from
     mart_flow.detail_flow_pv_wide_report
@@ -78,7 +78,7 @@ group by
 union all                
 select
     partition_date as dt,
-    '演出详情页' type,
+    'ycsensitive详情页' type,
     count(distinct union_id) uv
 from
     mart_flow.detail_flow_pv_wide_report

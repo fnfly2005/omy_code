@@ -6,7 +6,7 @@ select
     quantity,
     purchase_price
 from
-    mart_movie.detail_maoyan_order_sale_cost_new_info
+    mart_movie.detail_mysensitive_order_sale_cost_new_info
 where
     pay_time>='$$begindate'
     and pay_time<'$$enddate'

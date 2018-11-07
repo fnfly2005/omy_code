@@ -19,7 +19,7 @@ from (
         '团购' as lv1_type,
         sum(purchase_price) as totalprice
     from
-        mart_movie.detail_maoyan_order_sale_cost_new_info
+        mart_movie.detail_mysensitive_order_sale_cost_new_info
     where
         pay_time is not null
         and pay_time>='\$\$yesterday_monthfirst'
@@ -62,7 +62,7 @@ from (
     union all
     select
         dt,
-        '演出' as lv1_type,
+        'ycsensitive' as lv1_type,
         sum(totalprice) as totalprice
     from
         upload_table.sale_offline

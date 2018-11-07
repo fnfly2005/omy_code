@@ -1,5 +1,5 @@
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
+#--------------------mysensitiveycsensitivereadme-------------------
 #*************************api1.0*******************
 # 优化输出方式,优化函数处理
 path=""
@@ -17,8 +17,8 @@ fun() {
     fi
 }
 
-oni=`fun detail_maoyan_order_new_info.sql`
-cni=`fun detail_maoyan_order_sale_cost_new_info.sql`
+oni=`fun detail_mysensitive_order_new_info.sql`
+cni=`fun detail_mysensitive_order_sale_cost_new_info.sql`
 fpw=`fun detail_flow_pv_wide_report.sql`
 
 file="xk01"
@@ -55,7 +55,7 @@ from (
             count(distinct user_id) as user_num,
             count(distinct deal_id) as dea_num
         from
-            mart_movie.detail_maoyan_order_sale_cost_new_info
+            mart_movie.detail_mysensitive_order_sale_cost_new_info
         where
             pay_time is not null
             and pay_time>='\$\$begindate'
@@ -82,7 +82,7 @@ from (
                     order_id,
                     total_money/100 totalprice
                 from
-                    mart_movie.detail_maoyan_order_new_info
+                    mart_movie.detail_mysensitive_order_new_info
                 where
                     pay_time is not null
                     and category=12
@@ -106,7 +106,7 @@ from (
             and partition_log_channel='movie'
             and partition_app in (
             'movie',
-            'dianping_nova',
+            'dpsensitive_nova',
             'other_app',
             'dp_m',
             'group'

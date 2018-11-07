@@ -1,8 +1,8 @@
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
+#--------------------mysensitiveycsensitivereadme-------------------
 #*************************api1.0*******************
 # 优化输出方式,优化函数处理
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 fun() {
     if [ $2x == dx ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
@@ -50,15 +50,15 @@ from (
         select
             dt,
             sellchannel,
-            meituan_userid,
+            mtsensitive_userid,
             mobile,
             row_number() over (partition by mobile order by dt desc) rank
         from (
             select
                 substr(pay_time,1,10) dt,
                 sellchannel,
-                case when sellchannel in (1,2,5) then meituan_userid
-                else -99 end as meituan_userid,
+                case when sellchannel in (1,2,5) then mtsensitive_userid
+                else -99 end as mtsensitive_userid,
                 usermobileno as mobile
             $so
                 and performance_id in (\$performance_id)
@@ -71,7 +71,7 @@ from (
                 substr(CreateTime,1,10) as dt,
                 sellchannel,
                 case when usertype=2 and sellchannel in (1,2,5) then userid
-                else -99 end as meituan_userid,
+                else -99 end as mtsensitive_userid,
                 phonenumber as mobile
             from
                 origindb.dp_myshow__s_messagepush 
@@ -88,8 +88,8 @@ from (
             $dub
                 and city_id is not null
             ) dub
-        on dub.userid=so.meituan_userid
-        and so.meituan_userid<>-99
+        on dub.userid=so.mtsensitive_userid
+        and so.mtsensitive_userid<>-99
         and rank=1
         left join (
             $md

@@ -1,8 +1,8 @@
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
+#--------------------mysensitiveycsensitivereadme-------------------
 #*************************api1.0*******************
 # 优化输出方式,优化函数处理
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 fun() {
     if [ $2x == dx ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
@@ -43,8 +43,8 @@ from (
         $so
             and sellchannel not in (9,10,11)
             and (
-                (meituan_userid<>0
-                and '\$user'='meituan_userid')
+                (mtsensitive_userid<>0
+                and '\$user'='mtsensitive_userid')
                 or (usermobileno not in (13800138000,13000000000)
                     and usermobileno is not null
                     and '\$user'='mobile')
@@ -70,8 +70,8 @@ from (
         $sos
             and sellchannel not in (9,10,11)
             and (
-                (meituan_userid<>0
-                and '\$user'='meituan_userid')
+                (mtsensitive_userid<>0
+                and '\$user'='mtsensitive_userid')
                 or (usermobileno not in (13800138000,13000000000)
                     and usermobileno is not null
                     and '\$user'='mobile')

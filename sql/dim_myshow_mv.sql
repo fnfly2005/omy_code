@@ -1,4 +1,4 @@
-/*猫眼演出模块埋点配置维度表*/
+/*mysensitiveycsensitive模块埋点配置维度表*/
 select
     page_name_my,
     event_name_lv1,

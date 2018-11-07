@@ -73,7 +73,7 @@ from (
             category_id,
             count(distinct union_id) uv
         $mpw
-            and page_name_my='演出详情页'
+            and page_name_my='ycsensitive详情页'
         group by
             1,2
         ) as mpw

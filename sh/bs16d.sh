@@ -37,7 +37,7 @@ from (
         and partition_log_channel='movie'
         and partition_app in (
             'movie',
-            'dianping_nova',
+            'dpsensitive_nova',
             'other_app',
             'dp_m',
             'group'

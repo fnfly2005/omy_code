@@ -63,7 +63,7 @@ from (
         order_id,
         purchase_price
     from 
-        mart_movie.detail_maoyan_order_sale_cost_new_info
+        mart_movie.detail_mysensitive_order_sale_cost_new_info
     where 
         pay_time>='\$\$begindate'
         and pay_time<'\$\$enddate'
@@ -73,7 +73,7 @@ from (
             where category=12
             )
     ) as sc
-    left join mart_movie.detail_maoyan_order_new_info mon
+    left join mart_movie.detail_mysensitive_order_new_info mon
     on mon.order_id=sc.order_id
 group by
     1,2

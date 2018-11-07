@@ -1,4 +1,4 @@
-/*猫眼演出页面埋点配置维度表*/
+/*mysensitiveycsensitive页面埋点配置维度表*/
 select
     biz_bg_name,
     page_intention,

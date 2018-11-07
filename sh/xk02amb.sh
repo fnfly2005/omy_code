@@ -1,8 +1,8 @@
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
+#--------------------mysensitiveycsensitivereadme-------------------
 #*************************api1.0*******************
 # 优化输出方式,优化函数处理
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 fun() {
     if [ $2x == dx ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
@@ -44,7 +44,7 @@ from (
     from (
         select
             spo.dt,
-            '演出' as bu,
+            'ycsensitive' as bu,
             count(distinct spo.order_id) as order_num,
             sum(spo.salesplan_count*spo.setnumber) as ticket_num,
             sum(spo.totalprice) as totalprice
@@ -58,7 +58,7 @@ from (
         union all
         select
             dt,
-            '电影' as bu,
+            'dysensitive' as bu,
             mdk.order_num,
             mdk.ticket_num,
             mdk.gmv as totalprice
@@ -71,7 +71,7 @@ from (
     union all
     select
         spo.dt,
-        '演出' as bu,
+        'ycsensitive' as bu,
         count(distinct spo.order_id) as order_num,
         sum(spo.salesplan_count*spo.setnumber) as ticket_num,
         sum(spo.totalprice) as totalprice
@@ -85,7 +85,7 @@ from (
     union all
     select
         dt,
-        '电影' as bu,
+        'dysensitive' as bu,
         mdk.order_num,
         mdk.ticket_num,
         mdk.gmv as totalprice
@@ -96,7 +96,7 @@ from (
     left join (
         select
             partition_date as dt,
-            '电影' as bu,
+            'dysensitive' as bu,
             count(distinct union_id) as uv
         from
             mart_flow.detail_flow_pv_wide_report
@@ -117,7 +117,7 @@ from (
         union all
         select
             partition_date as dt,
-            '演出' as bu,
+            'ycsensitive' as bu,
             count(distinct union_id) as uv
         from
             mart_flow.detail_flow_pv_wide_report

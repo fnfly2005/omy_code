@@ -13,12 +13,12 @@ attach="${path}doc/${file}.sql"
 echo "
 select
     so.order_id,
-    maoyan_order_id,
+    mysensitive_order_id,
     md2.value2 as pt,
     UserName,
     IDNumber,
     mobile,
-    meituan_userid,
+    mtsensitive_userid,
     so.performance_id,
     so.performance_name,
     order_create_time,

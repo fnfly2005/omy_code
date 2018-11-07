@@ -1,4 +1,4 @@
-/*微格点评城市映射表*/
+/*微格dpsensitive城市映射表*/
 select
     city_id,
     city_name

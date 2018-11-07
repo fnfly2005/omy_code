@@ -1,4 +1,4 @@
-/*演出客户表*/
+/*ycsensitive客户表*/
 select
     TPID,
     Name,

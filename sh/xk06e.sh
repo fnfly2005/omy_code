@@ -1,5 +1,5 @@
 #!/bin/bash
-#演出模块埋点配置字典
+#ycsensitive模块埋点配置字典
 source ./fuc.sh
 
 mp=`fun dim_myshow_pv.sql`

@@ -1,4 +1,4 @@
-/*演出项目商品匹配表*/
+/*ycsensitive项目商品匹配表*/
 select
     ActivityID,
     case when TPID<6 then '渠道'

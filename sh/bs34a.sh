@@ -76,7 +76,7 @@ from (
                 approx_distinct(case when page_cat=1 then union_id end) as first_uv,
                 approx_distinct(case when page_cat=2 then union_id end) as detail_uv,
                 approx_distinct(case when page_cat=3 then union_id end) as order_uv,
-                approx_distinct(case when page_name_my='演出列表页' then union_id end) as list_uv
+                approx_distinct(case when page_name_my='ycsensitive列表页' then union_id end) as list_uv
             $mpw
             group by
                 1,2

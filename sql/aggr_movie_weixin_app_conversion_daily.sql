@@ -1,4 +1,4 @@
-/*猫眼漏斗_微信吃喝玩乐*/
+/*mysensitive漏斗_微信吃喝玩乐*/
 select
     dt,
     '微信吃喝玩乐' as pt,

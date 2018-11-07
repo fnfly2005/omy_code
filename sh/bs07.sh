@@ -1,5 +1,5 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 t1='$time1'
 fun() {
 echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
@@ -44,8 +44,8 @@ echo "
 select 
     substr(x.pay_time,1,7) mt,
     sum(quantity) sq
-from mart_movie.detail_maoyan_order_new_info x
-join mart_movie.detail_maoyan_order_sale_cost_new_info y
+from mart_movie.detail_mysensitive_order_new_info x
+join mart_movie.detail_mysensitive_order_sale_cost_new_info y
 on x.order_id=y.order_id
 join mart_movie.dim_deal_new z
 on y.deal_id=z.deal_id

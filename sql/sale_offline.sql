@@ -1,4 +1,4 @@
-/*演出线下分销*/
+/*ycsensitive线下分销*/
 select
     totalprice,
     ticket_num,

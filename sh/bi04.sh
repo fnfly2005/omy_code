@@ -1,5 +1,5 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 t1='$time1'
 fun() {
 echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
@@ -13,15 +13,15 @@ echo "
 select dso.order_id,
     dso.sellchannel,
     dso.clientplatform,
-    dso.dianping_userid,
-    dso.meituan_userid,
+    dso.dpsensitive_userid,
+    dso.mtsensitive_userid,
     dso.city_id,
     dso.salesplan_id,
     dso.supply_price,
     dso.sell_price,
     dso.salesplan_count,
     dso.totalprice,
-    dso.maoyan_order_id,
+    dso.mysensitive_order_id,
     dso.customer_id,
     dso.tporderid,
     dso.order_create_time,
@@ -79,15 +79,15 @@ from (
     select order_id,
         sellchannel,
         clientplatform,
-        dianping_userid,
-        meituan_userid,
+        dpsensitive_userid,
+        mtsensitive_userid,
         city_id,
         salesplan_id,
         supply_price,
         sell_price,
         salesplan_count,
         totalprice,
-        maoyan_order_id,
+        mysensitive_order_id,
         customer_id,
         tporderid,
         order_create_time,

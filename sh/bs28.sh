@@ -10,7 +10,7 @@ cus=`fun dim_myshow_customer.sql`
 md=`fun dim_myshow_dictionary.sql`
 wso=`fun detail_wg_saleorder.sql u`
 wi=`fun dim_wg_performance_s.sql`
-scn=`fun detail_maoyan_order_sale_cost_new_info.sql u`
+scn=`fun detail_mysensitive_order_sale_cost_new_info.sql u`
 ddn=`fun dim_deal_new.sql u`
 dsh=`fun dim_myshow_show.sql u`
 
@@ -40,7 +40,7 @@ select
     sum(ap_num) as ap_num
 from (
     select
-        case when 0 in (\$dim) then '猫眼演出'
+        case when 0 in (\$dim) then 'mysensitiveycsensitive'
         else 'all' end as ds,
         case when 1 in (\$dim) then substr(dt,1,7) 
         else 'all' end mt,
@@ -162,7 +162,7 @@ from (
         1,2,3,4,5,6,7,8,9,10,11
     union all
     select
-        case when 0 in (\$dim) then '微格演出'
+        case when 0 in (\$dim) then '微格ycsensitive'
         else 'all' end as ds,
         case when 1 in (\$dim) then substr(dt,1,7) 
         else 'all' end mt,
@@ -224,7 +224,7 @@ from (
         1,2,3,4,5,6,7,8,9,10,11
     union all
     select
-        case when 0 in (\$dim) then '猫眼团购'
+        case when 0 in (\$dim) then 'mysensitive团购'
         else 'all' end as ds,
         case when 1 in (\$dim) then substr(pay_time,1,7) 
         else 'all' end mt,
@@ -233,7 +233,7 @@ from (
         'all' pt,
         case when 4 in (\$dim) then '自营' 
         else 'all' end as customer_type_name,
-        case when 5 in (\$dim) then '猫眼团购' 
+        case when 5 in (\$dim) then 'mysensitive团购' 
         else 'all' end as customer_lvl1_name,
         'all' category_name,
         'all' area_1_level_name,
@@ -258,7 +258,7 @@ from (
     ) as sp
     left join (
         select
-            case when 0 in (\$dim) then '猫眼演出'
+            case when 0 in (\$dim) then 'mysensitiveycsensitive'
             else 'all' end as ds,
             case when 1 in (\$dim) then substr(dt,1,7) 
             else 'all' end mt,

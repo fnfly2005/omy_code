@@ -1,6 +1,6 @@
 #!/bin/bash
 #分平台流量销售
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 fun() {
     if [ $2x == dx ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
@@ -80,7 +80,7 @@ from (
             and partition_log_channel='movie'
             and partition_app in (
             'movie',
-            'dianping_nova',
+            'dpsensitive_nova',
             'other_app',
             'dp_m',
             'group'

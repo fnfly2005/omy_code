@@ -5,7 +5,7 @@ select
     sellchannel,
     customer_id,
     performance_id,
-    meituan_userid,
+    mtsensitive_userid,
     show_id,
     totalprice,
     grossprofit,

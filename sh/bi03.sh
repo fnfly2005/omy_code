@@ -1,5 +1,5 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 t1='$time1'
 fun() {
 echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
@@ -13,8 +13,8 @@ attach="${path}doc/${file}.sql"
 
 echo "
 select
-    meituan_userid,
-    dianping_userid,
+    mtsensitive_userid,
+    dpsensitive_userid,
     value3,
     coalesce(category_id,-99) category_id,
     first_pay_order_date,
@@ -22,8 +22,8 @@ select
     pay_dt_num
 from
 (select
-    meituan_userid,
-    dianping_userid,
+    mtsensitive_userid,
+    dpsensitive_userid,
     value3,
     category_id,
     min(dt) as first_pay_order_date,
@@ -32,8 +32,8 @@ from
 from
 (
 select
-    meituan_userid,
-    dianping_userid,
+    mtsensitive_userid,
+    dpsensitive_userid,
     sellchannel,
     case when category_id is null then 8
     when category_id=0 then 8
@@ -51,13 +51,13 @@ where
     ) as dic
     on s1.sellchannel=dic.key
 group by
-    meituan_userid,
-    dianping_userid,
+    mtsensitive_userid,
+    dpsensitive_userid,
     value3,
     category_id
 grouping sets(
-(meituan_userid,dianping_userid,value3),
-(meituan_userid,dianping_userid,value3,category_id)
+(mtsensitive_userid,dpsensitive_userid,value3),
+(mtsensitive_userid,dpsensitive_userid,value3,category_id)
 )
 ) as s2
 $lim">${attach}

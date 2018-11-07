@@ -64,7 +64,7 @@ from (
             performance_id,
             count(distinct union_id) uv
         $mpw
-            and page_name_my='演出详情页'
+            and page_name_my='ycsensitive详情页'
             and (performance_id in (\$performance_id)
             or -99 in (\$performance_id))
             and ((substr(stat_time,12,2)>=\$hts and substr(stat_time,12,2)<\$hte)

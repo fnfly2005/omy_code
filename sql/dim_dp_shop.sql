@@ -1,4 +1,4 @@
-/*点评商户维度表*/
+/*dpsensitive商户维度表*/
 select
     dp_shop_id,
     dp_shop_name,

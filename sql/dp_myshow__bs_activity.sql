@@ -1,4 +1,4 @@
-/*演出商品表*/
+/*ycsensitive商品表*/
 select
     ActivityID,
     TicketStatus,

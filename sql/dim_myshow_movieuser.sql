@@ -1,4 +1,4 @@
-/*电影用户池*/
+/*dysensitive用户池*/
 select
     user_id,
     mobile,

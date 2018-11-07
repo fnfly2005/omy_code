@@ -1,4 +1,4 @@
-/*演出场馆维度表*/
+/*ycsensitive场馆维度表*/
 select
     shop_id,
     shop_name,

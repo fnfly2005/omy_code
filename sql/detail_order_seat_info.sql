@@ -1,4 +1,4 @@
-/*电影订单对应来源渠道详情表*/
+/*dysensitive订单对应来源渠道详情表*/
 select
     cinema_id,
     mobile_phone

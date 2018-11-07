@@ -29,7 +29,7 @@ from (
     from (
         select
             spo.dt,
-            '演出' as bu,
+            'ycsensitive' as bu,
             count(distinct spo.order_id) as order_num,
             sum(ticket_num) as ticket_num,
             sum(spo.totalprice) as totalprice
@@ -69,18 +69,18 @@ from (
             ) spo
         group by
             spo.dt,
-            '演出'
+            'ycsensitive'
         union all
         select
             '\$\$today{-1d}' as dt,
-            '电影' as bu,
+            'dysensitive' as bu,
             sum(ordernum) as order_num,
             sum(seatnum) as ticket_num,
             sum(gmv) as totalprice
         $mdk
         group by
             '\$\$today{-1d}',
-            '电影'
+            'dysensitive'
         ) as sp1
     group by
         dt,

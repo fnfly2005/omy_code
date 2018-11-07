@@ -3,7 +3,7 @@ clock="00"
 t1=${1:-`date -v -1d +"%Y-%m-%d ${clock}:00:00"`}
 t2=${2:-`date -j -f %s $(expr $(date -j -f%Y-%m-%d ${t1% *} +%s) + 86400) +"%Y-%m-%d ${clock}:00:00"`}
 t3=`date -j -f %s $(expr $(date -j -f%Y-%m-%d ${t1% *} +%s) - 86400) +"%Y-%m-%d ${clock}:00:00"`
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 fun() {
 echo `cat ${path}sql/${1}.sql | sed "s/-time1/${2:-${t1% *}}/g;
 s/-time2/${3:-${t2% *}}/g;s/-time3/${4:-${t3% *}}/g"`
@@ -11,7 +11,7 @@ s/-time2/${3:-${t2% *}}/g;s/-time3/${4:-${t3% *}}/g"`
 dfp=`fun detail_flow_pv_wide_report` 
 file="cp01"
 attach="${path}doc/${file}.sql"
-an="('group','dianping_nova','movie','dianping_movie_wx')"
+an="('group','dpsensitive_nova','movie','dpsensitive_movie_wx')"
 pid=40000386
 so=`fun dp_myshow__s_order`
 
@@ -22,10 +22,10 @@ echo "/*分渠道页面跳失率*/
 select
     partition_date,
     case app_name
-        when 'group' then '美团'
-        when 'dianping_nova' then '点评'
-        when 'movie' then '猫眼'
-        when 'dianping_movie_wx' then '微信站'
+        when 'group' then 'mtsensitive'
+        when 'dpsensitive_nova' then 'dpsensitive'
+        when 'movie' then 'mysensitive'
+        when 'dpsensitive_movie_wx' then '微信站'
         when 'all' then '整体'
     end app_name,
     sv,

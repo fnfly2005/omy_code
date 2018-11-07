@@ -1,8 +1,8 @@
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
+#--------------------mysensitiveycsensitivereadme-------------------
 #*************************来源追踪-来源/日期/平台/UV/销售数据*******************
 # 优化输出方式,优化函数处理
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 fun() {
     if [ $2x == dx ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
@@ -16,7 +16,7 @@ fun() {
         echo `cat ${path}sql/${1} | grep -iv "/\*"`
     fi
 }
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 
 fpw=`fun detail_flow_pv_wide_report.sql` 
 md=`fun myshow_dictionary.sql`
@@ -67,8 +67,8 @@ from (
                 partition_date as dt,
                 case when 2 in (\$dim) then app_name
                 else 'all' end as app_name,
-                count(distinct case when page_name_my='演出首页' then union_id end) as first_uv,
-                count(distinct case when page_name_my='演出详情页' then union_id end) as detail_uv
+                count(distinct case when page_name_my='ycsensitive首页' then union_id end) as first_uv,
+                count(distinct case when page_name_my='ycsensitive详情页' then union_id end) as detail_uv
             from 
                 mart_movie.detail_myshow_pv_wide_report
             where partition_date>='\$\$begindate'
@@ -76,11 +76,11 @@ from (
                 and partition_biz_bg=1
                 and (
                     (
-                        page_name_my in ('演出详情页','演出首页')
+                        page_name_my in ('ycsensitive详情页','ycsensitive首页')
                         and \$source=0
                         )
                     or (
-                        page_name_my='演出详情页'
+                        page_name_my='ycsensitive详情页'
                         and \$source=1
                             )
                         )
@@ -134,7 +134,7 @@ from (
                         )
                     and partition_app in (
                         'movie',
-                        'dianping_nova',
+                        'dpsensitive_nova',
                         'other_app',
                         'dp_m',
                         'group'
@@ -204,7 +204,7 @@ from (
                         and partition_log_channel='movie'
                         and partition_app in (
                             'movie',
-                            'dianping_nova',
+                            'dpsensitive_nova',
                             'other_app',
                             'dp_m',
                             'group'

@@ -1,8 +1,8 @@
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
+#--------------------mysensitiveycsensitivereadme-------------------
 #*************************api1.0*******************
-# 线上埋点查询-猫眼文化-电影演出
-path="/Users/fannian/Documents/my_code/"
+# 线上埋点查询-mysensitive文化-dysensitiveycsensitive
+path="$private_home/my_code/"
 fun() {
     if [ $2x == dx ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
@@ -62,14 +62,14 @@ from (
         and partition_log_channel='movie'
         and partition_app in (
             'movie',
-            'dianping_nova',
+            'dpsensitive_nova',
             'other_app',
             'dp_m',
             'group'
             )
         and (
             app_name='gewara'
-            or page_identifier like '%演出%'
+            or page_identifier like '%ycsensitive%'
             )
     group by
         1,2

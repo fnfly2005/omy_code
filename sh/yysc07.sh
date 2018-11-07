@@ -1,8 +1,8 @@
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
+#--------------------mysensitiveycsensitivereadme-------------------
 #*************************api1.0*******************
 # 优化输出方式,优化函数处理
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 fun() {
     if [ $2x == dx ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
@@ -60,7 +60,7 @@ from (
                 )
             and partition_app in (
             'movie',
-            'dianping_nova',
+            'dpsensitive_nova',
             'other_app',
             'dp_m',
             'group'
@@ -78,7 +78,7 @@ from (
                 and partition_date<'\$\$enddate'
                 and partition_log_channel='movie'
                 and partition_etl_source='2_5x'
-                and partition_app in ('movie', 'dianping_nova', 'other_app', 'dp_m', 'group')
+                and partition_app in ('movie', 'dpsensitive_nova', 'other_app', 'dp_m', 'group')
                 and event_id='b_WLx9n'
             ) as fmw
         on fp1.dt=fmw.dt

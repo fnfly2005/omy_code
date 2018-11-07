@@ -12,9 +12,9 @@ where partition_date>='$$begindate'
     and partition_log_channel='firework'
     and partition_app in (
     'movie',
-    'dianping_nova',
+    'dpsensitive_nova',
     'other_app',
     'dp_m',
     'group'
     )
-    and page_bg='猫眼文化'
+    and page_bg='mysensitive文化'

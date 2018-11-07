@@ -1,4 +1,4 @@
-/*猫眼注册用户信息详情表*/
+/*mysensitive注册用户信息详情表*/
 select
     userid,
     birthday,

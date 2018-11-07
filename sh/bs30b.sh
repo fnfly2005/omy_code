@@ -81,7 +81,7 @@ from (
                 city_name,
                 performance_id,
                 case when \$uid=1 then usermobileno
-                else meituan_userid end as uid,
+                else mtsensitive_userid end as uid,
                 1 as action_flag,
                 order_id,
                 totalprice

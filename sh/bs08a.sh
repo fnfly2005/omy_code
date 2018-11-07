@@ -1,8 +1,8 @@
 #!/bin/bash
 #团购月报数据
 source ./fuc.sh
-oni=`fun detail_maoyan_order_new_info.sql`
-cni=`fun detail_maoyan_order_sale_cost_new_info.sql`
+oni=`fun detail_mysensitive_order_new_info.sql`
+cni=`fun detail_mysensitive_order_sale_cost_new_info.sql`
 fpw=`fun detail_flow_pv_wide_report.sql`
 
 file="bs08"
@@ -14,7 +14,7 @@ select
     substr(pay_time,1,7) mt,
     sum(quantity) as sku_num
 from
-    mart_movie.detail_maoyan_order_sale_cost_new_info
+    mart_movie.detail_mysensitive_order_sale_cost_new_info
 where
     pay_time is not null
     and pay_time>='\$\$begindate'

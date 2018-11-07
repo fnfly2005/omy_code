@@ -1,5 +1,5 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 t1='$time1'
 fun() {
 echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
@@ -32,7 +32,7 @@ from (
     from (
         select
             spo.dt,
-            '演出' as bu,
+            'ycsensitive' as bu,
             count(distinct spo.order_id) as order_num,
             sum(spo.salesplan_count*spo.setnumber) as ticket_num,
             sum(spo.totalprice) as totalprice
@@ -43,11 +43,11 @@ from (
             ) spo
         group by
             spo.dt,
-            '演出'
+            'ycsensitive'
         union all
         select
             '\$\$begindate' as dt,
-            '电影' as bu,
+            'dysensitive' as bu,
             mdk.order_num,
             mdk.ticket_num,
             mdk.gmv as totalprice

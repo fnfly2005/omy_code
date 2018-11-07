@@ -1,7 +1,7 @@
-/*猫眼漏斗_猫眼*/
+/*mysensitive漏斗_mysensitive*/
 select
     dt,
-    '猫眼' as pt,
+    'mysensitive' as pt,
     firpage_uv as firstpage_uv
 from
     aggr_movie_dau_client_core_page_daily

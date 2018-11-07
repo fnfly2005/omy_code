@@ -1,4 +1,4 @@
-/*美团电影选座订单表分月(BY 下单时间)*/
+/*mtsensitivedysensitive选座订单表分月(BY 下单时间)*/
 select
     cinema_city,
     movie_id,

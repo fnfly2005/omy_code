@@ -49,8 +49,8 @@ from (
                 partition_date as dt,
                 case when 2 in (\$dim) then app_name
                 else 'all' end as app_name,
-                approx_distinct(case when page_name_my='演出首页' then union_id end) as first_uv,
-                approx_distinct(case when page_name_my='演出详情页' then union_id end) as detail_uv
+                approx_distinct(case when page_name_my='ycsensitive首页' then union_id end) as first_uv,
+                approx_distinct(case when page_name_my='ycsensitive详情页' then union_id end) as detail_uv
             from 
                 mart_movie.detail_myshow_pv_wide_report
             where 
@@ -59,11 +59,11 @@ from (
                 and partition_biz_bg=1
                 and (
                     (
-                        page_name_my in ('演出详情页','演出首页')
+                        page_name_my in ('ycsensitive详情页','ycsensitive首页')
                         and \$source=0
                         )
                     or (
-                        page_name_my='演出详情页'
+                        page_name_my='ycsensitive详情页'
                         and \$source=1
                         and (
                             performance_id in (\$pid)
@@ -116,7 +116,7 @@ from (
                         )
                     and partition_app in (
                         'movie',
-                        'dianping_nova',
+                        'dpsensitive_nova',
                         'other_app',
                         'dp_m',
                         'group'
@@ -174,7 +174,7 @@ from (
                         and partition_etl_source='2_5x'
                         and partition_app in (
                             'movie',
-                            'dianping_nova',
+                            'dpsensitive_nova',
                             'other_app',
                             'dp_m',
                             'group'

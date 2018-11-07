@@ -1,5 +1,5 @@
 #!/bin/bash
-#选人工具-电影-短信
+#选人工具-dysensitive-短信
 source ./fuc.sh
 
 spe=`fun myshow_send_performance.sql`

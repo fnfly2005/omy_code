@@ -1,5 +1,5 @@
 #!/bin/bash
-#演出页面埋点配置字典
+#ycsensitive页面埋点配置字典
 source ./fuc.sh
 mp=`fun dim_myshow_pv.sql`
 md=`fun dim_myshow_dictionary.sql`
@@ -30,7 +30,7 @@ from (
             page_identifier,
             app_name,
             approx_distinct(union_id) uv,
-            approx_distinct(case when page_name_my='演出详情页' and performance_id is not null then union_id end) custom_uv
+            approx_distinct(case when page_name_my='ycsensitive详情页' and performance_id is not null then union_id end) custom_uv
         $ort
         group by
             1,2

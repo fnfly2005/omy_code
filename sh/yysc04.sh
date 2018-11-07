@@ -1,5 +1,5 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 fun() {
     if [ $2x == dx ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
@@ -54,7 +54,7 @@ from (
             partition_date as dt,
             case when 3 in (\$dim) then app_name
             else 'all' end app_name,
-            case when app_name='maoyan_wxwallet_i' then custom['id'] 
+            case when app_name='mysensitive_wxwallet_i' then custom['id'] 
             else custom['performance_id'] end as performance_id,
             approx_distinct(union_id) as uv
         from mart_flow.detail_flow_pv_wide_report
@@ -62,7 +62,7 @@ from (
             and partition_date<'\$\$enddate'
             and partition_log_channel='movie'
             and partition_app in (
-            'movie','dianping_nova','other_app','dp_m','group'
+            'movie','dpsensitive_nova','other_app','dp_m','group'
             )
             and app_name<>'gewara'
             and page_identifier in (

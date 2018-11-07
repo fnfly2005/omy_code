@@ -1,5 +1,5 @@
 #!/bin/bash
-#选人-演出-user_id
+#选人-ycsensitive-user_id
 source ./fuc.sh
 
 bel=`fun sql/dim_myshow_userlabel.sql u`
@@ -27,13 +27,13 @@ where dp_flag=0
 4 话剧歌剧
 5 舞蹈芭蕾
 6 音乐会
-7 亲子演出
+7 亲子ycsensitive
 8 其他
 9 休闲展览
 \$sellchannel
-1 点评
-2 美团
-5 猫眼
+1 dpsensitive
+2 mtsensitive
+5 mysensitive
 8 格瓦拉
 COMMENT
 echo "

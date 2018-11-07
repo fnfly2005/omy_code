@@ -1,5 +1,5 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 t1='$time1'
 fun() {
 echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
@@ -381,7 +381,7 @@ select
 from
     (
     $apa
-    and new_page_name in ('演出首页','演出详情页','演出确认订单页')
+    and new_page_name in ('ycsensitive首页','ycsensitive详情页','ycsensitive确认订单页')
     ) apa
 group by
     1,2,3
@@ -394,7 +394,7 @@ select
 from
     (
     $app
-    and new_page_name in ('演出首页','演出详情页','演出确认订单页')
+    and new_page_name in ('ycsensitive首页','ycsensitive详情页','ycsensitive确认订单页')
     ) app
 group by
     1,2,3

@@ -1,4 +1,4 @@
-/*点评城市信息表*/
+/*dpsensitive城市信息表*/
 select
     
 from

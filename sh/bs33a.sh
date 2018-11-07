@@ -1,8 +1,8 @@
 #!/bin/bash
-#--------------------猫眼演出readme-------------------
+#--------------------mysensitiveycsensitivereadme-------------------
 #*************************api1.0*******************
 # 优化输出方式,优化函数处理
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 fun() {
     if [ $2x == dx ];then
         echo `cat ${path}sql/${1} | grep -iv "/\*" | sed '/where/,$'d`
@@ -27,12 +27,12 @@ select
     partition_date as dt,
     order_id,
     sellchannel,
-    dianping_userid,
-    meituan_userid,
+    dpsensitive_userid,
+    mtsensitive_userid,
     supply_price,
     salesplan_count,
     totalprice,
-    maoyan_order_id,
+    mysensitive_order_id,
     customer_id,
     wxopenid,
     order_create_time,

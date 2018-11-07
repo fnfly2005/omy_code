@@ -1,5 +1,5 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 fun() {
 echo `cat ${path}sql/${1} | sed "s/-time1/${2}/g;
 s/-time2/${3}/g;s/-time3/${4}/g"`

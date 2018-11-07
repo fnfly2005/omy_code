@@ -1,12 +1,12 @@
 #!/bin/bash
-path="/Users/fannian/Documents/my_code/"
+path="$private_home/my_code/"
 t1='$time1'
 fun() {
 echo `cat ${path}sql/${1} | sed "s/'-time3'/substr(date_add('day',-1,timestamp'$t1'),1,10)/g" | grep -iv "/\*"`
 }
 
-oni=`fun detail_maoyan_order_new_info.sql` 
-cni=`fun detail_maoyan_order_sale_cost_new_info.sql`
+oni=`fun detail_mysensitive_order_new_info.sql` 
+cni=`fun detail_mysensitive_order_sale_cost_new_info.sql`
 dea=`fun dim_deal_new.sql`
 cus=`fun dim_myshow_customer.sql`
 

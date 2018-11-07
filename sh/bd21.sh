@@ -42,7 +42,7 @@ from (
         row_number() over (partition by \$par order by \$ord desc) rank
     from (
         select
-            '猫眼演出' as ds,
+            'mysensitiveycsensitive' as ds,
             mt,
             per.province_name,
             per.city_name,
@@ -108,7 +108,7 @@ from (
             1,2,3,4,5,6,7,8
         union all
         select
-            '微格演出' as ds,
+            '微格ycsensitive' as ds,
             mt,
             province_name,
             city_name,

@@ -1,10 +1,10 @@
-/*猫眼漏斗_微信演出赛事*/
+/*mysensitive漏斗_微信ycsensitive赛事*/
 select
     dt,
-    '美团' as pt,
+    'mtsensitive' as pt,
     firstpage_uv
 from
-    aggr_movie_meituan_app_conversion_daily
+    aggr_movie_mtsensitive_app_conversion_daily
 where
     dt>='$$begindatekey'
     and dt<'$$enddatekey'
