@@ -1,9 +1,0 @@
-/*wgsensitive用户兴趣项目*/
-select
-    dt,
-    item_id,
-    user_id,
-    type,
-    rate
-from
-    upload_table.detail_wg_iteminterests
